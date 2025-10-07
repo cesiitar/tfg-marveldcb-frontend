@@ -1,0 +1,375 @@
+import React, { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { apiService } from '../services/api'
+import { Card, CardSet } from '../types/card'
+
+const SetCardsPage: React.FC = () => {
+  const { setId } = useParams<{ setId: string }>()
+  const navigate = useNavigate()
+  
+  const [set, setSet] = useState<CardSet | null>(null)
+  const [cards, setCards] = useState<Card[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  
+  // Filtros y ordenamiento
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('tipo')
+  const [statsView, setStatsView] = useState<string>('general')
+
+  // Cargar datos del set
+  useEffect(() => {
+    const loadSetData = async () => {
+      if (!setId) return
+      
+      setIsLoading(true)
+      try {
+        // Cargar información del set
+        const setsData = await apiService.getSets()
+        const currentSet = setsData.find(s => s.id === parseInt(setId))
+        setSet(currentSet || null)
+        
+        // Cargar cartas del set
+        await loadCards()
+      } catch (error) {
+        console.error('Error loading set data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadSetData()
+  }, [setId])
+
+  // Cargar cartas con filtros
+  const loadCards = async () => {
+    if (!setId) return
+    
+    setIsLoading(true)
+    try {
+      const cardsData = await apiService.getCardsBySet(
+        parseInt(setId), 
+        search || undefined, 
+        sortBy
+      )
+      setCards(cardsData.cards)
+    } catch (error) {
+      console.error('Error loading cards:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Recargar cartas cuando cambien los filtros
+  useEffect(() => {
+    loadCards()
+  }, [search, sortBy])
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value)
+  }
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value)
+  }
+
+  const getCardGradient = (clase: string) => {
+    const gradients = {
+      'aggression': 'from-red-100 to-red-200 border-red-400',
+      'justice': 'from-blue-100 to-blue-200 border-blue-400', 
+      'leadership': 'from-yellow-100 to-yellow-200 border-yellow-400',
+      'protection': 'from-emerald-100 to-emerald-200 border-emerald-400',
+      'basic': 'from-gray-100 to-gray-200 border-gray-400',
+      'campaign': 'from-purple-100 to-purple-200 border-purple-400',
+      'hero': 'from-orange-100 to-orange-200 border-orange-400',
+      'pool': 'from-indigo-100 to-indigo-200 border-indigo-400'
+    }
+    return gradients[clase as keyof typeof gradients] || 'from-gray-50 to-gray-100 border-gray-300'
+  }
+
+  const generateSetStats = (cards: Card[], viewType: string = 'general') => {
+    let filteredCards = cards
+    
+    // Filtrar cartas por clase si se selecciona una clase específica
+    if (viewType !== 'general') {
+      filteredCards = cards.filter(c => c.clase === viewType)
+    }
+    
+    const stats = {
+      total: filteredCards.length,
+      heroes: filteredCards.filter(c => c.type === 'hero').length,
+      allies: filteredCards.filter(c => c.type === 'ally').length,
+      events: filteredCards.filter(c => c.type === 'event').length,
+      upgrades: filteredCards.filter(c => c.type === 'upgrade').length,
+      supports: filteredCards.filter(c => c.type === 'support').length,
+      resources: filteredCards.filter(c => c.type === 'resource').length,
+      avgCost: filteredCards.length > 0 ? (filteredCards.reduce((sum, card) => sum + card.cost, 0) / filteredCards.length).toFixed(1) : '0',
+      maxCost: filteredCards.length > 0 ? Math.max(...filteredCards.map(c => c.cost)) : 0,
+      minCost: filteredCards.length > 0 ? Math.min(...filteredCards.map(c => c.cost)) : 0
+    }
+
+    // Si es vista general, mostrar distribución por CLASES
+    if (viewType === 'general') {
+      const classDistribution = getAvailableClasses(cards)
+      return [
+        { value: stats.total, label: 'Total Cartas', color: 'text-blue-600' },
+        { value: classDistribution.find(c => c.value === 'hero')?.count || 0, label: 'Clase Hero', color: 'text-orange-600' },
+        { value: classDistribution.find(c => c.value === 'basic')?.count || 0, label: 'Clase Basic', color: 'text-gray-600' },
+        { value: classDistribution.find(c => c.value === 'aggression')?.count || 0, label: 'Clase Aggression', color: 'text-red-600' },
+        { value: classDistribution.find(c => c.value === 'justice')?.count || 0, label: 'Clase Justice', color: 'text-blue-500' },
+        { value: classDistribution.find(c => c.value === 'leadership')?.count || 0, label: 'Clase Leadership', color: 'text-yellow-600' },
+        { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Clase Protection', color: 'text-emerald-600' }
+      ].filter(stat => stat.value > 0) // Solo mostrar clases que existen
+    }
+    
+    // Si es vista por clase, mostrar estadísticas detalladas de esa clase
+    const classStats = [
+      { value: stats.total, label: 'Total', color: 'text-blue-600' },
+      { value: stats.heroes, label: 'Héroes', color: 'text-red-600' },
+      { value: stats.allies, label: 'Aliados', color: 'text-blue-500' },
+      { value: stats.events, label: 'Eventos', color: 'text-purple-600' },
+      { value: stats.upgrades, label: 'Mejoras', color: 'text-green-600' },
+      { value: stats.supports, label: 'Apoyos', color: 'text-yellow-600' },
+      { value: stats.resources, label: 'Recursos', color: 'text-orange-600' },
+      { value: `${stats.minCost}-${stats.maxCost}`, label: 'Rango Coste', color: 'text-gray-600' }
+    ]
+    
+    // Filtrar estadísticas que tengan valor 0 para mantener la UI limpia
+    return classStats.filter(stat => stat.value !== 0 || stat.label === 'Total' || stat.label === 'Rango Coste')
+  }
+
+  const getClassBadgeStyle = (clase: string) => {
+    const styles = {
+      'aggression': 'text-red-800 bg-red-200',
+      'justice': 'text-blue-800 bg-blue-200', 
+      'leadership': 'text-yellow-800 bg-yellow-200',
+      'protection': 'text-emerald-800 bg-emerald-200',
+      'basic': 'text-gray-800 bg-gray-200',
+      'campaign': 'text-purple-800 bg-purple-200',
+      'hero': 'text-orange-800 bg-orange-200',
+      'pool': 'text-indigo-800 bg-indigo-200'
+    }
+    return styles[clase as keyof typeof styles] || 'text-gray-700 bg-gray-100'
+  }
+
+  const getAvailableClasses = (cards: Card[]) => {
+    const classes = [...new Set(cards.map(c => c.clase))].sort()
+    return classes.map(clase => ({
+      value: clase,
+      label: clase.charAt(0).toUpperCase() + clase.slice(1),
+      count: cards.filter(c => c.clase === clase).length
+    }))
+  }
+
+  const getStatsTitle = (viewType: string) => {
+    if (viewType === 'general') return 'Estadísticas del Set'
+    return `Estadísticas de ${viewType.charAt(0).toUpperCase() + viewType.slice(1)}`
+  }
+
+  if (!set) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Set no encontrado</h1>
+          <button
+            onClick={() => navigate('/cards')}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Volver a cartas
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => navigate('/cards')}
+            className="mb-6 text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver a cartas
+          </button>
+          
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold mb-2">{set.name}</h1>
+                <p className="text-blue-100 text-lg">
+                  {set.cardCount} cartas disponibles
+                </p>
+              </div>
+              <div className="hidden md:block">
+                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Estadísticas del Set */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+              <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              {getStatsTitle(statsView)}
+            </h2>
+            
+            {/* Desplegable de vista de estadísticas */}
+            <div className="relative">
+              <select
+                value={statsView}
+                onChange={(e) => setStatsView(e.target.value)}
+                className="px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm font-medium"
+              >
+                <option value="general">Resumen General</option>
+                {getAvailableClasses(cards).map(clase => (
+                  <option key={clase.value} value={clase.value}>
+                    {clase.label} ({clase.count})
+                  </option>
+                ))}
+              </select>
+              <svg className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {generateSetStats(cards, statsView).map((stat, index) => (
+              <div key={index} className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+                <div className="text-sm text-gray-600">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Filtros */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+            <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+            </svg>
+            Filtros y Ordenamiento
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Buscador */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                🔍 Buscar por nombre
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={handleSearchChange}
+                  placeholder="Escribe el nombre de la carta..."
+                  className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+                <svg className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Ordenamiento */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                📊 Ordenar por
+              </label>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={handleSortChange}
+                  className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
+                >
+                  <option value="tipo">Tipo (héroes primero)</option>
+                  <option value="clase">Clase</option>
+                  <option value="nombre">Nombre</option>
+                  <option value="fuerza">Fuerza (coste)</option>
+                </select>
+                <svg className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Cartas */}
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+              <svg className="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Cartas del Set
+            </h2>
+            {!isLoading && cards.length > 0 && (
+              <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                {cards.length} cartas
+              </span>
+            )}
+          </div>
+          
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+              <p className="text-gray-600 text-lg">Cargando cartas...</p>
+            </div>
+          ) : cards.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.343A7.962 7.962 0 0112 4c-2.34 0-4.29 1.009-5.824 2.57" />
+                </svg>
+              </div>
+              <p className="text-lg">No se encontraron cartas</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {cards.map((card, index) => (
+                <div key={index} className={`bg-gradient-to-br ${getCardGradient(card.clase)} border-2 rounded-xl p-5 hover:shadow-lg hover:scale-105 transition-all duration-300 hover:-translate-y-1`}>
+                  <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2">{card.name}</h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 text-sm">Clase:</span>
+                      <span className={`font-semibold capitalize px-2 py-1 rounded-full text-xs ${getClassBadgeStyle(card.clase)}`}>
+                        {card.clase}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 text-sm">Tipo:</span>
+                      <span className="font-medium capitalize text-gray-800">{card.type}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 text-sm">Coste:</span>
+                      <span className="font-bold text-lg text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                        {card.cost}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default SetCardsPage
