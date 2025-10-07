@@ -15,6 +15,10 @@ const SetCardsPage: React.FC = () => {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('tipo')
   const [statsView, setStatsView] = useState<string>('general')
+  
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [cardsPerPage] = useState(20)
 
   // Cargar datos del set
   useEffect(() => {
@@ -62,6 +66,7 @@ const SetCardsPage: React.FC = () => {
   // Recargar cartas cuando cambien los filtros
   useEffect(() => {
     loadCards()
+    setCurrentPage(1) // Resetear página cuando cambien los filtros
   }, [search, sortBy])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +75,22 @@ const SetCardsPage: React.FC = () => {
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortBy(e.target.value)
+  }
+
+  // Funciones de paginación
+  const getCurrentPageCards = () => {
+    const startIndex = (currentPage - 1) * cardsPerPage
+    const endIndex = startIndex + cardsPerPage
+    return cards.slice(startIndex, endIndex)
+  }
+
+  const getTotalPages = () => {
+    return Math.ceil(cards.length / cardsPerPage)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const getCardGradient = (clase: string) => {
@@ -182,8 +203,8 @@ const SetCardsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 py-8">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -245,7 +266,7 @@ const SetCardsPage: React.FC = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
             {generateSetStats(cards, statsView).map((stat, index) => (
               <div key={index} className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                 <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
@@ -318,9 +339,16 @@ const SetCardsPage: React.FC = () => {
               Cartas del Set
             </h2>
             {!isLoading && cards.length > 0 && (
-              <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                {cards.length} cartas
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                  {cards.length} cartas
+                </span>
+                {getTotalPages() > 1 && (
+                  <span className="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+                    Página {currentPage} de {getTotalPages()}
+                  </span>
+                )}
+              </div>
             )}
           </div>
           
@@ -339,31 +367,89 @@ const SetCardsPage: React.FC = () => {
               <p className="text-lg">No se encontraron cartas</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {cards.map((card, index) => (
-                <div key={index} className={`bg-gradient-to-br ${getCardGradient(card.clase)} border-2 rounded-xl p-5 hover:shadow-lg hover:scale-105 transition-all duration-300 hover:-translate-y-1`}>
-                  <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2">{card.name}</h3>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 text-sm">Clase:</span>
-                      <span className={`font-semibold capitalize px-2 py-1 rounded-full text-xs ${getClassBadgeStyle(card.clase)}`}>
-                        {card.clase}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 text-sm">Tipo:</span>
-                      <span className="font-medium capitalize text-gray-800">{card.type}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 text-sm">Coste:</span>
-                      <span className="font-bold text-lg text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                        {card.cost}
-                      </span>
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                {getCurrentPageCards().map((card, index) => (
+                  <div key={index} className={`bg-gradient-to-br ${getCardGradient(card.clase)} border-2 rounded-xl p-5 hover:shadow-lg hover:scale-105 transition-all duration-300 hover:-translate-y-1`}>
+                    <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2">{card.name}</h3>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 text-sm">Clase:</span>
+                        <span className={`font-semibold capitalize px-2 py-1 rounded-full text-xs ${getClassBadgeStyle(card.clase)}`}>
+                          {card.clase}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 text-sm">Tipo:</span>
+                        <span className="font-medium capitalize text-gray-800">{card.type}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 text-sm">Coste:</span>
+                        <span className="font-bold text-lg text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                          {card.cost}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+              
+              {getTotalPages() > 1 && (
+                <div className="mt-8 flex items-center justify-center">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
+                      const showPage = page === 1 || page === getTotalPages() || 
+                                     (page >= currentPage - 2 && page <= currentPage + 2)
+                      
+                      if (!showPage) {
+                        if (page === currentPage - 3 || page === currentPage + 3) {
+                          return <span key={page} className="px-2 text-gray-400">...</span>
+                        }
+                        return null
+                      }
+                      
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                            currentPage === page
+                              ? 'bg-blue-600 text-white'
+                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    })}
+                    
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === getTotalPages()}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="ml-6 text-sm text-gray-500">
+                    Mostrando {((currentPage - 1) * cardsPerPage) + 1} - {Math.min(currentPage * cardsPerPage, cards.length)} de {cards.length} cartas
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
