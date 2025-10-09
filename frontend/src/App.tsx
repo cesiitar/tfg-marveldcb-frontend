@@ -1,24 +1,46 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
 import HomePage from './pages/HomePage'
 import DecksPage from './pages/DecksPage'
+import MyDecksPage from './pages/MyDecksPage'
 import CardsPage from './pages/CardsPage'
 import SetCardsPage from './pages/SetCardsPage'
 import CardSearchPage from './pages/CardSearchPage'
 import FAQPage from './pages/FAQPage'
+import ProfilePage from './pages/ProfilePage'
+import { AuthProvider } from './contexts/AuthContext'
 
 function App() {
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/decks" element={<DecksPage />} />
-        <Route path="/cards" element={<CardsPage />} />
-        <Route path="/cards/set/:setId" element={<SetCardsPage />} />
-        <Route path="/cards/search" element={<CardSearchPage />} />
-        <Route path="/faq" element={<FAQPage />} />
-      </Routes>
-    </Layout>
+    <AuthProvider>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/decks" element={<DecksPage />} />
+          <Route 
+            path="/mydecks" 
+            element={
+              <ProtectedRoute>
+                <MyDecksPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/cards" element={<CardsPage />} />
+          <Route path="/cards/set/:setId" element={<SetCardsPage />} />
+          <Route path="/cards/search" element={<CardSearchPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+      </Layout>
+    </AuthProvider>
   )
 }
 

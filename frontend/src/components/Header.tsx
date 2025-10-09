@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAuthenticated, user, loginWithRedirect, logout } = useAuth()
 
   return (
     <header className="bg-primary-800 shadow-lg">
@@ -19,13 +21,13 @@ const Header: React.FC = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link 
-              to="/decks" 
+              to="/mydecks" 
               className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
             >
               My Decks
             </Link>
             <Link 
-              to="/decklists" 
+              to="/decks" 
               className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
             >
               Decklists
@@ -57,13 +59,45 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex space-x-4">
-            <button className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200">
-              Login
-            </button>
-            <button className="px-6 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium">
-              Sign Up
-            </button>
+          <div className="hidden md:flex items-center space-x-4">
+            {isAuthenticated ? (
+              <>
+                <Link 
+                  to="/profile" 
+                  className="flex items-center space-x-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                >
+                  {user?.picture && (
+                    <img
+                      src={user.picture}
+                      alt="Avatar"
+                      className="w-8 h-8 rounded-full"
+                    />
+                  )}
+                  <span>{user?.name || 'Usuario'}</span>
+                </Link>
+                <button 
+                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                  className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={() => loginWithRedirect()}
+                  className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => loginWithRedirect({ screen_hint: 'signup' })}
+                  className="px-6 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -82,14 +116,14 @@ const Header: React.FC = () => {
           <div className="md:hidden py-4 border-t border-primary-700">
             <nav className="flex flex-col space-y-4">
               <Link 
-                to="/decks" 
+                to="/mydecks" 
                 className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 My Decks
               </Link>
               <Link 
-                to="/decklists" 
+                to="/decks" 
                 className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -124,12 +158,45 @@ const Header: React.FC = () => {
                 FAQs
               </Link>
               <div className="flex flex-col space-y-2 pt-4 border-t border-primary-700">
-                <button className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left">
-                  Login
-                </button>
-                <button className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium text-left">
-                  Sign Up
-                </button>
+                {isAuthenticated ? (
+                  <>
+                    <Link 
+                      to="/profile" 
+                      className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left flex items-center space-x-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {user?.picture && (
+                        <img
+                          src={user.picture}
+                          alt="Avatar"
+                          className="w-6 h-6 rounded-full"
+                        />
+                      )}
+                      <span>{user?.name || 'Usuario'}</span>
+                    </Link>
+                    <button 
+                      onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                      className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => loginWithRedirect()}
+                      className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left"
+                    >
+                      Login
+                    </button>
+                    <button 
+                      onClick={() => loginWithRedirect({ screen_hint: 'signup' })}
+                      className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium text-left"
+                    >
+                      Sign Up
+                    </button>
+                  </>
+                )}
               </div>
             </nav>
           </div>
