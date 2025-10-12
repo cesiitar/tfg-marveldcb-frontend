@@ -3,24 +3,7 @@ import { Card, CardSet, Hero, Deck } from '../types/card'
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
 class ApiService {
-  private getAuthHeaders = async (): Promise<HeadersInit> => {
-    // Esta función se implementará cuando tengamos el contexto de auth
-    return {
-      'Content-Type': 'application/json',
-    }
-  }
 
-  private async makeAuthenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
-    const headers = await this.getAuthHeaders()
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...headers,
-        ...options.headers,
-      },
-    })
-    return response
-  }
   async getSets(): Promise<CardSet[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/sets`)
@@ -103,15 +86,46 @@ class ApiService {
 
   // Métodos para héroes - Temporalmente deshabilitados hasta que el backend los implemente
   async getHeroes(): Promise<Hero[]> {
-    // TODO: Implementar cuando el backend tenga el endpoint /api/heroes
-    console.warn('Endpoint /api/heroes no implementado en el backend')
-    return []
+    try {
+      const response = await fetch(`${API_BASE_URL}/heroes`)
+      if (!response.ok) {
+        throw new Error('Error al obtener los héroes')
+      }
+      const data = await response.json()
+      return data.heroes || data
+    } catch (error) {
+      console.error('Error fetching heroes:', error)
+      throw error
+    }
   }
 
   async getHeroCards(heroName: string): Promise<Card[]> {
-    // TODO: Implementar cuando el backend tenga el endpoint /api/heroes/{name}/cards
-    console.warn(`Endpoint /api/heroes/${heroName}/cards no implementado en el backend`)
-    return []
+    try {
+      const response = await fetch(`${API_BASE_URL}/heroes/${encodeURIComponent(heroName)}/cards`)
+      if (!response.ok) {
+        throw new Error(`Error al obtener las cartas del héroe ${heroName}`)
+      }
+      const data = await response.json()
+      return data.cards || data
+    } catch (error) {
+      console.error('Error fetching hero cards:', error)
+      throw error
+    }
+  }
+
+  // Método para obtener cartas por aspecto
+  async getCardsByAspect(aspect: string): Promise<Card[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cards/aspect/${aspect}`)
+      if (!response.ok) {
+        throw new Error(`Error al obtener las cartas del aspecto ${aspect}`)
+      }
+      const data = await response.json()
+      return data.cards || data
+    } catch (error) {
+      console.error('Error fetching cards by aspect:', error)
+      throw error
+    }
   }
 
   // Nuevos métodos para mazos
@@ -129,22 +143,92 @@ class ApiService {
     }
   }
 
-  async createDeck(deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'>): Promise<Deck> {
+  async createDeck(deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'>, auth0Id: string): Promise<Deck> {
     try {
       const response = await fetch(`${API_BASE_URL}/decks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id,
         },
         body: JSON.stringify(deck),
       })
       if (!response.ok) {
-        throw new Error('Error al crear el mazo')
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al crear el mazo: ${response.status}`)
       }
       const data = await response.json()
       return data.deck || data
     } catch (error) {
       console.error('Error creating deck:', error)
+      throw error
+    }
+  }
+
+  // Método para obtener estadísticas del usuario
+  async getUserStats(auth0Id: string): Promise<{ deckCount: number }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/stats`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id, // Enviar el auth0_id como header personalizado
+        },
+      })
+      if (!response.ok) {
+        throw new Error('Error al obtener las estadísticas del usuario')
+      }
+      const data = await response.json()
+      
+      return data
+    } catch (error) {
+      console.error('Error fetching user stats:', error)
+      throw error
+    }
+  }
+
+  // Método para obtener información del perfil del usuario
+  async getUserProfile(token: string): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error('Error al obtener el perfil del usuario')
+      }
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error fetching user profile:', error)
+      throw error
+    }
+  }
+
+  // Método para obtener los mazos del usuario
+  async getUserDecks(auth0Id: string): Promise<Deck[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/decks`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id,
+        },
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al obtener los mazos del usuario: ${response.status}`)
+      }
+      const data = await response.json()
+      return data.decks || data
+    } catch (error) {
+      console.error('Error fetching user decks:', error)
       throw error
     }
   }

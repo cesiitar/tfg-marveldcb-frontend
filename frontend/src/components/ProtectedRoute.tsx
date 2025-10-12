@@ -20,10 +20,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     )
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />
-  }
-
+  // Siempre mostrar el contenido, cada página maneja su propia lógica de autenticación
   return <>{children}</>
 }
 

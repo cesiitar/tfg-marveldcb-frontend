@@ -4,6 +4,7 @@ export interface Card {
   type: 'ally' | 'alter_ego' | 'attachment' | 'environment' | 'event' | 'hero' | 'minion' | 'obligation' | 'player_side_scheme' | 'resource' | 'side_scheme' | 'support' | 'treachery' | 'upgrade'
   cost: number
   set: string
+  quantity?: number  // Número de copias que se añaden automáticamente
 }
 
 export interface CardSet {

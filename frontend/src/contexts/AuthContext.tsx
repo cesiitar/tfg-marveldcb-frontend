@@ -7,7 +7,6 @@ interface AuthContextType {
   isLoading: boolean
   loginWithRedirect: () => void
   logout: () => void
-  getAccessTokenSilently: () => Promise<string>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -22,14 +21,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     isLoading,
     loginWithRedirect,
-    logout,
-    getAccessTokenSilently
+    logout
   } = useAuth0()
 
   // Función para sincronizar usuario con el backend
   const syncUser = async (user: User) => {
     try {
-      const response = await fetch('http://localhost:8000/api/sync-user', {
+      const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api'
+      const response = await fetch(`${API_BASE_URL}/sync-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           picture: user.picture
         })
       });
-      
+
       if (response.ok) {
         console.log('Usuario sincronizado correctamente');
       } else {
@@ -64,8 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     isLoading,
     loginWithRedirect,
-    logout,
-    getAccessTokenSilently
+    logout
   }
 
   return (

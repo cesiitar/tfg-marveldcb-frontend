@@ -6,6 +6,24 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isAuthenticated, user, loginWithRedirect, logout } = useAuth()
 
+  // Abrir registro de Auth0 (pantalla con email y proveedores sociales)
+  const handleSignupClick = async () => {
+    await loginWithRedirect({
+      authorizationParams: {
+        screen_hint: 'signup'
+      }
+    })
+  }
+
+  // Abrir login clásico (usuario/contraseña o sociales si están activos)
+  const handleLoginClick = async () => {
+    await loginWithRedirect({
+      authorizationParams: {
+        prompt: 'login'
+      }
+    })
+  }
+
   return (
     <header className="bg-primary-800 shadow-lg">
       <div className="container mx-auto px-4">
@@ -85,13 +103,13 @@ const Header: React.FC = () => {
             ) : (
               <>
                 <button 
-                  onClick={() => loginWithRedirect()}
+                  onClick={handleLoginClick}
                   className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
                 >
                   Login
                 </button>
                 <button 
-                  onClick={() => loginWithRedirect({ screen_hint: 'signup' })}
+                  onClick={handleSignupClick}
                   className="px-6 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium"
                 >
                   Sign Up
@@ -184,13 +202,13 @@ const Header: React.FC = () => {
                 ) : (
                   <>
                     <button 
-                      onClick={() => loginWithRedirect()}
+                      onClick={handleLoginClick}
                       className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left"
                     >
                       Login
                     </button>
                     <button 
-                      onClick={() => loginWithRedirect({ screen_hint: 'signup' })}
+                      onClick={handleSignupClick}
                       className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium text-left"
                     >
                       Sign Up

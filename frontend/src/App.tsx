@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import HomePage from './pages/HomePage'
 import DecksPage from './pages/DecksPage'
 import MyDecksPage from './pages/MyDecksPage'
+import CreateDeckPage from './pages/CreateDeckPage'
 import CardsPage from './pages/CardsPage'
 import SetCardsPage from './pages/SetCardsPage'
 import CardSearchPage from './pages/CardSearchPage'
@@ -15,30 +16,38 @@ function App() {
   return (
     <AuthProvider>
       <Layout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/decks" element={<DecksPage />} />
-          <Route 
-            path="/mydecks" 
-            element={
-              <ProtectedRoute>
-                <MyDecksPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/cards" element={<CardsPage />} />
-          <Route path="/cards/set/:setId" element={<SetCardsPage />} />
-          <Route path="/cards/search" element={<CardSearchPage />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/decks" element={<DecksPage />} />
+              <Route
+                path="/mydecks"
+                element={
+                  <ProtectedRoute>
+                    <MyDecksPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-deck"
+                element={
+                  <ProtectedRoute>
+                    <CreateDeckPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/cards" element={<CardsPage />} />
+              <Route path="/cards/set/:setId" element={<SetCardsPage />} />
+              <Route path="/cards/search" element={<CardSearchPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
       </Layout>
     </AuthProvider>
   )

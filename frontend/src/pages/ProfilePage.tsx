@@ -1,8 +1,42 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { apiService } from '../services/api'
 
 const ProfilePage: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth()
+  const [deckCount, setDeckCount] = useState<number>(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Cargar estadísticas del usuario
+  const loadUserStats = async () => {
+    if (!isAuthenticated) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const auth0Id = user?.sub
+      if (!auth0Id) {
+        throw new Error('No se pudo obtener el Auth0 ID del usuario')
+      }
+      const stats = await apiService.getUserStats(auth0Id)
+      setDeckCount(stats.deckCount || 0)
+    } catch (err) {
+      console.error('Error:', err)
+      // Si hay error, mostrar 0 en lugar de mensaje de error
+      setDeckCount(0)
+      setError(null) // No mostrar error, solo usar valor por defecto
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadUserStats()
+    }
+  }, [isAuthenticated])
 
   if (!isAuthenticated) {
     return (
@@ -21,7 +55,7 @@ const ProfilePage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Mi Perfil</h1>
           <button
-            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            onClick={() => logout()}
             className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
           >
             Cerrar Sesión
@@ -71,32 +105,22 @@ const ProfilePage: React.FC = () => {
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-700">Estadísticas</h2>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold text-accent-500">0</div>
-                <div className="text-sm text-gray-600">Mazos Creados</div>
+            {loading && (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-500 mx-auto mb-2"></div>
+                <p className="text-gray-600">Cargando estadísticas...</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold text-accent-500">0</div>
-                <div className="text-sm text-gray-600">Cartas Favoritas</div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold text-accent-500">0</div>
-                <div className="text-sm text-gray-600">Partidas Jugadas</div>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold text-accent-500">0</div>
-                <div className="text-sm text-gray-600">Victorias</div>
-              </div>
-            </div>
-          </div>
-        </div>
+            )}
 
-        {/* Actividad reciente */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Actividad Reciente</h2>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-gray-600 text-center">No hay actividad reciente</p>
+            {!loading && (
+              <div className="bg-gray-50 p-6 rounded-lg text-center">
+                <div className="text-3xl font-bold text-accent-500 mb-2">{deckCount}</div>
+                <div className="text-lg text-gray-600">Mazos Creados</div>
+                <div className="text-sm text-gray-500 mt-2">
+                  {deckCount === 0 ? 'Aún no has creado ningún mazo' : 'Total de mazos en tu colección'}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
