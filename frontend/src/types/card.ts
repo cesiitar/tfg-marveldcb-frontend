@@ -5,6 +5,7 @@ export interface Card {
   cost: number
   set: string
   quantity?: number  // Número de copias que se añaden automáticamente
+  max_quantity?: number  // Límite máximo de copias permitidas en un mazo
 }
 
 export interface CardSet {

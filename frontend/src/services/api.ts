@@ -169,8 +169,20 @@ class ApiService {
       })
       if (!response.ok) {
         const errorText = await response.text()
+        let detail = `Error al crear el mazo: ${response.status}`
+        try {
+          const parsed = JSON.parse(errorText)
+          if (parsed) {
+            if (parsed.card_name && (parsed.allowed !== undefined || parsed.limit !== undefined)) {
+              const allowed = parsed.allowed ?? parsed.limit
+              detail = `Límite excedido: "${parsed.card_name}" permite máximo ${allowed} copias`
+            } else if (parsed.detail || parsed.message) {
+              detail = parsed.detail || parsed.message
+            }
+          }
+        } catch {}
         console.error('Error response body:', errorText)
-        throw new Error(`Error al crear el mazo: ${response.status}`)
+        throw new Error(detail)
       }
       const data = await response.json()
       return data.deck || data

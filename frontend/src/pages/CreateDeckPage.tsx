@@ -99,9 +99,19 @@ const CreateDeckPage: React.FC = () => {
       setHeroCards([])
       setCurrentStep('setup')
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error creating deck:', err)
-      setError('Error al crear el mazo')
+      
+      // Mostrar el mensaje exacto del backend si viene
+      if (err && err.message) {
+        setError(err.message)
+      } else if (err.message && err.message.includes('401')) {
+        setError('Error: No tienes permisos para crear mazos. Inicia sesión nuevamente.')
+      } else if (err.message && err.message.includes('422')) {
+        setError('Error: Los datos del mazo no son válidos. Verifica que todas las cartas existan.')
+      } else {
+        setError('Error al crear el mazo. Inténtalo de nuevo.')
+      }
     } finally {
       setLoading(false)
     }
