@@ -82,6 +82,7 @@ const CreateDeckPage: React.FC = () => {
       const newDeck: Omit<Deck, 'id' | 'created_at' | 'updated_at'> = {
         name: deckName,
         hero_name: selectedHero,
+        aspect: selectedAspect as any,
         cards: selectedCards
       }
 

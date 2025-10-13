@@ -11,6 +11,7 @@ import CardSearchPage from './pages/CardSearchPage'
 import FAQPage from './pages/FAQPage'
 import ProfilePage from './pages/ProfilePage'
 import { AuthProvider } from './contexts/AuthContext'
+import DeckDetailPage from './pages/DeckDetailPage'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/decks" element={<DecksPage />} />
+              <Route path="/decks/:id" element={<DeckDetailPage />} />
               <Route
                 path="/mydecks"
                 element={

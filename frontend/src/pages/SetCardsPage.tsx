@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { apiService } from '../services/api'
 import { Card, CardSet } from '../types/card'
+import { getClassBadgeStyle, getClassGradientClasses } from '../utils/classColors'
 
 const SetCardsPage: React.FC = () => {
   const { setId } = useParams<{ setId: string }>()
@@ -93,19 +94,7 @@ const SetCardsPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const getCardGradient = (clase: string) => {
-    const gradients = {
-      'aggression': 'from-red-100 to-red-200 border-red-400',
-      'justice': 'from-blue-100 to-blue-200 border-blue-400', 
-      'leadership': 'from-yellow-100 to-yellow-200 border-yellow-400',
-      'protection': 'from-emerald-100 to-emerald-200 border-emerald-400',
-      'basic': 'from-gray-100 to-gray-200 border-gray-400',
-      'campaign': 'from-purple-100 to-purple-200 border-purple-400',
-      'hero': 'from-orange-100 to-orange-200 border-orange-400',
-      'pool': 'from-indigo-100 to-indigo-200 border-indigo-400'
-    }
-    return gradients[clase as keyof typeof gradients] || 'from-gray-50 to-gray-100 border-gray-300'
-  }
+  const getCardGradient = (clase: string) => getClassGradientClasses(clase)
 
   const generateSetStats = (cards: Card[], viewType: string = 'general') => {
     let filteredCards = cards
@@ -158,19 +147,7 @@ const SetCardsPage: React.FC = () => {
     return classStats.filter(stat => stat.value !== 0 || stat.label === 'Total' || stat.label === 'Rango Coste')
   }
 
-  const getClassBadgeStyle = (clase: string) => {
-    const styles = {
-      'aggression': 'text-red-800 bg-red-200',
-      'justice': 'text-blue-800 bg-blue-200', 
-      'leadership': 'text-yellow-800 bg-yellow-200',
-      'protection': 'text-emerald-800 bg-emerald-200',
-      'basic': 'text-gray-800 bg-gray-200',
-      'campaign': 'text-purple-800 bg-purple-200',
-      'hero': 'text-orange-800 bg-orange-200',
-      'pool': 'text-indigo-800 bg-indigo-200'
-    }
-    return styles[clase as keyof typeof styles] || 'text-gray-700 bg-gray-100'
-  }
+  // getClassBadgeStyle reutilizado desde utils/classColors
 
   const getAvailableClasses = (cards: Card[]) => {
     const classes = [...new Set(cards.map(c => c.clase))].sort()

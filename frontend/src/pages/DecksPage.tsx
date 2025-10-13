@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useMemo, useState, useEffect } from 'react'
 import { apiService } from '../services/api'
-import { Deck, Hero } from '../types/card'
+import { Deck } from '../types/card'
+import { getClassPillClasses } from '../utils/classColors'
 
 const DecksPage: React.FC = () => {
   const [decks, setDecks] = useState<Deck[]>([])
-  const [heroes, setHeroes] = useState<Hero[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [newDeck, setNewDeck] = useState({
-    name: '',
-    hero_name: ''
-  })
+  const [search, setSearch] = useState('')
+  const [heroFilter, setHeroFilter] = useState('')
+  const [aspectFilter, setAspectFilter] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,8 +18,6 @@ const DecksPage: React.FC = () => {
         setError(null)
         const decksData = await apiService.getDecks()
         setDecks(decksData)
-        // Temporalmente deshabilitado hasta que el backend implemente /api/heroes
-        setHeroes([])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar los datos')
       } finally {
@@ -33,32 +28,33 @@ const DecksPage: React.FC = () => {
     fetchData()
   }, [])
 
-  const handleCreateDeck = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newDeck.name || !newDeck.hero_name) return
+  const getDeckHeroName = (d: Deck): string | undefined => d.hero_name
+  const getDeckAspect = (d: Deck): string | undefined => (d as any).aspect
 
-    try {
-      // Crear mazo con las cartas del héroe automáticamente
-      const heroCards = await apiService.getHeroCards(newDeck.hero_name)
-      const deckCards = heroCards.map(card => ({
-        card_name: card.name,
-        quantity: 1
-      }))
+  const availableHeroes = useMemo(() => {
+    const set = new Set<string>()
+    decks.forEach(d => { const h = getDeckHeroName(d); if (h) set.add(h) })
+    return Array.from(set).sort((a, b) => a.localeCompare(b))
+  }, [decks])
 
-      const deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'> = {
-        name: newDeck.name,
-        hero_name: newDeck.hero_name,
-        cards: deckCards
-      }
+  const availableAspects = useMemo(() => {
+    const set = new Set<string>()
+    decks.forEach(d => { const a = getDeckAspect(d); if (a) set.add(a) })
+    // Si el backend aún no manda aspect, ofrecemos las 4 por defecto
+    const base = ['aggression', 'justice', 'leadership', 'protection']
+    const derived = Array.from(set)
+    const merged = new Set([...base, ...derived])
+    return Array.from(merged).sort((a, b) => a.localeCompare(b))
+  }, [decks])
 
-      const createdDeck = await apiService.createDeck(deck)
-      setDecks([createdDeck, ...decks])
-      setNewDeck({ name: '', hero_name: '' })
-      setShowCreateForm(false)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear el mazo')
-    }
-  }
+  const filteredDecks = useMemo(() => {
+    return decks.filter(d => {
+      const matchesText = !search || d.name.toLowerCase().includes(search.toLowerCase())
+      const matchesHero = !heroFilter || getDeckHeroName(d) === heroFilter
+      const matchesAspect = !aspectFilter || getDeckAspect(d) === aspectFilter
+      return matchesText && matchesHero && matchesAspect
+    })
+  }, [decks, search, heroFilter, aspectFilter])
 
   const getHeroColor = (index: number) => {
     const colors = [
@@ -127,15 +123,8 @@ const DecksPage: React.FC = () => {
               Decklists Públicos
             </h1>
             <p className="text-lg text-gray-300 mb-6">
-              Explora y crea mazos públicos de Marvel Champions
+              Explora los mazos públicos de Marvel Champions
             </p>
-            
-            <button 
-              onClick={() => setShowCreateForm(true)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-            >
-              Crear Nuevo Mazo
-            </button>
           </div>
         </div>
       </div>
@@ -143,65 +132,41 @@ const DecksPage: React.FC = () => {
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Create Deck Form */}
-          {showCreateForm && (
-            <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200 mb-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Crear Nuevo Mazo</h2>
-              <form onSubmit={handleCreateDeck} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre del Mazo
-                  </label>
-                  <input
-                    type="text"
-                    value={newDeck.name}
-                    onChange={(e) => setNewDeck({ ...newDeck, name: e.target.value })}
-                    placeholder="Ej: Mazo de Hulk Agresivo"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Héroe
-                  </label>
-                  <select
-                    value={newDeck.hero_name}
-                    onChange={(e) => setNewDeck({ ...newDeck, hero_name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    required
-                  >
-                    <option value="">Selecciona un héroe</option>
-                    {heroes.map((hero, index) => (
-                      <option key={hero.name} value={hero.pack_name}>
-                        {hero.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-                  >
-                    Crear Mazo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateForm(false)}
-                    className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors duration-200 font-medium"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
+          {/* Filters */}
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nombre de mazo"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              />
+              <select
+                value={heroFilter}
+                onChange={(e) => setHeroFilter(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              >
+                <option value="">Todos los héroes</option>
+                {availableHeroes.map(h => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
+              <select
+                value={aspectFilter}
+                onChange={(e) => setAspectFilter(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              >
+                <option value="">Todos los aspectos</option>
+                {availableAspects.map(a => (
+                  <option key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</option>
+                ))}
+              </select>
             </div>
-          )}
+          </div>
 
           {/* Decks Grid */}
-          {decks.length === 0 ? (
+          {filteredDecks.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,48 +174,61 @@ const DecksPage: React.FC = () => {
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-700 mb-4">
-                No hay mazos públicos
+                No hay mazos que coincidan
               </h3>
               <p className="text-gray-500 mb-8 text-lg">
-                Sé el primero en crear un mazo público
+                Ajusta los filtros o limpia la búsqueda
               </p>
-              <button 
-                onClick={() => setShowCreateForm(true)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-              >
-                Crear Primer Mazo
-              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {decks.map((deck, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {filteredDecks.map((deck, index) => (
                 <div 
                   key={deck.id}
-                  className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300 overflow-hidden"
+                  className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-gray-300 overflow-hidden"
                 >
                   {/* Header with subtle gradient */}
-                  <div className={`h-2 bg-gradient-to-r ${getHeroColor(index)}`}></div>
+                  <div className={`h-1.5 bg-gradient-to-r ${getHeroColor(index)}`}></div>
                   
                   <div className="p-5">
-                    <div className="mb-3">
-                      <h3 className="text-lg font-semibold text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors duration-200">
+                    <div className="mb-2">
+                      <h3 className="text-base font-semibold text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors duration-200">
                         {deck.name}
                       </h3>
-                      <p className="text-sm text-gray-600">
-                        Héroe: {deck.hero_name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {deck.cards.length} cartas
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                          Héroe: {getDeckHeroName(deck) || '—'}
+                        </span>
+                        {getDeckAspect(deck) && (
+                          <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full ${getClassPillClasses(getDeckAspect(deck))}`}>
+                            {getDeckAspect(deck)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{deck.cards.length} cartas</span>
+                        <span className="inline-flex items-center gap-1">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.343-3 3m6 0a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          {deck.creator_name || 'Anónimo'}
+                        </span>
+                      </div>
                     </div>
                     
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
-                        Ver detalles
+                    <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                      <span className="inline-flex items-center gap-1">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
+                        </svg>
+                        {deck.created_at ? new Date(deck.created_at).toLocaleDateString() : ''}
                       </span>
-                      <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <span className="inline-flex items-center gap-1 text-blue-600 group-hover:text-blue-700 cursor-pointer" onClick={() => window.location.href = `/decks/${deck.id}` }>
+                        Ver detalles
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
                     </div>
                   </div>
                 </div>

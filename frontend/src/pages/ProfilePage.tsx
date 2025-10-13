@@ -6,7 +6,7 @@ const ProfilePage: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth()
   const [deckCount, setDeckCount] = useState<number>(0)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
 
   // Cargar estadísticas del usuario
   const loadUserStats = async () => {
@@ -21,7 +21,18 @@ const ProfilePage: React.FC = () => {
         throw new Error('No se pudo obtener el Auth0 ID del usuario')
       }
       const stats = await apiService.getUserStats(auth0Id)
-      setDeckCount(stats.deckCount || 0)
+      const primary = stats && typeof stats.deckCount === 'number' ? stats.deckCount : 0
+      // Fallback: si el endpoint de stats no está, contar mazos del usuario
+      if (primary === 0) {
+        try {
+          const decks = await apiService.getUserDecks(auth0Id)
+          setDeckCount(Array.isArray(decks) ? decks.length : 0)
+        } catch {
+          setDeckCount(primary)
+        }
+      } else {
+        setDeckCount(primary)
+      }
     } catch (err) {
       console.error('Error:', err)
       // Si hay error, mostrar 0 en lugar de mensaje de error

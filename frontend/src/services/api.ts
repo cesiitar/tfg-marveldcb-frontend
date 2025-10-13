@@ -143,6 +143,20 @@ class ApiService {
     }
   }
 
+  async getDeckById(id: number): Promise<Deck> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/decks/${id}`)
+      if (!response.ok) {
+        throw new Error('Error al obtener el mazo')
+      }
+      const data = await response.json()
+      return (data.deck || data) as Deck
+    } catch (error) {
+      console.error('Error fetching deck by id:', error)
+      throw error
+    }
+  }
+
   async createDeck(deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'>, auth0Id: string): Promise<Deck> {
     try {
       const response = await fetch(`${API_BASE_URL}/decks`, {
