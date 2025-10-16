@@ -216,7 +216,7 @@ const DeckDetailPage: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between py-1">
                   <span className="text-xs font-medium text-gray-600">Cartas:</span>
-                  <span className="text-xs text-gray-800 font-semibold">{totalCards}/40</span>
+                  <span className="text-xs text-gray-800 font-semibold">{totalCards}/50</span>
                 </div>
                 <div className="flex items-center justify-between py-1">
                   <span className="text-xs font-medium text-gray-600">Fecha:</span>

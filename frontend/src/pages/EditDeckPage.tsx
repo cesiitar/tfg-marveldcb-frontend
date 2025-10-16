@@ -103,12 +103,12 @@ const EditDeckPage: React.FC = () => {
 
   // Calcular total de cartas seleccionadas
   const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
-  const remainingCards = 40 - totalSelectedCards
+  const remainingCards = 50 - totalSelectedCards
 
   // Añadir carta al mazo
   const addCard = (cardName: string) => {
     if (remainingCards <= 0) {
-      showToast('❌ Ya tienes 40 cartas en el mazo', 'error')
+      showToast('❌ Ya tienes 50 cartas en el mazo', 'error')
       return
     }
     
@@ -147,8 +147,8 @@ const EditDeckPage: React.FC = () => {
       return
     }
     
-    if (totalSelectedCards !== 40) {
-      showToast('❌ El mazo debe tener exactamente 40 cartas', 'error')
+    if (totalSelectedCards < 40 || totalSelectedCards > 50) {
+      showToast('❌ El mazo debe tener entre 40 y 50 cartas', 'error')
       return
     }
     
@@ -313,7 +313,7 @@ const EditDeckPage: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Cartas:</span>
-                        <span className="font-medium">{totalSelectedCards}/40</span>
+                        <span className="font-medium">{totalSelectedCards}/50</span>
                       </div>
                     </div>
                   </div>
@@ -321,7 +321,7 @@ const EditDeckPage: React.FC = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={handleSave}
-                      disabled={saving || totalSelectedCards !== 40}
+                      disabled={saving || totalSelectedCards < 40 || totalSelectedCards > 50}
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
                     >
                       {saving ? 'Guardando...' : 'Guardar Cambios'}
@@ -344,9 +344,9 @@ const EditDeckPage: React.FC = () => {
                   <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">
-                      {totalSelectedCards}/40 cartas
+                      {totalSelectedCards}/50 cartas
                     </span>
-                    <div className={`w-3 h-3 rounded-full ${totalSelectedCards === 40 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                    <div className={`w-3 h-3 rounded-full ${totalSelectedCards >= 40 && totalSelectedCards <= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                   </div>
                 </div>
                 

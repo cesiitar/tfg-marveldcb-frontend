@@ -99,11 +99,11 @@ class ApiService {
     }
   }
 
-  async getHeroCards(heroName: string): Promise<Card[]> {
+  async getHeroCards(heroId: number): Promise<Card[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/heroes/${encodeURIComponent(heroName)}/cards`)
+      const response = await fetch(`${API_BASE_URL}/heroes/${heroId}/cards`)
       if (!response.ok) {
-        throw new Error(`Error al obtener las cartas del héroe ${heroName}`)
+        throw new Error(`Error al obtener las cartas del héroe con ID ${heroId}`)
       }
       const data = await response.json()
       return data.cards || data

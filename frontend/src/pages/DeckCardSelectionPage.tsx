@@ -34,7 +34,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
   const heroCardsCount = heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)
   const totalCards = heroCardsCount + totalSelectedCards
-  const remainingCards = 40 - totalCards
+  const remainingCards = 50 - totalCards
 
   // Filtrar cartas básicas cuando cambie el término de búsqueda
   useEffect(() => {
@@ -89,14 +89,15 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
     loadCards()
   }, [aspectName])
 
-  // Función helper para crear clave única de carta
+  // Función helper para crear clave única de carta usando ID
   const getCardKey = (card: Card): string => {
-    return `${card.name}|${card.set}`
+    return `${card.id}` // Usar ID único en lugar de nombre+set
   }
 
-  // Función helper para extraer nombre de carta desde la clave
-  const getCardNameFromKey = (cardKey: string): string => {
-    return cardKey.split('|')[0]
+  // Función helper para obtener carta desde la clave
+  const getCardFromKey = (cardKey: string): Card | undefined => {
+    const cardId = parseInt(cardKey)
+    return [...basicCards, ...aspectCards, ...heroCards].find(c => c.id === cardId)
   }
 
   const handleCardQuantityChange = (cardKey: string, quantity: number, maxQuantity?: number) => {
@@ -119,6 +120,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   }
 
   const handleComplete = () => {
+    
     const cardMap = new Map<string, number>()
     
     // Añadir cartas del héroe con sus cantidades automáticas
@@ -134,15 +136,20 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
       cardMap.set(cardKey, currentQuantity + quantity)
     })
 
-    // Convertir Map a array de cartas - enviar card_set para distinguir cartas con mismo nombre
+    // Convertir Map a array de cartas - usar IDs únicos para evitar duplicados
     const deckCards: DeckCard[] = Array.from(cardMap.entries()).map(([cardKey, quantity]) => {
-      const [cardName, cardSet] = cardKey.split('|')
+      const card = getCardFromKey(cardKey)
+      if (!card) {
+        return null
+      }
+      
       return {
-        card_name: cardName,
-        card_set: cardSet, // Enviar información del set
+        card_id: card.id,
+        card_name: card.name,
+        card_set: card.set,
         quantity: quantity
       }
-    })
+    }).filter(Boolean) as DeckCard[]
 
     onComplete(deckCards)
   }
@@ -185,7 +192,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
             <p><strong>Aspecto:</strong> {aspectName}</p>
             <p><strong>Cartas del héroe:</strong> {heroCardsCount}</p>
             <p><strong>Cartas seleccionadas:</strong> {totalSelectedCards}</p>
-            <p><strong>Total de cartas:</strong> {totalCards}/40</p>
+            <p><strong>Total de cartas:</strong> {totalCards}/50</p>
             <p className={`font-medium ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-orange-600'}`}>
               <strong>Cartas restantes:</strong> {remainingCards}
             </p>
@@ -368,14 +375,14 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
         <div className="mt-8 text-center">
           <button
             onClick={handleComplete}
-            disabled={totalCards !== 40}
+            disabled={totalCards < 40 || totalCards > 50}
             className={`px-8 py-3 rounded-lg font-medium transition-colors duration-200 ${
-              totalCards === 40
+              totalCards >= 40 && totalCards <= 50
                 ? 'bg-green-500 text-white hover:bg-green-600'
                 : 'bg-gray-400 text-gray-200 cursor-not-allowed'
             }`}
           >
-            {totalCards === 40 ? 'Finalizar Mazo' : `Necesitas ${remainingCards} cartas más`}
+            {totalCards >= 40 && totalCards <= 50 ? 'Finalizar Mazo' : totalCards < 40 ? `Necesitas ${40 - totalCards} cartas más` : `Tienes ${totalCards - 50} cartas de más`}
           </button>
         </div>
       </div>

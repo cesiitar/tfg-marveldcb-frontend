@@ -128,7 +128,7 @@ const SetCardsPage: React.FC = () => {
         { value: classDistribution.find(c => c.value === 'justice')?.count || 0, label: 'Clase Justice', color: 'text-blue-500' },
         { value: classDistribution.find(c => c.value === 'leadership')?.count || 0, label: 'Clase Leadership', color: 'text-yellow-600' },
         { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Clase Protection', color: 'text-emerald-600' },
-        { value: classDistribution.find(c => c.value === 'encounter')?.count || 0, label: 'Clase Encounter', color: 'text-purple-600' },
+        { value: classDistribution.find(c => c.value === 'encounter')?.count || 0, label: 'Clase Encounter', color: 'text-red-900' },
         { value: classDistribution.find(c => c.value === 'campaign')?.count || 0, label: 'Clase Campaign', color: 'text-indigo-600' }
       ].filter(stat => stat.value > 0) // Solo mostrar clases que existen
     }

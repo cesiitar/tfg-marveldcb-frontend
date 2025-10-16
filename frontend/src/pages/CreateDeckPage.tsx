@@ -9,7 +9,8 @@ const CreateDeckPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth()
   const { showToast, ToastContainer } = useToast()
   const [heroes, setHeroes] = useState<Hero[]>([])
-  const [selectedHero, setSelectedHero] = useState<string>('')
+  const [selectedHero, setSelectedHero] = useState<number | null>(null)
+  const [selectedHeroName, setSelectedHeroName] = useState<string>('')
   const [selectedAspect, setSelectedAspect] = useState<string>('')
   const [heroCards, setHeroCards] = useState<Card[]>([])
   const [deckName, setDeckName] = useState<string>('')
@@ -48,11 +49,17 @@ const CreateDeckPage: React.FC = () => {
     }
   }, [selectedHero])
 
-  const handleHeroChange = (heroName: string) => {
-    setSelectedHero(heroName)
-    setSelectedAspect('')
-    setHeroCards([])
+  const handleHeroChange = (heroId: string) => {
+    const heroIdNum = parseInt(heroId)
+    const selectedHeroObj = heroes.find(h => h.id === heroIdNum)
+    if (selectedHeroObj) {
+      setSelectedHero(heroIdNum) // Para las consultas API
+      setSelectedHeroName(selectedHeroObj.name) // Para mostrar en el select
+      setSelectedAspect('')
+      setHeroCards([])
+    }
   }
+
 
   const handleAspectChange = (aspect: string) => {
     setSelectedAspect(aspect)
@@ -81,9 +88,10 @@ const CreateDeckPage: React.FC = () => {
 
     try {
       // Crear el mazo con todas las cartas
+      const selectedHeroObj = heroes.find(h => h.id === selectedHero)
       const newDeck: Omit<Deck, 'id' | 'created_at' | 'updated_at'> = {
         name: deckName,
-        hero_name: selectedHero,
+        hero_name: selectedHeroObj?.hero_name || '',
         aspect: selectedAspect as any,
         cards: selectedCards
       }
@@ -162,13 +170,13 @@ const CreateDeckPage: React.FC = () => {
               Selecciona un Héroe *
             </label>
             <select
-              value={selectedHero}
+              value={selectedHero || ''}
               onChange={(e) => handleHeroChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
             >
               <option value="">Selecciona un héroe...</option>
               {heroes.map((hero) => (
-                <option key={hero.name} value={hero.name}>
+                <option key={hero.id} value={hero.id}>
                   {hero.name}
                 </option>
               ))}
@@ -230,7 +238,7 @@ const CreateDeckPage: React.FC = () => {
               </h2>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="text-sm text-blue-700 mb-3">
-                  <p><strong>Héroe:</strong> {selectedHero}</p>
+                  <p><strong>Héroe:</strong> {selectedHeroName}</p>
                   <p><strong>Aspecto:</strong> {selectedAspect || 'No seleccionado'}</p>
                   <p><strong>Cartas del héroe:</strong> {heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)}</p>
                 </div>

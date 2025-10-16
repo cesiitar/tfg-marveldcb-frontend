@@ -13,6 +13,8 @@ export function getClassColor(cls?: string): string {
       return 'bg-green-600'
     case 'hero':
       return 'bg-violet-500'
+    case 'encounter':
+      return 'bg-red-900'
     case 'campaign':
       return 'bg-indigo-600'
     case 'basic':
@@ -34,6 +36,8 @@ export function getClassPillClasses(cls?: string): string {
       return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
     case 'hero':
       return 'bg-violet-50 text-violet-700 border border-violet-200'
+    case 'encounter':
+      return 'bg-red-50 text-red-900 border border-red-300'
     case 'campaign':
       return 'bg-indigo-50 text-indigo-700 border border-indigo-200'
     case 'basic':
@@ -55,6 +59,8 @@ export function getClassGradientClasses(cls?: string): string {
       return 'from-emerald-100 to-emerald-200 border-emerald-300'
     case 'hero':
       return 'from-violet-100 to-violet-200 border-violet-300'
+    case 'encounter':
+      return 'from-red-200 to-red-300 border-red-400'
     case 'campaign':
       return 'from-indigo-100 to-indigo-200 border-indigo-300'
     case 'basic':
@@ -76,6 +82,8 @@ export function getClassBadgeStyle(cls?: string): string {
       return 'text-emerald-800 bg-emerald-200'
     case 'hero':
       return 'text-violet-800 bg-violet-200'
+    case 'encounter':
+      return 'text-red-900 bg-red-300'
     case 'campaign':
       return 'text-indigo-800 bg-indigo-200'
     case 'basic':
