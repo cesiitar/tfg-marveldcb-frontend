@@ -7,6 +7,7 @@ interface AuthContextType {
   isLoading: boolean
   loginWithRedirect: () => void
   logout: () => void
+  getAccessToken: () => Promise<string | undefined>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,7 +22,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     isLoading,
     loginWithRedirect,
-    logout
+    logout,
+    getAccessTokenSilently
   } = useAuth0()
 
   // Función para sincronizar usuario con el backend
@@ -58,12 +60,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [isAuthenticated, user]);
 
+  // Función para obtener el access token
+  const getAccessToken = async (): Promise<string | undefined> => {
+    try {
+      if (isAuthenticated) {
+        return await getAccessTokenSilently()
+      }
+      return undefined
+    } catch (error) {
+      console.error('Error getting access token:', error)
+      return undefined
+    }
+  }
+
   const value = {
     user,
     isAuthenticated,
     isLoading,
     loginWithRedirect,
-    logout
+    logout,
+    getAccessToken
   }
 
   return (

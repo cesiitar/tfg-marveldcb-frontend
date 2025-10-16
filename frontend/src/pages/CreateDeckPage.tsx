@@ -3,9 +3,11 @@ import { useAuth } from '../contexts/AuthContext'
 import { apiService } from '../services/api'
 import { Hero, Card, Deck, DeckCard } from '../types/card'
 import DeckCardSelectionPage from './DeckCardSelectionPage'
+import { useToast } from '../components/Toast'
 
 const CreateDeckPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth()
+  const { showToast, ToastContainer } = useToast()
   const [heroes, setHeroes] = useState<Hero[]>([])
   const [selectedHero, setSelectedHero] = useState<string>('')
   const [selectedAspect, setSelectedAspect] = useState<string>('')
@@ -89,7 +91,7 @@ const CreateDeckPage: React.FC = () => {
       await apiService.createDeck(newDeck, user.sub)
       
       // Mostrar mensaje de éxito
-      alert(`¡Mazo "${deckName}" creado exitosamente!`)
+      showToast(`🎉 ¡Mazo "${deckName}" creado exitosamente!`, 'success')
       
       // Limpiar formulario
       setSelectedHero('')
@@ -104,13 +106,13 @@ const CreateDeckPage: React.FC = () => {
       
       // Mostrar el mensaje exacto del backend si viene
       if (err && err.message) {
-        setError(err.message)
+        showToast(`❌ ${err.message}`, 'error')
       } else if (err.message && err.message.includes('401')) {
-        setError('Error: No tienes permisos para crear mazos. Inicia sesión nuevamente.')
+        showToast('❌ No tienes permisos para crear mazos. Inicia sesión nuevamente.', 'error')
       } else if (err.message && err.message.includes('422')) {
-        setError('Error: Los datos del mazo no son válidos. Verifica que todas las cartas existan.')
+        showToast('❌ Los datos del mazo no son válidos. Verifica que todas las cartas existan.', 'error')
       } else {
-        setError('Error al crear el mazo. Inténtalo de nuevo.')
+        showToast('❌ Error al crear el mazo. Inténtalo de nuevo.', 'error')
       }
     } finally {
       setLoading(false)
@@ -262,6 +264,9 @@ const CreateDeckPage: React.FC = () => {
           </button>
         </div>
       </div>
+      
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
   )
 }

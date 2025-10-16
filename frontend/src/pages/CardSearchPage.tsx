@@ -198,6 +198,17 @@ const CardSearchPage: React.FC = () => {
                       <option value="event">Evento</option>
                       <option value="upgrade">Mejora</option>
                       <option value="support">Apoyo</option>
+                      <option value="resource">Recurso</option>
+                      <option value="attachment">Anexo</option>
+                      <option value="environment">Entorno</option>
+                      <option value="minion">Secuaz</option>
+                      <option value="obligation">Obligación</option>
+                      <option value="side_scheme">Esquema Secundario</option>
+                      <option value="treachery">Traición</option>
+                      <option value="villain">Villano</option>
+                      <option value="main_scheme">Esquema Principal</option>
+                      <option value="evidence">Evidencia</option>
+                      <option value="player_side_scheme">Esquema de Jugador</option>
                     </select>
                     <svg className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

@@ -127,7 +127,9 @@ const SetCardsPage: React.FC = () => {
         { value: classDistribution.find(c => c.value === 'aggression')?.count || 0, label: 'Clase Aggression', color: 'text-red-600' },
         { value: classDistribution.find(c => c.value === 'justice')?.count || 0, label: 'Clase Justice', color: 'text-blue-500' },
         { value: classDistribution.find(c => c.value === 'leadership')?.count || 0, label: 'Clase Leadership', color: 'text-yellow-600' },
-        { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Clase Protection', color: 'text-emerald-600' }
+        { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Clase Protection', color: 'text-emerald-600' },
+        { value: classDistribution.find(c => c.value === 'encounter')?.count || 0, label: 'Clase Encounter', color: 'text-purple-600' },
+        { value: classDistribution.find(c => c.value === 'campaign')?.count || 0, label: 'Clase Campaign', color: 'text-indigo-600' }
       ].filter(stat => stat.value > 0) // Solo mostrar clases que existen
     }
     
@@ -184,15 +186,18 @@ const SetCardsPage: React.FC = () => {
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => navigate('/cards')}
-            className="mb-6 text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Volver a cartas
-          </button>
+          <div className="flex justify-between items-start mb-6">
+            <div></div>
+            <button
+              onClick={() => navigate('/cards')}
+              className="text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Volver a cartas
+            </button>
+          </div>
           
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white shadow-lg">
             <div className="flex items-center justify-between">

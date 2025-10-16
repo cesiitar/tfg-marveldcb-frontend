@@ -258,6 +258,60 @@ class ApiService {
       throw error
     }
   }
+
+  // Actualizar un mazo existente
+  async updateDeck(deckId: number, deckData: any, auth0Id: string): Promise<any> {
+    try {
+      if (!auth0Id) {
+        throw new Error('No hay Auth0 ID')
+      }
+
+      const response = await fetch(`${API_BASE_URL}/decks/${deckId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id // Enviar solo el Auth0 SUB, no el JWT token
+        },
+        body: JSON.stringify(deckData)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al actualizar el mazo: ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error('Error updating deck:', error)
+      throw error
+    }
+  }
+
+  // Eliminar un mazo
+  async deleteDeck(deckId: number, auth0Id: string): Promise<void> {
+    try {
+      if (!auth0Id) {
+        throw new Error('No hay Auth0 ID')
+      }
+
+      const response = await fetch(`${API_BASE_URL}/decks/${deckId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-Auth0-ID': auth0Id // Enviar solo el Auth0 SUB, no el JWT token
+        }
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al eliminar el mazo: ${response.status}`)
+      }
+    } catch (error) {
+      console.error('Error deleting deck:', error)
+      throw error
+    }
+  }
 }
 
 export const apiService = new ApiService()

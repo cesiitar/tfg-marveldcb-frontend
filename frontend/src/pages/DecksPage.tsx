@@ -49,7 +49,7 @@ const DecksPage: React.FC = () => {
 
   const filteredDecks = useMemo(() => {
     return decks.filter(d => {
-      const matchesText = !search || d.name.toLowerCase().includes(search.toLowerCase())
+      const matchesText = !search || d.name.toLowerCase().startsWith(search.toLowerCase())
       const matchesHero = !heroFilter || getDeckHeroName(d) === heroFilter
       const matchesAspect = !aspectFilter || getDeckAspect(d) === aspectFilter
       return matchesText && matchesHero && matchesAspect
@@ -181,54 +181,70 @@ const DecksPage: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredDecks.map((deck, index) => (
                 <div 
                   key={deck.id}
-                  className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 hover:border-gray-300 overflow-hidden"
+                  className="group bg-white border border-gray-200 hover:border-blue-300 transition-all duration-200 overflow-hidden hover:shadow-lg cursor-pointer"
+                  onClick={() => window.location.href = `/decks/${deck.id}`}
                 >
-                  {/* Header with subtle gradient */}
-                  <div className={`h-1.5 bg-gradient-to-r ${getHeroColor(index)}`}></div>
+                  {/* Header Section - Clean and Professional */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
+                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                      {deck.name}
+                    </h3>
+                  </div>
                   
-                  <div className="p-5">
-                    <div className="mb-2">
-                      <h3 className="text-base font-semibold text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors duration-200">
-                        {deck.name}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                          Héroe: {getDeckHeroName(deck) || '—'}
-                        </span>
-                        {getDeckAspect(deck) && (
-                          <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full ${getClassPillClasses(getDeckAspect(deck))}`}>
-                            {getDeckAspect(deck)}
+                  {/* Content Section */}
+                  <div className="p-4">
+                    {/* Hero and Aspect Info */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                          </div>
+                          <span className="text-lg font-bold text-gray-900">
+                            {getDeckHeroName(deck) || '—'}
                           </span>
+                        </div>
+                        {getDeckAspect(deck) && (
+                          <div className="flex items-center gap-1 ml-auto">
+                            <div className={`w-3 h-3 rounded-full shadow-sm ${getDeckAspect(deck) === 'aggression' ? 'bg-red-500' : getDeckAspect(deck) === 'justice' ? 'bg-amber-500' : getDeckAspect(deck) === 'leadership' ? 'bg-blue-500' : getDeckAspect(deck) === 'protection' ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+                            <span className="text-sm font-semibold text-gray-700 capitalize px-2 py-1 rounded-full bg-gray-100">
+                              {getDeckAspect(deck)}
+                            </span>
+                          </div>
                         )}
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>{deck.cards.length} cartas</span>
-                        <span className="inline-flex items-center gap-1">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.343-3 3m6 0a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          {deck.creator_name || 'Anónimo'}
-                        </span>
                       </div>
                     </div>
                     
-                    <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-                      <span className="inline-flex items-center gap-1">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {/* Footer */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 bg-gradient-to-br from-gray-400 to-gray-500 rounded-md flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.343-3 3m6 0a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <span className="font-medium text-gray-600">
+                          by {deck.creator_name || 'Anónimo'}
+                        </span>
+                        <span className="text-gray-400">·</span>
+                        <span className="font-semibold text-blue-600">
+                          {deck.cards.length} cartas
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
                         </svg>
-                        {deck.created_at ? new Date(deck.created_at).toLocaleDateString() : ''}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-blue-600 group-hover:text-blue-700 cursor-pointer" onClick={() => window.location.href = `/decks/${deck.id}` }>
-                        Ver detalles
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
+                        <span>
+                          {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

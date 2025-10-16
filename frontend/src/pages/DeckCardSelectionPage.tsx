@@ -89,19 +89,29 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
     loadCards()
   }, [aspectName])
 
-  const handleCardQuantityChange = (cardName: string, quantity: number, maxQuantity?: number) => {
+  // Función helper para crear clave única de carta
+  const getCardKey = (card: Card): string => {
+    return `${card.name}|${card.set}`
+  }
+
+  // Función helper para extraer nombre de carta desde la clave
+  const getCardNameFromKey = (cardKey: string): string => {
+    return cardKey.split('|')[0]
+  }
+
+  const handleCardQuantityChange = (cardKey: string, quantity: number, maxQuantity?: number) => {
     const newSelectedCards = new Map(selectedCards)
     
     // Validar límite máximo de la carta
     if (maxQuantity && quantity > maxQuantity) {
-      setError(`No puedes añadir más de ${maxQuantity} copias de "${cardName}"`)
+      setError(`No puedes añadir más de ${maxQuantity} copias de esta carta`)
       return
     }
     
     if (quantity <= 0) {
-      newSelectedCards.delete(cardName)
+      newSelectedCards.delete(cardKey)
     } else {
-      newSelectedCards.set(cardName, quantity)
+      newSelectedCards.set(cardKey, quantity)
     }
     
     setSelectedCards(newSelectedCards)
@@ -109,22 +119,29 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   }
 
   const handleComplete = () => {
-    const deckCards: DeckCard[] = []
+    const cardMap = new Map<string, number>()
     
     // Añadir cartas del héroe con sus cantidades automáticas
     heroCards.forEach(card => {
-      deckCards.push({
-        card_name: card.name,
-        quantity: card.quantity || 1
-      })
+      const cardKey = getCardKey(card)
+      const currentQuantity = cardMap.get(cardKey) || 0
+      cardMap.set(cardKey, currentQuantity + (card.quantity || 1))
     })
     
     // Añadir cartas seleccionadas
-    selectedCards.forEach((quantity, cardName) => {
-      deckCards.push({
+    selectedCards.forEach((quantity, cardKey) => {
+      const currentQuantity = cardMap.get(cardKey) || 0
+      cardMap.set(cardKey, currentQuantity + quantity)
+    })
+
+    // Convertir Map a array de cartas - enviar card_set para distinguir cartas con mismo nombre
+    const deckCards: DeckCard[] = Array.from(cardMap.entries()).map(([cardKey, quantity]) => {
+      const [cardName, cardSet] = cardKey.split('|')
+      return {
         card_name: cardName,
+        card_set: cardSet, // Enviar información del set
         quantity: quantity
-      })
+      }
     })
 
     onComplete(deckCards)
@@ -228,11 +245,12 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                     <p className="text-gray-500 text-center py-4">No se encontraron cartas básicas</p>
                   ) : (
                     filteredBasicCards.map((card) => {
-                      const quantity = selectedCards.get(card.name) || 0
+                      const cardKey = getCardKey(card)
+                      const quantity = selectedCards.get(cardKey) || 0
                       const maxQuantity = card.max_quantity
                       const canAddMore = remainingCards > 0 && (maxQuantity ? quantity < maxQuantity : true)
                       return (
-                        <div key={card.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={cardKey} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex-1">
                             <h3 className="text-sm font-medium text-gray-800">{card.name}</h3>
                             <p className="text-xs text-gray-500">
@@ -241,7 +259,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                           </div>
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => handleCardQuantityChange(card.name, Math.max(0, quantity - 1), maxQuantity)}
+                              onClick={() => handleCardQuantityChange(cardKey, Math.max(0, quantity - 1), maxQuantity)}
                               className="w-6 h-6 bg-gray-300 text-gray-600 rounded-full hover:bg-gray-400 flex items-center justify-center text-sm"
                               disabled={quantity <= 0}
                             >
@@ -249,7 +267,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                             </button>
                             <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                             <button
-                              onClick={() => handleCardQuantityChange(card.name, quantity + 1, maxQuantity)}
+                              onClick={() => handleCardQuantityChange(cardKey, quantity + 1, maxQuantity)}
                               className="w-6 h-6 bg-accent-500 text-white rounded-full hover:bg-accent-600 flex items-center justify-center text-sm"
                               disabled={!canAddMore}
                             >
@@ -307,11 +325,12 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                     <p className="text-gray-500 text-center py-4">No se encontraron cartas del aspecto</p>
                   ) : (
                     filteredAspectCards.map((card) => {
-                      const quantity = selectedCards.get(card.name) || 0
+                      const cardKey = getCardKey(card)
+                      const quantity = selectedCards.get(cardKey) || 0
                       const maxQuantity = card.max_quantity
                       const canAddMore = remainingCards > 0 && (maxQuantity ? quantity < maxQuantity : true)
                       return (
-                        <div key={card.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={cardKey} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex-1">
                             <h3 className="text-sm font-medium text-gray-800">{card.name}</h3>
                             <p className="text-xs text-gray-500">
@@ -320,7 +339,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                           </div>
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => handleCardQuantityChange(card.name, Math.max(0, quantity - 1), maxQuantity)}
+                              onClick={() => handleCardQuantityChange(cardKey, Math.max(0, quantity - 1), maxQuantity)}
                               className="w-6 h-6 bg-gray-300 text-gray-600 rounded-full hover:bg-gray-400 flex items-center justify-center text-sm"
                               disabled={quantity <= 0}
                             >
@@ -328,7 +347,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                             </button>
                             <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                             <button
-                              onClick={() => handleCardQuantityChange(card.name, quantity + 1, maxQuantity)}
+                              onClick={() => handleCardQuantityChange(cardKey, quantity + 1, maxQuantity)}
                               className="w-6 h-6 bg-accent-500 text-white rounded-full hover:bg-accent-600 flex items-center justify-center text-sm"
                               disabled={!canAddMore}
                             >

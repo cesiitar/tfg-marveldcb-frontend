@@ -106,21 +106,24 @@ const DeckDetailPage: React.FC = () => {
                     return acc
                   }, {})
 
-                  const typeOrder = ['hero', 'ally', 'event', 'upgrade', 'support', 'resource', 'player_side_scheme', 'attachment', 'environment', 'minion', 'obligation', 'side_scheme', 'treachery']
+                  const typeOrder = ['hero', 'ally', 'event', 'upgrade', 'support', 'resource', 'player_side_scheme', 'attachment', 'environment', 'minion', 'obligation', 'side_scheme', 'treachery', 'villain', 'main_scheme', 'evidence']
                   const typeLabels: { [key: string]: string } = {
-                    hero: 'Héroe',
-                    ally: 'Aliados',
-                    event: 'Eventos',
-                    upgrade: 'Mejoras',
-                    support: 'Apoyos',
-                    resource: 'Recursos',
-                    player_side_scheme: 'Esquemas de Jugador',
-                    attachment: 'Anexos',
-                    environment: 'Ambiente',
-                    minion: 'Secuaces',
-                    obligation: 'Obligaciones',
-                    side_scheme: 'Esquemas Secundarios',
-                    treachery: 'Traiciones'
+                    hero: 'Hero',
+                    ally: 'Ally',
+                    event: 'Event',
+                    upgrade: 'Upgrade',
+                    support: 'Support',
+                    resource: 'Resource',
+                    player_side_scheme: 'Player Side Scheme',
+                    attachment: 'Attachment',
+                    environment: 'Environment',
+                    minion: 'Minion',
+                    obligation: 'Obligation',
+                    side_scheme: 'Side Scheme',
+                    treachery: 'Treachery',
+                    villain: 'Villain',
+                    main_scheme: 'Main Scheme',
+                    evidence: 'Evidence'
                   }
 
                   return Object.keys(cardsByType)
@@ -259,3 +262,4 @@ const DeckDetailPage: React.FC = () => {
 export default DeckDetailPage
 
 
+ 
