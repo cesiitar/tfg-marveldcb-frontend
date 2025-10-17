@@ -26,6 +26,17 @@ const EditDeckPage: React.FC = () => {
   const [aspectSearchTerm, setAspectSearchTerm] = useState('')
   const [filteredBasicCards, setFilteredBasicCards] = useState<Card[]>([])
   const [filteredAspectCards, setFilteredAspectCards] = useState<Card[]>([])
+
+  // Función helper para crear clave única de carta usando ID
+  const getCardKey = (card: Card): string => {
+    return `${card.id}` // Usar ID único en lugar de nombre
+  }
+
+  // Función helper para obtener carta desde la clave
+  const getCardFromKey = (cardKey: string): Card | undefined => {
+    const cardId = parseInt(cardKey)
+    return [...basicCards, ...aspectCards].find(c => c.id === cardId)
+  }
   
   // Cargar el mazo existente
   useEffect(() => {
@@ -53,11 +64,18 @@ const EditDeckPage: React.FC = () => {
         setDeckName(deckData.name)
         setDeckDescription((deckData as any).description || '')
         
-        // Convertir cartas del mazo a Map para edición
+        // Convertir cartas del mazo a Map para edición usando IDs
         const cardsMap = new Map<string, number>()
         deckData.cards.forEach((card: any) => {
-          const cardName = card.card_name || card.name
-          cardsMap.set(cardName, card.quantity)
+          // Buscar la carta por nombre + set para obtener su ID correcto
+          const foundCard = [...basicCardsData, ...aspectCardsData].find(c => 
+            c.name === (card.card_name || card.name) && 
+            c.set === (card.card_set || card.set)
+          )
+          if (foundCard) {
+            const cardKey = getCardKey(foundCard)
+            cardsMap.set(cardKey, card.quantity)
+          }
         })
         setSelectedCards(cardsMap)
         
@@ -106,35 +124,36 @@ const EditDeckPage: React.FC = () => {
   const remainingCards = 50 - totalSelectedCards
 
   // Añadir carta al mazo
-  const addCard = (cardName: string) => {
+  const addCard = (card: Card) => {
     if (remainingCards <= 0) {
       showToast('❌ Ya tienes 50 cartas en el mazo', 'error')
       return
     }
     
-    const currentQuantity = selectedCards.get(cardName) || 0
-    const card = [...basicCards, ...aspectCards].find(c => c.name === cardName)
-    const maxQuantity = card?.max_quantity || 3
+    const cardKey = getCardKey(card)
+    const currentQuantity = selectedCards.get(cardKey) || 0
+    const maxQuantity = card.max_quantity || 3
     
     if (currentQuantity >= maxQuantity) {
       showToast(`❌ No puedes añadir más de ${maxQuantity} copias de esta carta`, 'error')
       return
     }
     
-    setSelectedCards(prev => new Map(prev.set(cardName, currentQuantity + 1)))
+    setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity + 1)))
   }
 
   // Quitar carta del mazo
-  const removeCard = (cardName: string) => {
-    const currentQuantity = selectedCards.get(cardName) || 0
+  const removeCard = (card: Card) => {
+    const cardKey = getCardKey(card)
+    const currentQuantity = selectedCards.get(cardKey) || 0
     if (currentQuantity <= 1) {
       setSelectedCards(prev => {
         const newMap = new Map(prev)
-        newMap.delete(cardName)
+        newMap.delete(cardKey)
         return newMap
       })
     } else {
-      setSelectedCards(prev => new Map(prev.set(cardName, currentQuantity - 1)))
+      setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity - 1)))
     }
   }
 
@@ -161,11 +180,20 @@ const EditDeckPage: React.FC = () => {
         return
       }
       
-      // Convertir Map a array de cartas
-      const cardsArray = Array.from(selectedCards.entries()).map(([name, quantity]) => ({
-        card_name: name,
-        quantity: quantity
-      }))
+      // Convertir Map a array de cartas usando IDs únicos
+      const cardsArray = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {
+        const card = getCardFromKey(cardKey)
+        if (!card) {
+          return null
+        }
+        
+        return {
+          card_id: card.id,
+          card_name: card.name,
+          card_set: card.set,
+          quantity: quantity
+        }
+      }).filter(Boolean)
       
       const updatedDeck = {
         name: deckName.trim(),
@@ -376,7 +404,7 @@ const EditDeckPage: React.FC = () => {
                       <p className="text-gray-500 text-center py-4">No se encontraron cartas básicas</p>
                     ) : (
                       filteredBasicCards.map((card) => {
-                        const quantity = selectedCards.get(card.name) || 0
+                        const quantity = selectedCards.get(getCardKey(card)) || 0
                         const maxQuantity = card.max_quantity || 3
                         const canAddMore = remainingCards > 0 && quantity < maxQuantity
                         
@@ -391,7 +419,7 @@ const EditDeckPage: React.FC = () => {
                             
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => removeCard(card.name)}
+                                onClick={() => removeCard(card)}
                                 disabled={quantity === 0}
                                 className="w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
                               >
@@ -399,7 +427,7 @@ const EditDeckPage: React.FC = () => {
                               </button>
                               <span className="w-6 text-center font-medium text-sm">{quantity}</span>
                               <button
-                                onClick={() => addCard(card.name)}
+                                onClick={() => addCard(card)}
                                 disabled={!canAddMore}
                                 className="w-6 h-6 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
                               >
@@ -439,7 +467,7 @@ const EditDeckPage: React.FC = () => {
                       <p className="text-gray-500 text-center py-4">No se encontraron cartas del aspecto</p>
                     ) : (
                       filteredAspectCards.map((card) => {
-                        const quantity = selectedCards.get(card.name) || 0
+                        const quantity = selectedCards.get(getCardKey(card)) || 0
                         const maxQuantity = card.max_quantity || 3
                         const canAddMore = remainingCards > 0 && quantity < maxQuantity
                         
@@ -454,7 +482,7 @@ const EditDeckPage: React.FC = () => {
                             
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => removeCard(card.name)}
+                                onClick={() => removeCard(card)}
                                 disabled={quantity === 0}
                                 className="w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
                               >
@@ -462,7 +490,7 @@ const EditDeckPage: React.FC = () => {
                               </button>
                               <span className="w-6 text-center font-medium text-sm">{quantity}</span>
                               <button
-                                onClick={() => addCard(card.name)}
+                                onClick={() => addCard(card)}
                                 disabled={!canAddMore}
                                 className="w-6 h-6 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
                               >

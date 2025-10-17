@@ -91,7 +91,7 @@ const CreateDeckPage: React.FC = () => {
       const selectedHeroObj = heroes.find(h => h.id === selectedHero)
       const newDeck: Omit<Deck, 'id' | 'created_at' | 'updated_at'> = {
         name: deckName,
-        hero_name: selectedHeroObj?.hero_name || '',
+        hero_name: selectedHeroName, // Usar el nombre completo del héroe
         aspect: selectedAspect as any,
         cards: selectedCards
       }
@@ -142,7 +142,7 @@ const CreateDeckPage: React.FC = () => {
   if (currentStep === 'cards') {
     return (
       <DeckCardSelectionPage
-        heroName={selectedHero}
+        heroName={selectedHeroName}
         aspectName={selectedAspect}
         heroCards={heroCards}
         onComplete={handleCompleteDeck}

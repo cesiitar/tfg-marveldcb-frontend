@@ -89,15 +89,15 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
     loadCards()
   }, [aspectName])
 
-  // Función helper para crear clave única de carta usando ID
+  // Función helper para crear clave única de carta usando nombre + set (temporal hasta que backend envíe IDs)
   const getCardKey = (card: Card): string => {
-    return `${card.id}` // Usar ID único en lugar de nombre+set
+    return `${card.name}|${card.set}` // Usar nombre + set temporalmente
   }
 
   // Función helper para obtener carta desde la clave
   const getCardFromKey = (cardKey: string): Card | undefined => {
-    const cardId = parseInt(cardKey)
-    return [...basicCards, ...aspectCards, ...heroCards].find(c => c.id === cardId)
+    const [name, set] = cardKey.split('|')
+    return [...basicCards, ...aspectCards, ...heroCards].find(c => c.name === name && c.set === set)
   }
 
   const handleCardQuantityChange = (cardKey: string, quantity: number, maxQuantity?: number) => {
