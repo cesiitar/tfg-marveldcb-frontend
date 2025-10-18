@@ -198,11 +198,23 @@ const EditDeckPage: React.FC = () => {
         }
       }).filter(Boolean)
       
-      // Obtener las cartas del héroe del mazo original
-      const heroCards = deck.cards.filter((card: any) => 
-        card.card_name === deck.hero_name || 
-        (deck.hero_name && card.card_name && card.card_name.includes(deck.hero_name))
-      )
+      // Obtener las cartas del héroe desde la API
+      // Primero obtener el ID del héroe por su nombre
+      const heroes = await apiService.getHeroes()
+      const hero = heroes.find(h => h.hero_name === deck.hero_name)
+      
+      if (!hero) {
+        showToast('❌ No se encontró el héroe', 'error')
+        return
+      }
+      
+      const heroCardsData = await apiService.getHeroCards(hero.id)
+      const heroCards = heroCardsData.map((card: Card) => ({
+        card_id: card.id,
+        card_name: card.name,
+        card_set: card.set,
+        quantity: card.quantity || 1
+      }))
       
       // Combinar cartas editables + cartas del héroe
       const cardsArray = [...editableCardsArray, ...heroCards]
