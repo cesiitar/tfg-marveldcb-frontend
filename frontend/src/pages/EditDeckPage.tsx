@@ -62,27 +62,21 @@ const EditDeckPage: React.FC = () => {
         setFilteredAspectCards(aspectCardsData)
         
         // Cargar cartas del héroe
+        console.log('🔍 Mazo completo recibido:', deckData)
+        console.log('🔍 Hero_id:', (deckData as any).hero_id)
+        
         const heroes = await apiService.getHeroes()
-        let hero = null
         
-        // Buscar por ID primero (más seguro)
-        if ((deckData as any).hero_id) {
-          hero = heroes.find(h => h.id === (deckData as any).hero_id)
-          console.log('🔍 Héroe encontrado por ID:', hero)
-        }
-        
-        // Si no se encuentra por ID, buscar por nombre completo
-        if (!hero) {
-          hero = heroes.find(h => h.name === deckData.hero_name)
-          console.log('🔍 Héroe encontrado por nombre:', hero)
-        }
+        // Buscar el héroe por ID
+        const hero = heroes.find(h => h.id === (deckData as any).hero_id)
+        console.log('🔍 Héroe encontrado por ID:', hero)
         
         if (hero) {
           const heroCardsData = await apiService.getHeroCards(hero.id)
           console.log('🔍 Cartas del héroe cargadas:', heroCardsData)
           setHeroCards(heroCardsData)
         } else {
-          console.log('❌ No se encontró el héroe:', deckData.hero_name, 'ID:', (deckData as any).hero_id)
+          console.log('❌ No se encontró el héroe con ID:', (deckData as any).hero_id)
         }
         
         // Inicializar estados de edición
@@ -235,25 +229,25 @@ const EditDeckPage: React.FC = () => {
       }).filter(Boolean)
       
       // Obtener las cartas del héroe desde la API
-      // Primero obtener el ID del héroe por su nombre
-      const heroes = await apiService.getHeroes()
-      const hero = heroes.find(h => h.hero_name === deck.hero_name)
+      // Usar el hero_id que viene del backend (más seguro)
+      const heroId = (deck as any).hero_id
+      let cardsArray = [...editableCardsArray]
       
-      if (!hero) {
-        showToast('❌ No se encontró el héroe', 'error')
-        return
+      if (heroId) {
+        const heroCardsData = await apiService.getHeroCards(heroId)
+        const heroCards = heroCardsData.map((card: Card) => ({
+          card_id: card.id,
+          card_name: card.name,
+          card_set: card.set,
+          quantity: card.quantity || 1
+        }))
+        
+        // Combinar cartas editables + cartas del héroe
+        cardsArray = [...editableCardsArray, ...heroCards]
+      } else {
+        console.log('❌ No hay hero_id en el mazo')
+        // Usar solo cartas editables (fallback)
       }
-      
-      const heroCardsData = await apiService.getHeroCards(hero.id)
-      const heroCards = heroCardsData.map((card: Card) => ({
-        card_id: card.id,
-        card_name: card.name,
-        card_set: card.set,
-        quantity: card.quantity || 1
-      }))
-      
-      // Combinar cartas editables + cartas del héroe
-      const cardsArray = [...editableCardsArray, ...heroCards]
       
       const updatedDeck = {
         name: deckName.trim(),

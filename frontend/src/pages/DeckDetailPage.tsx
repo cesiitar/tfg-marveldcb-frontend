@@ -37,6 +37,8 @@ const DeckDetailPage: React.FC = () => {
         setLoading(true)
         setError(null)
         const d = await apiService.getDeckById(Number(id))
+        console.log('🔍 Deck recibido del backend:', d)
+        console.log('🔍 Descripción:', d.description)
         setDeck(d)
       } catch (err) {
         setError('No se pudo cargar el mazo')
@@ -110,9 +112,7 @@ const DeckDetailPage: React.FC = () => {
                 </div>
                 <div className="mt-3 pt-3 border-t border-blue-200">
                   <span className="text-gray-600 text-xs">Descripción:</span>
-                  <p className="text-sm text-gray-700 mt-1">
-                    {deck.description ? deck.description : 'Sin descripción'}
-                  </p>
+                  <p className="text-sm text-gray-700 mt-1">{deck.description}</p>
                 </div>
               </div>
             </div>
@@ -343,7 +343,7 @@ const DeckDetailPage: React.FC = () => {
               </h2>
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  Pronto añadiremos descripción, comentarios y gráficos estadísticos para este mazo.
+                  {deck.description || 'Sin descripción'}
                 </p>
               </div>
             </div>
