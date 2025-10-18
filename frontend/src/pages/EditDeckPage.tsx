@@ -63,14 +63,26 @@ const EditDeckPage: React.FC = () => {
         
         // Cargar cartas del héroe
         const heroes = await apiService.getHeroes()
-        const hero = heroes.find(h => h.name === deckData.hero_name)
-        console.log('🔍 Héroe encontrado:', hero)
+        let hero = null
+        
+        // Buscar por ID primero (más seguro)
+        if ((deckData as any).hero_id) {
+          hero = heroes.find(h => h.id === (deckData as any).hero_id)
+          console.log('🔍 Héroe encontrado por ID:', hero)
+        }
+        
+        // Si no se encuentra por ID, buscar por nombre completo
+        if (!hero) {
+          hero = heroes.find(h => h.name === deckData.hero_name)
+          console.log('🔍 Héroe encontrado por nombre:', hero)
+        }
+        
         if (hero) {
           const heroCardsData = await apiService.getHeroCards(hero.id)
           console.log('🔍 Cartas del héroe cargadas:', heroCardsData)
           setHeroCards(heroCardsData)
         } else {
-          console.log('❌ No se encontró el héroe:', deckData.hero_name)
+          console.log('❌ No se encontró el héroe:', deckData.hero_name, 'ID:', (deckData as any).hero_id)
         }
         
         // Inicializar estados de edición
@@ -247,6 +259,7 @@ const EditDeckPage: React.FC = () => {
         name: deckName.trim(),
         description: deckDescription.trim(),
         hero_name: deck.hero_name,
+        hero_id: (deck as any).hero_id,
         aspect: deck.aspect,
         cards: cardsArray
       }

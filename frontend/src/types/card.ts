@@ -37,6 +37,7 @@ export interface Deck {
   name: string
   description?: string
   hero_name: string
+  hero_id?: number
   aspect?: 'aggression' | 'justice' | 'leadership' | 'protection'
   cards: DeckCard[]
   creator_name?: string

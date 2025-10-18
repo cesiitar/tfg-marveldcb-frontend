@@ -93,9 +93,13 @@ const CreateDeckPage: React.FC = () => {
         name: deckName,
         description: deckDescription,
         hero_name: selectedHeroName, // Usar el nombre completo del héroe
+        hero_id: selectedHero, // Usar el ID del héroe
         aspect: selectedAspect as any,
         cards: selectedCards
       }
+
+      console.log('📤 Enviando mazo al backend:', newDeck)
+      console.log('📤 Descripción enviada:', deckDescription)
 
       await apiService.createDeck(newDeck, user.sub)
       
