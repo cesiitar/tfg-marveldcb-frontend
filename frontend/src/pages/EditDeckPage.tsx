@@ -121,12 +121,15 @@ const EditDeckPage: React.FC = () => {
 
   // Calcular total de cartas seleccionadas
   const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
-  const remainingCards = 50 - totalSelectedCards
+  // En edición, solo contamos las cartas que el usuario puede editar (no las del héroe)
+  // Las cartas del héroe se asignan automáticamente, por lo que el límite es 35 cartas editables
+  const maxEditableCards = 35
+  const remainingCards = maxEditableCards - totalSelectedCards
 
   // Añadir carta al mazo
   const addCard = (card: Card) => {
     if (remainingCards <= 0) {
-      showToast('❌ Ya tienes 50 cartas en el mazo', 'error')
+      showToast(`❌ Ya tienes ${maxEditableCards} cartas editables en el mazo`, 'error')
       return
     }
     
@@ -166,8 +169,8 @@ const EditDeckPage: React.FC = () => {
       return
     }
     
-    if (totalSelectedCards < 40 || totalSelectedCards > 50) {
-      showToast('❌ El mazo debe tener entre 40 y 50 cartas', 'error')
+    if (totalSelectedCards < 25 || totalSelectedCards > 35) {
+      showToast(`❌ El mazo debe tener entre 25 y ${maxEditableCards} cartas editables`, 'error')
       return
     }
     
@@ -340,8 +343,8 @@ const EditDeckPage: React.FC = () => {
                         <span className="font-medium capitalize">{deck.aspect}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Cartas:</span>
-                        <span className="font-medium">{totalSelectedCards}/50</span>
+                        <span className="text-gray-600">Cartas editables:</span>
+                        <span className="font-medium">{totalSelectedCards}/{maxEditableCards}</span>
                       </div>
                     </div>
                   </div>
@@ -349,7 +352,7 @@ const EditDeckPage: React.FC = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={handleSave}
-                      disabled={saving || totalSelectedCards < 40 || totalSelectedCards > 50}
+                      disabled={saving || totalSelectedCards < 25 || totalSelectedCards > 35}
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
                     >
                       {saving ? 'Guardando...' : 'Guardar Cambios'}
@@ -372,9 +375,9 @@ const EditDeckPage: React.FC = () => {
                   <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">
-                      {totalSelectedCards}/50 cartas
+                      {totalSelectedCards}/{maxEditableCards} cartas editables
                     </span>
-                    <div className={`w-3 h-3 rounded-full ${totalSelectedCards >= 40 && totalSelectedCards <= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                    <div className={`w-3 h-3 rounded-full ${totalSelectedCards >= 25 && totalSelectedCards <= 35 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                   </div>
                 </div>
                 
