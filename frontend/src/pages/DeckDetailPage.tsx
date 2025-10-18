@@ -86,7 +86,115 @@ const DeckDetailPage: React.FC = () => {
         </div>
 
         <div className="mt-4 grid lg:grid-cols-3 gap-6">
-          {/* Columna izquierda - Lista de cartas */}
+          {/* Columna izquierda - Estadísticas y gráficos */}
+          <div className="lg:col-span-1">
+            {/* Información del mazo */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 mb-6 border border-blue-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Información del Mazo</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Héroe:</span>
+                  <span className="font-medium">{deck.hero_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Aspecto:</span>
+                  <span className="font-medium capitalize">{(deck as any).aspect || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total cartas:</span>
+                  <span className="font-medium">{totalCards}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Creado:</span>
+                  <span className="font-medium">{formattedDate}</span>
+                </div>
+                {deck.description && (
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <span className="text-gray-600 text-xs">Descripción:</span>
+                    <p className="text-sm text-gray-700 mt-1">{deck.description}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Estadísticas de cartas */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Distribución de Cartas</h3>
+              {(() => {
+                const stats = deck.cards.reduce((acc: any, card: any) => {
+                  const clase = card.clase || 'basic'
+                  acc[clase] = (acc[clase] || 0) + card.quantity
+                  return acc
+                }, {})
+
+                const aspectStats = Object.entries(stats).map(([clase, count]) => ({
+                  clase,
+                  count: count as number,
+                  percentage: Math.round(((count as number) / totalCards) * 100)
+                })).sort((a, b) => b.count - a.count)
+
+                return (
+                  <div className="space-y-3">
+                    {aspectStats.map(({ clase, count, percentage }) => (
+                      <div key={clase} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${getClassColor(clase)}`}></div>
+                          <span className="text-sm font-medium capitalize">{clase}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${getClassColor(clase)}`}
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm text-gray-600 w-8 text-right">{count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Gráfico de tipos de cartas */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Tipos de Cartas</h3>
+              {(() => {
+                const typeStats = deck.cards.reduce((acc: any, card: any) => {
+                  const type = card.type || 'unknown'
+                  acc[type] = (acc[type] || 0) + card.quantity
+                  return acc
+                }, {})
+
+                const sortedTypes = Object.entries(typeStats)
+                  .map(([type, count]) => ({ type, count: count as number }))
+                  .sort((a, b) => b.count - a.count)
+                  .slice(0, 6) // Mostrar solo los 6 tipos más comunes
+
+                return (
+                  <div className="space-y-2">
+                    {sortedTypes.map(({ type, count }) => (
+                      <div key={type} className="flex items-center justify-between text-sm">
+                        <span className="capitalize">{type.replace('_', ' ')}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                            <div 
+                              className="bg-blue-500 h-1.5 rounded-full"
+                              style={{ width: `${(count / totalCards) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-gray-600 w-6 text-right">{count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </div>
+          </div>
+
+          {/* Columna derecha - Lista de cartas */}
           <div className="lg:col-span-2">
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
               <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-4 py-3 border-b border-gray-200 rounded-t-lg">
