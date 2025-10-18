@@ -63,10 +63,14 @@ const EditDeckPage: React.FC = () => {
         
         // Cargar cartas del héroe
         const heroes = await apiService.getHeroes()
-        const hero = heroes.find(h => h.hero_name === deckData.hero_name)
+        const hero = heroes.find(h => h.name === deckData.hero_name)
+        console.log('🔍 Héroe encontrado:', hero)
         if (hero) {
           const heroCardsData = await apiService.getHeroCards(hero.id)
+          console.log('🔍 Cartas del héroe cargadas:', heroCardsData)
           setHeroCards(heroCardsData)
+        } else {
+          console.log('❌ No se encontró el héroe:', deckData.hero_name)
         }
         
         // Inicializar estados de edición
@@ -130,9 +134,21 @@ const EditDeckPage: React.FC = () => {
 
   // Calcular total de cartas seleccionadas
   const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
-  const heroCardsCount = heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)
+  const heroCardsCount = heroCards.reduce((sum, card) => {
+    const quantity = card.quantity || 1
+    console.log('🔍 Carta del héroe:', card.name, 'quantity:', quantity)
+    return sum + quantity
+  }, 0)
   const totalCards = heroCardsCount + totalSelectedCards
   const remainingCards = 50 - totalCards
+  
+  console.log('🔍 Estado de cartas:', { 
+    heroCards: heroCards.length, 
+    heroCardsCount, 
+    totalSelectedCards, 
+    totalCards,
+    heroCardsData: heroCards 
+  })
 
   // Añadir carta al mazo
   const addCard = (card: Card) => {
@@ -465,7 +481,7 @@ const EditDeckPage: React.FC = () => {
                         const canAddMore = remainingCards > 0 && quantity < maxQuantity
                         
                         return (
-                          <div key={card.name} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50">
+                          <div key={card.id} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50">
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
@@ -528,7 +544,7 @@ const EditDeckPage: React.FC = () => {
                         const canAddMore = remainingCards > 0 && quantity < maxQuantity
                         
                         return (
-                          <div key={card.name} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50">
+                          <div key={card.id} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50">
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">

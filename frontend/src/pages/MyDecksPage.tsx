@@ -48,6 +48,8 @@ const MyDecksPage: React.FC = () => {
     return matchesText
   })
 
+
+
   const handleDeleteDeck = async (deckId: number) => {
     if (!confirm('¿Estás seguro de que quieres eliminar este mazo?')) return
     
