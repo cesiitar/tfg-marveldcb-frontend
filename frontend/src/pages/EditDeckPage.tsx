@@ -418,6 +418,22 @@ const EditDeckPage: React.FC = () => {
                   </div>
                 </div>
                 
+                {/* Información del límite de cartas */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p><strong>Cartas del héroe:</strong> {heroCardsCount}</p>
+                      <p><strong>Cartas seleccionadas:</strong> {totalSelectedCards}</p>
+                    </div>
+                    <div>
+                      <p><strong>Total de cartas:</strong> {totalCards}/50</p>
+                      <p className={`font-medium ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                        <strong>Cartas restantes:</strong> {remainingCards}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 {/* Cartas Básicas */}
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">
