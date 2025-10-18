@@ -184,7 +184,7 @@ const EditDeckPage: React.FC = () => {
       }
       
       // Convertir Map a array de cartas usando IDs únicos
-      const cardsArray = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {
+      const editableCardsArray = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {
         const card = getCardFromKey(cardKey)
         if (!card) {
           return null
@@ -197,6 +197,15 @@ const EditDeckPage: React.FC = () => {
           quantity: quantity
         }
       }).filter(Boolean)
+      
+      // Obtener las cartas del héroe del mazo original
+      const heroCards = deck.cards.filter((card: any) => 
+        card.card_name === deck.hero_name || 
+        (deck.hero_name && card.card_name && card.card_name.includes(deck.hero_name))
+      )
+      
+      // Combinar cartas editables + cartas del héroe
+      const cardsArray = [...editableCardsArray, ...heroCards]
       
       const updatedDeck = {
         name: deckName.trim(),
