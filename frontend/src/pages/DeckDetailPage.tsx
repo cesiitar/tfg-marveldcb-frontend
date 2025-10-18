@@ -108,12 +108,12 @@ const DeckDetailPage: React.FC = () => {
                   <span className="text-gray-600">Creado:</span>
                   <span className="font-medium">{formattedDate}</span>
                 </div>
-                {deck.description && (
-                  <div className="mt-3 pt-3 border-t border-blue-200">
-                    <span className="text-gray-600 text-xs">Descripción:</span>
-                    <p className="text-sm text-gray-700 mt-1">{deck.description}</p>
-                  </div>
-                )}
+                <div className="mt-3 pt-3 border-t border-blue-200">
+                  <span className="text-gray-600 text-xs">Descripción:</span>
+                  <p className="text-sm text-gray-700 mt-1">
+                    {deck.description ? deck.description : 'Sin descripción'}
+                  </p>
+                </div>
               </div>
             </div>
 
