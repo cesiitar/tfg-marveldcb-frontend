@@ -492,7 +492,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set}
+                                {card.type} • Coste: {card.cost} • Set: {card.set} • Máx: {maxQuantity}
                               </p>
                             </div>
                             
@@ -555,7 +555,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set}
+                                {card.type} • Coste: {card.cost} • Set: {card.set} • Máx: {maxQuantity}
                               </p>
                             </div>
                             
