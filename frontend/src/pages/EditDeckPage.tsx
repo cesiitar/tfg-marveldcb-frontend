@@ -288,9 +288,9 @@ const EditDeckPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando mazo...</p>
         </div>
       </div>
@@ -299,14 +299,22 @@ const EditDeckPage: React.FC = () => {
 
   if (error || !deck) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Error</h2>
-          <p className="text-gray-600 mb-6">{error || 'Mazo no encontrado'}</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="text-red-500 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
+          <p className="text-gray-600 mb-4">{error || 'Mazo no encontrado'}</p>
           <button 
             onClick={() => navigate('/mydecks')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
             Volver a Mis Mazos
           </button>
         </div>
@@ -315,147 +323,152 @@ const EditDeckPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-      {/* Header */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 py-12 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-start mb-4">
-              <div></div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header mejorado */}
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Editar Mazo</h1>
+                <div className="flex flex-wrap items-center gap-3 text-blue-100">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span className="font-medium">{deck.hero_name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    <span className="font-medium capitalize">{deck.aspect}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h2a2 2 0 012 2v1m-6 0h6m-6 0l-3 3m3-3l3 3m-3-3v10a2 2 0 002 2h2a2 2 0 002-2V7" />
+                    </svg>
+                    <span className="font-medium">{totalCards} cartas</span>
+                  </div>
+                </div>
+              </div>
               <button
                 onClick={() => navigate('/mydecks')}
-                className="text-white hover:text-gray-300 flex items-center transition-colors duration-200"
+                className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 Volver a Mis Mazos
               </button>
             </div>
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Editar Mazo
-              </h1>
-              <p className="text-lg text-gray-300 mb-6">
-                Modifica tu mazo de {deck.hero_name}
-              </p>
+          </div>
+          
+          {/* Información adicional en el header */}
+          <div className="px-6 py-4 bg-gray-50 border-t">
+            <div className="flex flex-wrap items-center gap-6 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Cartas del héroe:</span>
+                <span className="font-medium text-gray-900">{heroCardsCount}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Cartas seleccionadas:</span>
+                <span className="font-medium text-gray-900">{totalSelectedCards}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Total:</span>
+                <span className="font-medium text-gray-900">{totalCards}/50 cartas</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Restantes:</span>
+                <span className={`font-medium ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                  {remainingCards}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="relative -mt-8 z-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-3 gap-6">
-            
-            {/* Columna izquierda - Información del mazo */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Información del Mazo</h2>
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Columna izquierda - Información del mazo */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Información del Mazo</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre del Mazo
+                  </label>
+                  <input
+                    type="text"
+                    value={deckName}
+                    onChange={(e) => setDeckName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Nombre del mazo"
+                  />
+                </div>
                 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre del Mazo
-                    </label>
-                    <input
-                      type="text"
-                      value={deckName}
-                      onChange={(e) => setDeckName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Nombre del mazo"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Descripción
-                    </label>
-                    <textarea
-                      value={deckDescription}
-                      onChange={(e) => setDeckDescription(e.target.value)}
-                      rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Describe tu estrategia o tema del mazo..."
-                    />
-                  </div>
-                  
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">Información del Mazo</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Héroe:</span>
-                        <span className="font-medium">{deck.hero_name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Aspecto:</span>
-                        <span className="font-medium capitalize">{deck.aspect}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Cartas del héroe:</span>
-                        <span className="font-medium">{heroCardsCount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Cartas seleccionadas:</span>
-                        <span className="font-medium">{totalSelectedCards}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Total de cartas:</span>
-                        <span className="font-medium">{totalCards}/50</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleSave}
-                      disabled={saving || totalCards < 40 || totalCards > 50}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
-                    >
-                      {saving ? 'Guardando...' : 'Guardar Cambios'}
-                    </button>
-                    <button
-                      onClick={() => navigate('/mydecks')}
-                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Descripción
+                  </label>
+                  <textarea
+                    value={deckDescription}
+                    onChange={(e) => setDeckDescription(e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Describe tu estrategia o tema del mazo..."
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || totalCards < 40 || totalCards > 50}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                  >
+                    {saving ? 'Guardando...' : 'Guardar Cambios'}
+                  </button>
+                  <button
+                    onClick={() => navigate('/mydecks')}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
+                  >
+                    Cancelar
+                  </button>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Columna derecha - Cartas */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">
-                      {totalCards}/50 cartas
-                    </span>
-                    <div className={`w-3 h-3 rounded-full ${totalCards >= 40 && totalCards <= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+          {/* Columna derecha - Cartas */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">
+                    {totalCards}/50 cartas
+                  </span>
+                  <div className={`w-3 h-3 rounded-full ${totalCards >= 40 && totalCards <= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                </div>
+              </div>
+              
+              {/* Información del límite de cartas */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p><strong>Cartas del héroe:</strong> {heroCardsCount}</p>
+                    <p><strong>Cartas seleccionadas:</strong> {totalSelectedCards}</p>
+                  </div>
+                  <div>
+                    <p><strong>Total de cartas:</strong> {totalCards}/50</p>
+                    <p className={`font-medium ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                      <strong>Cartas restantes:</strong> {remainingCards}
+                    </p>
                   </div>
                 </div>
-                
-                {/* Información del límite de cartas */}
-                <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p><strong>Cartas del héroe:</strong> {heroCardsCount}</p>
-                      <p><strong>Cartas seleccionadas:</strong> {totalSelectedCards}</p>
-                    </div>
-                    <div>
-                      <p><strong>Total de cartas:</strong> {totalCards}/50</p>
-                      <p className={`font-medium ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-orange-600'}`}>
-                        <strong>Cartas restantes:</strong> {remainingCards}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              </div>
                 
                 {/* Cartas Básicas */}
                 <div className="mb-6">
