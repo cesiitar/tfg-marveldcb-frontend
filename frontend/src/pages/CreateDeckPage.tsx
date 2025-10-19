@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { apiService } from '../services/api'
 import { Hero, Card, Deck, DeckCard } from '../types/card'
@@ -6,6 +7,7 @@ import DeckCardSelectionPage from './DeckCardSelectionPage'
 import { useToast } from '../components/Toast'
 
 const CreateDeckPage: React.FC = () => {
+  const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
   const { showToast, ToastContainer } = useToast()
   const [heroes, setHeroes] = useState<Hero[]>([])
@@ -78,6 +80,8 @@ const CreateDeckPage: React.FC = () => {
   }
 
   const handleCompleteDeck = async (selectedCards: DeckCard[]) => {
+    console.log('🎯 handleCompleteDeck llamado con:', selectedCards)
+    
     if (!isAuthenticated || !user?.sub) {
       setError('Debes estar autenticado para crear un mazo')
       return
@@ -101,18 +105,23 @@ const CreateDeckPage: React.FC = () => {
       console.log('📤 Enviando mazo al backend:', newDeck)
       console.log('📤 Descripción enviada:', deckDescription)
 
-      await apiService.createDeck(newDeck, user.sub)
+      const createdDeck = await apiService.createDeck(newDeck, user.sub)
+      console.log('✅ Mazo creado exitosamente:', createdDeck)
       
       // Mostrar mensaje de éxito
       showToast(`🎉 ¡Mazo "${deckName}" creado exitosamente!`, 'success')
       
-      // Limpiar formulario
-      setSelectedHero('')
-      setSelectedAspect('')
-      setDeckName('')
-      setDeckDescription('')
-      setHeroCards([])
-      setCurrentStep('setup')
+      // Navegar a la página de configuración de partida
+      console.log('🚀 Navegando a configure-game con deckId:', createdDeck.id)
+      try {
+        navigate('/configure-game', { state: { deckId: createdDeck.id } })
+        console.log('✅ Navegación ejecutada')
+      } catch (navError) {
+        console.error('❌ Error en navegación:', navError)
+      }
+      
+      // Resetear loading después de crear el mazo exitosamente
+      setLoading(false)
       
     } catch (err: any) {
       console.error('Error creating deck:', err)

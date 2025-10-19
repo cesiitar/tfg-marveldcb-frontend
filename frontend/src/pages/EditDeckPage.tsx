@@ -99,8 +99,9 @@ const EditDeckPage: React.FC = () => {
         setSelectedCards(cardsMap)
         
       } catch (err) {
-        console.error('Error cargando mazo:', err)
-        setError('No se pudo cargar el mazo')
+        console.error('Error loading deck:', err)
+        setError('Error al cargar el mazo')
+        showToast('❌ Error al cargar el mazo', 'error')
       } finally {
         setLoading(false)
       }
@@ -109,102 +110,187 @@ const EditDeckPage: React.FC = () => {
     loadDeck()
   }, [id, isAuthenticated])
 
-  // Filtrar cartas básicas
+  // Filtrar cartas básicas cuando cambie el término de búsqueda
   useEffect(() => {
-    const filtered = basicCards.filter(card => 
-      card.name.toLowerCase().startsWith(basicSearchTerm.toLowerCase())
-    )
-    setFilteredBasicCards(filtered)
-  }, [basicCards, basicSearchTerm])
+    if (basicSearchTerm.trim() === '') {
+      setFilteredBasicCards(basicCards)
+    } else {
+      const filtered = basicCards.filter(card => 
+        card.name.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
+        card.set.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
+        card.type.toLowerCase().startsWith(basicSearchTerm.toLowerCase())
+      )
+      setFilteredBasicCards(filtered)
+    }
+  }, [basicSearchTerm, basicCards])
 
-  // Filtrar cartas del aspecto
+  // Filtrar cartas del aspecto cuando cambie el término de búsqueda
   useEffect(() => {
-    const filtered = aspectCards.filter(card => 
-      card.name.toLowerCase().startsWith(aspectSearchTerm.toLowerCase())
-    )
-    setFilteredAspectCards(filtered)
-  }, [aspectCards, aspectSearchTerm])
+    if (aspectSearchTerm.trim() === '') {
+      setFilteredAspectCards(aspectCards)
+    } else {
+      const filtered = aspectCards.filter(card => 
+        card.name.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
+        card.set.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
+        card.type.toLowerCase().startsWith(aspectSearchTerm.toLowerCase())
+      )
+      setFilteredAspectCards(filtered)
+    }
+  }, [aspectSearchTerm, aspectCards])
 
-  // Calcular estadísticas
-  const heroCardsCount = heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)
-  const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, qty) => sum + qty, 0)
+  // Calcular total de cartas seleccionadas
+  const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
+  const heroCardsCount = heroCards.reduce((sum, card) => {
+    const quantity = card.quantity || 1
+    console.log('🔍 Carta del héroe:', card.name, 'quantity:', quantity)
+    return sum + quantity
+  }, 0)
   const totalCards = heroCardsCount + totalSelectedCards
   const remainingCards = 50 - totalCards
+  
+  console.log('🔍 Estado de cartas:', { 
+    heroCards: heroCards.length, 
+    heroCardsCount, 
+    totalSelectedCards, 
+    totalCards,
+    heroCardsData: heroCards 
+  })
 
-  // Funciones para manejar cartas
+  // Añadir carta al mazo
   const addCard = (card: Card) => {
+    if (remainingCards <= 0) {
+      showToast('❌ Ya tienes 50 cartas en el mazo', 'error')
+      return
+    }
+    
     const cardKey = getCardKey(card)
     const currentQuantity = selectedCards.get(cardKey) || 0
     const maxQuantity = card.max_quantity || 3
     
-    if (remainingCards > 0 && currentQuantity < maxQuantity) {
-      setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity + 1)))
+    if (currentQuantity >= maxQuantity) {
+      showToast(`❌ No puedes añadir más de ${maxQuantity} copias de esta carta`, 'error')
+      return
     }
+    
+    setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity + 1)))
   }
 
+  // Quitar carta del mazo
   const removeCard = (card: Card) => {
     const cardKey = getCardKey(card)
     const currentQuantity = selectedCards.get(cardKey) || 0
-    
-    if (currentQuantity > 0) {
-      const newQuantity = currentQuantity - 1
-      if (newQuantity === 0) {
-        setSelectedCards(prev => {
-          const newMap = new Map(prev)
-          newMap.delete(cardKey)
-          return newMap
-        })
-      } else {
-        setSelectedCards(prev => new Map(prev.set(cardKey, newQuantity)))
-      }
+    if (currentQuantity <= 1) {
+      setSelectedCards(prev => {
+        const newMap = new Map(prev)
+        newMap.delete(cardKey)
+        return newMap
+      })
+    } else {
+      setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity - 1)))
     }
   }
 
-  // Función para guardar cambios
+  // Guardar cambios
   const handleSave = async () => {
-    if (!deck || !user?.sub) return
+    if (!deck) return
+    
+    if (!deckName.trim()) {
+      showToast('❌ El nombre del mazo es obligatorio', 'error')
+      return
+    }
+    
+    if (totalCards < 40 || totalCards > 50) {
+      showToast('❌ El mazo debe tener entre 40 y 50 cartas', 'error')
+      return
+    }
     
     try {
       setSaving(true)
       
-      // Convertir cartas seleccionadas al formato esperado por el backend
-      const cardsToSave = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {
+      // Verificar que tenemos el Auth0 SUB del usuario
+      if (!user?.sub) {
+        showToast('❌ No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
+        return
+      }
+      
+      // Convertir Map a array de cartas usando IDs únicos
+      const editableCardsArray = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {
         const card = getCardFromKey(cardKey)
-        if (!card) return null
+        if (!card) {
+          return null
+        }
         
         return {
           card_id: card.id,
           card_name: card.name,
           card_set: card.set,
-          clase: card.clase,
           quantity: quantity
         }
       }).filter(Boolean)
       
-      const updateData = {
-        name: deckName,
-        description: deckDescription,
-        cards: cardsToSave
+      // Obtener las cartas del héroe desde la API
+      // Usar el hero_id que viene del backend (más seguro)
+      const heroId = (deck as any).hero_id
+      let cardsArray = [...editableCardsArray]
+      
+      if (heroId) {
+        const heroCardsData = await apiService.getHeroCards(heroId)
+        const heroCards = heroCardsData.map((card: Card) => ({
+          card_id: card.id,
+          card_name: card.name,
+          card_set: card.set,
+          quantity: card.quantity || 1
+        }))
+        
+        // Combinar cartas editables + cartas del héroe
+        cardsArray = [...editableCardsArray, ...heroCards]
+      } else {
+        console.log('❌ No hay hero_id en el mazo')
+        // Usar solo cartas editables (fallback)
       }
       
-      await apiService.updateDeck(Number(id), updateData, user.sub)
+      const updatedDeck = {
+        name: deckName.trim(),
+        description: deckDescription.trim(),
+        hero_name: deck.hero_name,
+        hero_id: (deck as any).hero_id,
+        aspect: deck.aspect,
+        cards: cardsArray
+      }
       
-      showToast('Mazo actualizado correctamente', 'success')
-      navigate('/mydecks')
+      await apiService.updateDeck(deck.id!, updatedDeck, user.sub)
       
-    } catch (err) {
-      console.error('Error guardando mazo:', err)
-      showToast('Error al guardar el mazo', 'error')
+      showToast('🎉 ¡Mazo actualizado exitosamente!', 'success')
+      
+      // Redirigir a la página de mis mazos
+      setTimeout(() => {
+        navigate('/mydecks')
+      }, 1500)
+      
+    } catch (err: any) {
+      console.error('Error updating deck:', err)
+      showToast(`❌ Error al actualizar el mazo: ${err.message}`, 'error')
     } finally {
       setSaving(false)
     }
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h2>
+          <p className="text-gray-600 mb-6">Necesitas iniciar sesión para editar mazos</p>
+        </div>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando mazo...</p>
         </div>
       </div>
@@ -213,22 +299,14 @@ const EditDeckPage: React.FC = () => {
 
   if (error || !deck) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="text-red-500 mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600 mb-4">{error || 'Mazo no encontrado'}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Error</h2>
+          <p className="text-gray-600 mb-6">{error || 'Mazo no encontrado'}</p>
           <button 
             onClick={() => navigate('/mydecks')}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
             Volver a Mis Mazos
           </button>
         </div>
@@ -304,85 +382,96 @@ const EditDeckPage: React.FC = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Columna izquierda - Información del mazo */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Información del Mazo</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre del Mazo
-                  </label>
-                  <input
-                    type="text"
-                    value={deckName}
-                    onChange={(e) => setDeckName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Nombre del mazo"
-                  />
-                </div>
+            
+            {/* Columna izquierda - Información del mazo */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Información del Mazo</h2>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descripción
-                  </label>
-                  <textarea
-                    value={deckDescription}
-                    onChange={(e) => setDeckDescription(e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Describe tu estrategia o tema del mazo..."
-                  />
-                </div>
-                
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving || totalCards < 40 || totalCards > 50}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
-                  >
-                    {saving ? 'Guardando...' : 'Guardar Cambios'}
-                  </button>
-                  <button
-                    onClick={() => navigate('/mydecks')}
-                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
-                  >
-                    Cancelar
-                  </button>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nombre del Mazo
+                    </label>
+                    <input
+                      type="text"
+                      value={deckName}
+                      onChange={(e) => setDeckName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nombre del mazo"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Descripción
+                    </label>
+                    <textarea
+                      value={deckDescription}
+                      onChange={(e) => setDeckDescription(e.target.value)}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Describe tu estrategia o tema del mazo..."
+                    />
+                  </div>
+                  
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2">Información del Mazo</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Héroe:</span>
+                        <span className="font-medium">{deck.hero_name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Aspecto:</span>
+                        <span className="font-medium capitalize">{deck.aspect}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Cartas del héroe:</span>
+                        <span className="font-medium">{heroCardsCount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Cartas seleccionadas:</span>
+                        <span className="font-medium">{totalSelectedCards}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Total de cartas:</span>
+                        <span className="font-medium">{totalCards}/50</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleSave}
+                      disabled={saving || totalCards < 40 || totalCards > 50}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                    >
+                      {saving ? 'Guardando...' : 'Guardar Cambios'}
+                    </button>
+                    <button
+                      onClick={() => navigate('/mydecks')}
+                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Columna derecha - Cartas */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
-                    {totalCards}/50 cartas
-                  </span>
-                  <div className={`w-3 h-3 rounded-full ${totalCards >= 40 && totalCards <= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                </div>
-              </div>
-              
-              {/* Información del límite de cartas */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p><strong>Cartas del héroe:</strong> {heroCardsCount}</p>
-                    <p><strong>Cartas seleccionadas:</strong> {totalSelectedCards}</p>
-                  </div>
-                  <div>
-                    <p><strong>Total de cartas:</strong> {totalCards}/50</p>
-                    <p className={`font-medium ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-orange-600'}`}>
-                      <strong>Cartas restantes:</strong> {remainingCards}
-                    </p>
+            {/* Columna derecha - Cartas */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      {totalCards}/50 cartas
+                    </span>
+                    <div className={`w-3 h-3 rounded-full ${totalCards >= 40 && totalCards <= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                   </div>
                 </div>
-              </div>
                 
                 {/* Cartas Básicas */}
                 <div className="mb-6">
@@ -419,7 +508,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set} • Máx: {maxQuantity}
+                                {card.type} • Coste: {card.cost} • Set: {card.set}
                               </p>
                             </div>
                             
@@ -446,11 +535,11 @@ const EditDeckPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-
+                
                 {/* Cartas del Aspecto */}
-                <div className="mb-6">
+                <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Cartas de {deck.aspect}
+                    Cartas de {deck?.aspect || 'Aspecto'}
                     {aspectSearchTerm && (
                       <span className="text-sm text-gray-500 ml-2">
                         ({filteredAspectCards.length})
@@ -463,7 +552,7 @@ const EditDeckPage: React.FC = () => {
                       type="text"
                       value={aspectSearchTerm}
                       onChange={(e) => setAspectSearchTerm(e.target.value)}
-                      placeholder={`Buscar cartas de ${deck.aspect}...`}
+                      placeholder="Buscar cartas del aspecto..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
                   </div>
@@ -482,7 +571,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set} • Máx: {maxQuantity}
+                                {card.type} • Coste: {card.cost} • Set: {card.set}
                               </p>
                             </div>
                             
@@ -513,7 +602,6 @@ const EditDeckPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
       
       {/* Toast Container */}
       <ToastContainer />

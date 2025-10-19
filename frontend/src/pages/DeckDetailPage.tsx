@@ -152,19 +152,26 @@ const DeckDetailPage: React.FC = () => {
                 <span className="text-gray-600">Total:</span>
                 <span className="font-medium text-gray-900">{totalCards}/50 cartas</span>
               </div>
-              {deck.description && (
-                <div className="flex items-start gap-2">
-                  <span className="text-gray-600">Descripción:</span>
-                  <span className="text-gray-700">{deck.description}</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Columna izquierda - Estadísticas y gráficos */}
+          {/* Columna izquierda - Descripción y estadísticas */}
           <div className="lg:col-span-1 space-y-6">
+            {/* Descripción del mazo */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Descripción
+              </h3>
+              <p className="text-gray-700 leading-relaxed">
+                {deck.description || 'Sin descripción'}
+              </p>
+            </div>
+
             {/* Estadísticas de cartas */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">

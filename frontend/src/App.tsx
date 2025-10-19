@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage'
 import { AuthProvider } from './contexts/AuthContext'
 import DeckDetailPage from './pages/DeckDetailPage'
 import EditDeckPage from './pages/EditDeckPage'
+import ConfigureGamePage from './pages/ConfigureGamePage'
 
 function App() {
   return (
@@ -43,6 +44,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreateDeckPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/configure-game"
+                element={
+                  <ProtectedRoute>
+                    <ConfigureGamePage />
                   </ProtectedRoute>
                 }
               />
