@@ -99,9 +99,8 @@ const EditDeckPage: React.FC = () => {
         setSelectedCards(cardsMap)
         
       } catch (err) {
-        console.error('Error loading deck:', err)
-        setError('Error al cargar el mazo')
-        showToast('❌ Error al cargar el mazo', 'error')
+        console.error('Error cargando mazo:', err)
+        setError('No se pudo cargar el mazo')
       } finally {
         setLoading(false)
       }
@@ -110,180 +109,95 @@ const EditDeckPage: React.FC = () => {
     loadDeck()
   }, [id, isAuthenticated])
 
-  // Filtrar cartas básicas cuando cambie el término de búsqueda
+  // Filtrar cartas básicas
   useEffect(() => {
-    if (basicSearchTerm.trim() === '') {
-      setFilteredBasicCards(basicCards)
-    } else {
-      const filtered = basicCards.filter(card => 
-        card.name.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
-        card.set.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
-        card.type.toLowerCase().startsWith(basicSearchTerm.toLowerCase())
-      )
-      setFilteredBasicCards(filtered)
-    }
-  }, [basicSearchTerm, basicCards])
+    const filtered = basicCards.filter(card => 
+      card.name.toLowerCase().startsWith(basicSearchTerm.toLowerCase())
+    )
+    setFilteredBasicCards(filtered)
+  }, [basicCards, basicSearchTerm])
 
-  // Filtrar cartas del aspecto cuando cambie el término de búsqueda
+  // Filtrar cartas del aspecto
   useEffect(() => {
-    if (aspectSearchTerm.trim() === '') {
-      setFilteredAspectCards(aspectCards)
-    } else {
-      const filtered = aspectCards.filter(card => 
-        card.name.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
-        card.set.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
-        card.type.toLowerCase().startsWith(aspectSearchTerm.toLowerCase())
-      )
-      setFilteredAspectCards(filtered)
-    }
-  }, [aspectSearchTerm, aspectCards])
+    const filtered = aspectCards.filter(card => 
+      card.name.toLowerCase().startsWith(aspectSearchTerm.toLowerCase())
+    )
+    setFilteredAspectCards(filtered)
+  }, [aspectCards, aspectSearchTerm])
 
-  // Calcular total de cartas seleccionadas
-  const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
-  const heroCardsCount = heroCards.reduce((sum, card) => {
-    const quantity = card.quantity || 1
-    console.log('🔍 Carta del héroe:', card.name, 'quantity:', quantity)
-    return sum + quantity
-  }, 0)
+  // Calcular estadísticas
+  const heroCardsCount = heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)
+  const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, qty) => sum + qty, 0)
   const totalCards = heroCardsCount + totalSelectedCards
   const remainingCards = 50 - totalCards
-  
-  console.log('🔍 Estado de cartas:', { 
-    heroCards: heroCards.length, 
-    heroCardsCount, 
-    totalSelectedCards, 
-    totalCards,
-    heroCardsData: heroCards 
-  })
 
-  // Añadir carta al mazo
+  // Funciones para manejar cartas
   const addCard = (card: Card) => {
-    if (remainingCards <= 0) {
-      showToast('❌ Ya tienes 50 cartas en el mazo', 'error')
-      return
-    }
-    
     const cardKey = getCardKey(card)
     const currentQuantity = selectedCards.get(cardKey) || 0
     const maxQuantity = card.max_quantity || 3
     
-    if (currentQuantity >= maxQuantity) {
-      showToast(`❌ No puedes añadir más de ${maxQuantity} copias de esta carta`, 'error')
-      return
+    if (remainingCards > 0 && currentQuantity < maxQuantity) {
+      setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity + 1)))
     }
-    
-    setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity + 1)))
   }
 
-  // Quitar carta del mazo
   const removeCard = (card: Card) => {
     const cardKey = getCardKey(card)
     const currentQuantity = selectedCards.get(cardKey) || 0
-    if (currentQuantity <= 1) {
-      setSelectedCards(prev => {
-        const newMap = new Map(prev)
-        newMap.delete(cardKey)
-        return newMap
-      })
-    } else {
-      setSelectedCards(prev => new Map(prev.set(cardKey, currentQuantity - 1)))
+    
+    if (currentQuantity > 0) {
+      const newQuantity = currentQuantity - 1
+      if (newQuantity === 0) {
+        setSelectedCards(prev => {
+          const newMap = new Map(prev)
+          newMap.delete(cardKey)
+          return newMap
+        })
+      } else {
+        setSelectedCards(prev => new Map(prev.set(cardKey, newQuantity)))
+      }
     }
   }
 
-  // Guardar cambios
+  // Función para guardar cambios
   const handleSave = async () => {
-    if (!deck) return
-    
-    if (!deckName.trim()) {
-      showToast('❌ El nombre del mazo es obligatorio', 'error')
-      return
-    }
-    
-    if (totalCards < 40 || totalCards > 50) {
-      showToast('❌ El mazo debe tener entre 40 y 50 cartas', 'error')
-      return
-    }
+    if (!deck || !user?.sub) return
     
     try {
       setSaving(true)
       
-      // Verificar que tenemos el Auth0 SUB del usuario
-      if (!user?.sub) {
-        showToast('❌ No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
-        return
-      }
-      
-      // Convertir Map a array de cartas usando IDs únicos
-      const editableCardsArray = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {
+      // Convertir cartas seleccionadas al formato esperado por el backend
+      const cardsToSave = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {
         const card = getCardFromKey(cardKey)
-        if (!card) {
-          return null
-        }
+        if (!card) return null
         
         return {
           card_id: card.id,
           card_name: card.name,
           card_set: card.set,
+          clase: card.clase,
           quantity: quantity
         }
       }).filter(Boolean)
       
-      // Obtener las cartas del héroe desde la API
-      // Usar el hero_id que viene del backend (más seguro)
-      const heroId = (deck as any).hero_id
-      let cardsArray = [...editableCardsArray]
-      
-      if (heroId) {
-        const heroCardsData = await apiService.getHeroCards(heroId)
-        const heroCards = heroCardsData.map((card: Card) => ({
-          card_id: card.id,
-          card_name: card.name,
-          card_set: card.set,
-          quantity: card.quantity || 1
-        }))
-        
-        // Combinar cartas editables + cartas del héroe
-        cardsArray = [...editableCardsArray, ...heroCards]
-      } else {
-        console.log('❌ No hay hero_id en el mazo')
-        // Usar solo cartas editables (fallback)
+      const updateData = {
+        name: deckName,
+        description: deckDescription,
+        cards: cardsToSave
       }
       
-      const updatedDeck = {
-        name: deckName.trim(),
-        description: deckDescription.trim(),
-        hero_name: deck.hero_name,
-        hero_id: (deck as any).hero_id,
-        aspect: deck.aspect,
-        cards: cardsArray
-      }
+      await apiService.updateDeck(Number(id), updateData, user.sub)
       
-      await apiService.updateDeck(deck.id!, updatedDeck, user.sub)
+      showToast('Mazo actualizado correctamente', 'success')
+      navigate('/mydecks')
       
-      showToast('🎉 ¡Mazo actualizado exitosamente!', 'success')
-      
-      // Redirigir a la página de mis mazos
-      setTimeout(() => {
-        navigate('/mydecks')
-      }, 1500)
-      
-    } catch (err: any) {
-      console.error('Error updating deck:', err)
-      showToast(`❌ Error al actualizar el mazo: ${err.message}`, 'error')
+    } catch (err) {
+      console.error('Error guardando mazo:', err)
+      showToast('Error al guardar el mazo', 'error')
     } finally {
       setSaving(false)
     }
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h2>
-          <p className="text-gray-600 mb-6">Necesitas iniciar sesión para editar mazos</p>
-        </div>
-      </div>
-    )
   }
 
   if (loading) {
@@ -532,11 +446,11 @@ const EditDeckPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {/* Cartas del Aspecto */}
-                <div>
+                <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Cartas de {deck?.aspect || 'Aspecto'}
+                    Cartas de {deck.aspect}
                     {aspectSearchTerm && (
                       <span className="text-sm text-gray-500 ml-2">
                         ({filteredAspectCards.length})
@@ -549,7 +463,7 @@ const EditDeckPage: React.FC = () => {
                       type="text"
                       value={aspectSearchTerm}
                       onChange={(e) => setAspectSearchTerm(e.target.value)}
-                      placeholder="Buscar cartas del aspecto..."
+                      placeholder={`Buscar cartas de ${deck.aspect}...`}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
                   </div>
