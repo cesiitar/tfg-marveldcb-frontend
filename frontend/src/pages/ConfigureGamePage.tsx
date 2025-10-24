@@ -1,19 +1,44 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useToast } from '../components/Toast'
+import { apiService } from '../services/api'
+import { useAuth0 } from '@auth0/auth0-react'
 
 const ConfigureGamePage: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { showToast, ToastContainer } = useToast()
+  const { user } = useAuth0()
   
   const [difficulty, setDifficulty] = useState<'normal' | 'expert'>('normal')
   const [villain, setVillain] = useState<string>('')
   const [gameResult, setGameResult] = useState<'win' | 'loss' | ''>('')
   const [saving, setSaving] = useState(false)
+  const [villains, setVillains] = useState<string[]>([])
+  const [loadingVillains, setLoadingVillains] = useState(true)
   
   // Obtener el ID del mazo desde la navegación
   const deckId = location.state?.deckId
+
+  // Cargar villanos al montar el componente
+  useEffect(() => {
+    const loadVillains = async () => {
+      try {
+        setLoadingVillains(true)
+        const villainsData = await apiService.getVillains()
+        // El backend ya devuelve un array de strings válidos
+        setVillains(villainsData)
+        console.log('🎭 Villanos cargados:', villainsData)
+      } catch (error) {
+        console.error('Error cargando villanos:', error)
+        showToast('Error al cargar la lista de villanos', 'error')
+      } finally {
+        setLoadingVillains(false)
+      }
+    }
+
+    loadVillains()
+  }, []) // ← Quitar showToast de las dependencias para evitar bucle infinito
 
   const handleSave = async () => {
     if (!deckId) {
@@ -31,10 +56,14 @@ const ConfigureGamePage: React.FC = () => {
       return
     }
 
+    if (!user?.sub) {
+      showToast('Error: No se encontró el ID de usuario', 'error')
+      return
+    }
+
     try {
       setSaving(true)
       
-      // TODO: Implementar llamada al backend para guardar la configuración
       const gameConfig = {
         deck_id: deckId,
         difficulty: difficulty,
@@ -44,7 +73,7 @@ const ConfigureGamePage: React.FC = () => {
       }
       
       console.log('📤 Enviando configuración de partida:', gameConfig)
-      // await apiService.saveGameConfiguration(gameConfig)
+      await apiService.saveGameConfiguration(gameConfig, user.sub)
       
       showToast('Configuración de partida guardada correctamente', 'success')
       navigate('/mydecks')
@@ -145,26 +174,28 @@ const ConfigureGamePage: React.FC = () => {
                 <select
                   value={villain}
                   onChange={(e) => setVillain(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={loadingVillains}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
-                  <option value="">Selecciona un villano...</option>
-                  <option value="rhino">Rhino</option>
-                  <option value="klaw">Klaw</option>
-                  <option value="ultron">Ultron</option>
-                  <option value="green-goblin">Green Goblin</option>
-                  <option value="kang">Kang</option>
-                  <option value="thanos">Thanos</option>
+                  <option value="">
+                    {loadingVillains ? 'Cargando villanos...' : 'Selecciona un villano...'}
+                  </option>
+                  {villains.map((villainName, index) => (
+                    <option key={index} value={villainName.toLowerCase().replace(/\s+/g, '-')}>
+                      {villainName}
+                    </option>
+                  ))}
                 </select>
               </div>
               
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-start">
-                  <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <div className="text-sm text-yellow-800">
-                    <p className="font-medium">Próximamente</p>
-                    <p>La base de datos de villanos estará disponible mañana. Por ahora puedes seleccionar uno de los villanos básicos.</p>
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium">Villanos dinámicos</p>
+                    <p>Los villanos se cargan automáticamente desde la base de datos. Si hay algún problema, se mostrarán los villanos básicos.</p>
                   </div>
                 </div>
               </div>

@@ -312,6 +312,54 @@ class ApiService {
       throw error
     }
   }
+
+  // Obtener lista de villanos
+  async getVillains(): Promise<string[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/villains`)
+      if (!response.ok) {
+        throw new Error('Error al obtener los villanos')
+      }
+      const data = await response.json()
+      // El backend devuelve directamente un array de strings
+      return Array.isArray(data) ? data : []
+    } catch (error) {
+      console.error('Error fetching villains:', error)
+      throw error
+    }
+  }
+
+  // Guardar configuración de partida
+  async saveGameConfiguration(gameConfig: {
+    deck_id: number
+    difficulty: 'normal' | 'expert'
+    villain: string
+    result: 'win' | 'loss'
+    played_at: string
+  }, auth0Id: string): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/game-configurations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id,
+        },
+        body: JSON.stringify(gameConfig),
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al guardar la configuración de partida: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error saving game configuration:', error)
+      throw error
+    }
+  }
 }
 
 export const apiService = new ApiService()
