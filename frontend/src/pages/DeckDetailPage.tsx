@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { getClassPillClasses } from '../utils/classColors'
+import { useToast } from '../components/Toast'
 
 const getClassColor = (clase: string): string => {
   const c = clase.toLowerCase()
@@ -29,9 +31,13 @@ const getClassColor = (clase: string): string => {
 
 const DeckDetailPage: React.FC = () => {
   const { id } = useParams()
+  const { user, isAuthenticated } = useAuth0()
+  const { showToast, ToastContainer } = useToast()
   const [deck, setDeck] = useState<Deck | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [loadingFavorite, setLoadingFavorite] = useState(false)
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -50,6 +56,42 @@ const DeckDetailPage: React.FC = () => {
     }
     loadDeck()
   }, [id])
+
+  // Cargar estado de favorito
+  useEffect(() => {
+    const checkFavorite = async () => {
+      if (!isAuthenticated || !user?.sub || !deck?.id) return
+
+      try {
+        const favoriteStatus = await apiService.isFavorite(deck.id, user.sub)
+        setIsFavorite(favoriteStatus)
+      } catch (err) {
+        console.error('Error checking favorite:', err)
+      }
+    }
+
+    checkFavorite()
+  }, [isAuthenticated, user?.sub, deck?.id])
+
+  // Manejar toggle de favorito
+  const handleToggleFavorite = async () => {
+    if (!user?.sub || !deck?.id) {
+      showToast('Debes iniciar sesión para usar favoritos', 'error')
+      return
+    }
+
+    try {
+      setLoadingFavorite(true)
+      const result = await apiService.toggleFavorite(deck.id, user.sub)
+      setIsFavorite(result.is_favorite)
+      showToast(result.message, 'success')
+    } catch (err) {
+      console.error('Error toggling favorite:', err)
+      showToast('Error al actualizar favorito', 'error')
+    } finally {
+      setLoadingFavorite(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -97,7 +139,32 @@ const DeckDetailPage: React.FC = () => {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{deck.name}</h1>
+                <div className="flex items-center justify-between mb-3">
+                  <h1 className="text-3xl md:text-4xl font-bold text-white">{deck.name}</h1>
+                  {isAuthenticated && (
+                    <button
+                      onClick={handleToggleFavorite}
+                      disabled={loadingFavorite}
+                      className={`p-3 rounded-full transition-colors ${
+                        isFavorite 
+                          ? 'text-red-400 hover:text-red-300 hover:bg-red-500/20' 
+                          : 'text-blue-200 hover:text-red-400 hover:bg-red-500/20'
+                      } ${loadingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      title={isFavorite ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
+                    >
+                      {loadingFavorite ? (
+                        <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      )}
+                    </button>
+                  )}
+                </div>
                 <div className="flex flex-wrap items-center gap-3 text-blue-100">
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,6 +446,8 @@ const DeckDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      <ToastContainer />
     </div>
   )
 }

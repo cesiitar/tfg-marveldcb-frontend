@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
 
 const MyDecksPage: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
+  const { user: auth0User } = useAuth0()
   const navigate = useNavigate()
   const { showToast, ToastContainer } = useToast()
   const [decks, setDecks] = useState<Deck[]>([])
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
+  const [favorites, setFavorites] = useState<Set<number>>(new Set())
 
   // Cargar mazos del usuario cuando se autentica
   const loadUserDecks = async () => {
@@ -34,9 +37,52 @@ const MyDecksPage: React.FC = () => {
     }
   }
 
+  // Cargar favoritos del usuario
+  const loadFavorites = async () => {
+    if (!isAuthenticated || !auth0User?.sub) return
+
+    try {
+      const favoritesData = await apiService.getUserFavorites(auth0User.sub)
+      const favoriteIds = new Set(favoritesData.map(deck => deck.id!))
+      setFavorites(favoriteIds)
+    } catch (err) {
+      console.error('Error loading favorites:', err)
+      // No mostrar error al usuario, solo log
+    }
+  }
+
+  // Manejar toggle de favorito
+  const handleToggleFavorite = async (deckId: number) => {
+    if (!auth0User?.sub) {
+      showToast('Debes iniciar sesión para usar favoritos', 'error')
+      return
+    }
+
+    try {
+      const result = await apiService.toggleFavorite(deckId, auth0User.sub)
+      
+      // Actualizar el estado local
+      setFavorites(prev => {
+        const newFavorites = new Set(prev)
+        if (result.is_favorite) {
+          newFavorites.add(deckId)
+        } else {
+          newFavorites.delete(deckId)
+        }
+        return newFavorites
+      })
+
+      showToast(result.message, 'success')
+    } catch (err) {
+      console.error('Error toggling favorite:', err)
+      showToast('Error al actualizar favorito', 'error')
+    }
+  }
+
   useEffect(() => {
     if (isAuthenticated) {
       loadUserDecks()
+      loadFavorites()
     }
   }, [isAuthenticated])
 
@@ -121,6 +167,19 @@ const MyDecksPage: React.FC = () => {
             <p className="text-lg text-gray-300 mb-6">
               Gestiona tus mazos personales de Marvel Champions
             </p>
+            {isAuthenticated && (
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => navigate('/favorites')}
+                  className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  Mis Favoritos
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -195,9 +254,30 @@ const MyDecksPage: React.FC = () => {
                 >
                   {/* Header Section */}
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
-                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
-                      {deck.name}
-                    </h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                        {deck.name}
+                      </h3>
+                      {isAuthenticated && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleToggleFavorite(deck.id!)
+                          }}
+                          className={`p-1 rounded-full transition-colors ${
+                            favorites.has(deck.id!) 
+                              ? 'text-red-500 hover:text-red-700 hover:bg-red-50' 
+                              : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                          }`}
+                          title={favorites.has(deck.id!) ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
+                        >
+                          <svg className="w-5 h-5" fill={favorites.has(deck.id!) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
                   </div>
                   
                   {/* Content Section */}

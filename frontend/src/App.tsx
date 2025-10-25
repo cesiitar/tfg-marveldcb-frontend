@@ -14,6 +14,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import DeckDetailPage from './pages/DeckDetailPage'
 import EditDeckPage from './pages/EditDeckPage'
 import ConfigureGamePage from './pages/ConfigureGamePage'
+import FavoritesPage from './pages/FavoritesPage'
 
 function App() {
   return (
@@ -52,6 +53,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ConfigureGamePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/favorites"
+                element={
+                  <ProtectedRoute>
+                    <FavoritesPage />
                   </ProtectedRoute>
                 }
               />

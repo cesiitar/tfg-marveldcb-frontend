@@ -360,6 +360,86 @@ class ApiService {
       throw error
     }
   }
+
+  // Obtener favoritos del usuario
+  async getUserFavorites(auth0Id: string): Promise<Deck[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/favorites`, {
+        method: 'GET',
+        headers: {
+          'X-Auth0-ID': auth0Id,
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Error al obtener favoritos: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return data.favorites || []
+    } catch (error) {
+      console.error('Error fetching user favorites:', error)
+      throw error
+    }
+  }
+
+  // Verificar si un mazo es favorito
+  async isFavorite(deckId: number, auth0Id: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/decks/${deckId}/is-favorite`, {
+        method: 'GET',
+        headers: {
+          'X-Auth0-ID': auth0Id,
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Error al verificar favorito: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return data.is_favorite || false
+    } catch (error) {
+      console.error('Error checking if favorite:', error)
+      return false // En caso de error, asumir que no es favorito
+    }
+  }
+
+  // Añadir/quitar favorito
+  async toggleFavorite(deckId: number, auth0Id: string): Promise<{ is_favorite: boolean; message: string }> {
+    try {
+      // Primero verificar si ya es favorito
+      const isCurrentlyFavorite = await this.isFavorite(deckId, auth0Id)
+      const action = isCurrentlyFavorite ? 'remove' : 'add'
+      
+      const response = await fetch(`${API_BASE_URL}/favorites`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id,
+        },
+        body: JSON.stringify({
+          deck_id: deckId,
+          action: action
+        }),
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al ${action === 'add' ? 'añadir' : 'quitar'} favorito: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return {
+        is_favorite: data.is_favorite,
+        message: data.message
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+      throw error
+    }
+  }
 }
 
 export const apiService = new ApiService()

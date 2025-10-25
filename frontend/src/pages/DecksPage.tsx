@@ -1,15 +1,19 @@
 import React, { useMemo, useState, useEffect } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
-import { getClassPillClasses } from '../utils/classColors'
+import { useToast } from '../components/Toast'
 
 const DecksPage: React.FC = () => {
+  const { user, isAuthenticated } = useAuth0()
+  const { showToast, ToastContainer } = useToast()
   const [decks, setDecks] = useState<Deck[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [heroFilter, setHeroFilter] = useState('')
   const [aspectFilter, setAspectFilter] = useState('')
+  const [favorites, setFavorites] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,6 +31,54 @@ const DecksPage: React.FC = () => {
 
     fetchData()
   }, [])
+
+  // Cargar favoritos del usuario
+  const loadFavorites = async () => {
+    if (!isAuthenticated || !user?.sub) return
+
+    try {
+      const favoritesData = await apiService.getUserFavorites(user.sub)
+      const favoriteIds = new Set(favoritesData.map(deck => deck.id!))
+      setFavorites(favoriteIds)
+    } catch (err) {
+      console.error('Error loading favorites:', err)
+      // No mostrar error al usuario, solo log
+    }
+  }
+
+  // Manejar toggle de favorito
+  const handleToggleFavorite = async (deckId: number) => {
+    if (!user?.sub) {
+      showToast('Debes iniciar sesión para usar favoritos', 'error')
+      return
+    }
+
+    try {
+      const result = await apiService.toggleFavorite(deckId, user.sub)
+      
+      // Actualizar el estado local
+      setFavorites(prev => {
+        const newFavorites = new Set(prev)
+        if (result.is_favorite) {
+          newFavorites.add(deckId)
+        } else {
+          newFavorites.delete(deckId)
+        }
+        return newFavorites
+      })
+
+      showToast(result.message, 'success')
+    } catch (err) {
+      console.error('Error toggling favorite:', err)
+      showToast('Error al actualizar favorito', 'error')
+    }
+  }
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadFavorites()
+    }
+  }, [isAuthenticated])
 
   const getDeckHeroName = (d: Deck): string | undefined => d.hero_name
   const getDeckAspect = (d: Deck): string | undefined => (d as any).aspect
@@ -55,28 +107,6 @@ const DecksPage: React.FC = () => {
       return matchesText && matchesHero && matchesAspect
     })
   }, [decks, search, heroFilter, aspectFilter])
-
-  const getHeroColor = (index: number) => {
-    const colors = [
-      'from-blue-500 to-blue-600',
-      'from-slate-500 to-slate-600', 
-      'from-indigo-500 to-indigo-600',
-      'from-emerald-500 to-emerald-600',
-      'from-purple-500 to-purple-600',
-      'from-rose-500 to-rose-600',
-      'from-teal-500 to-teal-600',
-      'from-violet-500 to-violet-600',
-      'from-cyan-500 to-cyan-600',
-      'from-orange-500 to-orange-600',
-      'from-green-500 to-green-600',
-      'from-pink-500 to-pink-600',
-      'from-amber-500 to-amber-600',
-      'from-red-500 to-red-600',
-      'from-lime-500 to-lime-600',
-      'from-sky-500 to-sky-600'
-    ]
-    return colors[index % colors.length]
-  }
 
   if (loading) {
     return (
@@ -182,7 +212,7 @@ const DecksPage: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredDecks.map((deck, index) => (
+              {filteredDecks.map((deck) => (
                 <div 
                   key={deck.id}
                   className="group bg-white border border-gray-200 hover:border-blue-300 transition-all duration-200 overflow-hidden hover:shadow-lg cursor-pointer"
@@ -190,9 +220,30 @@ const DecksPage: React.FC = () => {
                 >
                   {/* Header Section - Clean and Professional */}
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
-                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
-                      {deck.name}
-                    </h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                        {deck.name}
+                      </h3>
+                      {isAuthenticated && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleToggleFavorite(deck.id!)
+                          }}
+                          className={`p-1 rounded-full transition-colors ${
+                            favorites.has(deck.id!) 
+                              ? 'text-red-500 hover:text-red-700 hover:bg-red-50' 
+                              : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                          }`}
+                          title={favorites.has(deck.id!) ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
+                        >
+                          <svg className="w-5 h-5" fill={favorites.has(deck.id!) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
                   </div>
                   
                   {/* Content Section */}
@@ -253,6 +304,8 @@ const DecksPage: React.FC = () => {
           )}
         </div>
       </div>
+      
+      <ToastContainer />
     </div>
   )
 }
