@@ -50,6 +50,14 @@ const Header: React.FC = () => {
             >
               Decklists
             </Link>
+            {isAuthenticated && (
+              <Link 
+                to="/games-history" 
+                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              >
+                Game History
+              </Link>
+            )}
             <Link 
               to="/cards" 
               className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
@@ -147,6 +155,15 @@ const Header: React.FC = () => {
               >
                 Decklists
               </Link>
+              {isAuthenticated && (
+                <Link 
+                  to="/games-history" 
+                  className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Game History
+                </Link>
+              )}
               <Link 
                 to="/cards" 
                 className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"

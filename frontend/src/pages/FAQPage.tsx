@@ -1,6 +1,7 @@
 import React from 'react'
 
 const FAQPage: React.FC = () => {
+  
   const faqs = [
     {
       question: "¿Qué es MarvelDCB?",

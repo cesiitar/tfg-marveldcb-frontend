@@ -12,9 +12,10 @@ const ConfigureGamePage: React.FC = () => {
   
   const [difficulty, setDifficulty] = useState<'normal' | 'expert'>('normal')
   const [villain, setVillain] = useState<string>('')
+  const [villainId, setVillainId] = useState<number | null>(null)
   const [gameResult, setGameResult] = useState<'win' | 'loss' | ''>('')
   const [saving, setSaving] = useState(false)
-  const [villains, setVillains] = useState<string[]>([])
+  const [villains, setVillains] = useState<{ id: number; name: string }[]>([])
   const [loadingVillains, setLoadingVillains] = useState(true)
   
   // Obtener el ID del mazo desde la navegación
@@ -25,10 +26,10 @@ const ConfigureGamePage: React.FC = () => {
     const loadVillains = async () => {
       try {
         setLoadingVillains(true)
-        const villainsData = await apiService.getVillains()
-        // El backend ya devuelve un array de strings válidos
+        const villainsData = await apiService.getVillainsWithIds()
+        // El backend devuelve un array de objetos { id, name }
         setVillains(villainsData)
-        console.log('🎭 Villanos cargados:', villainsData)
+        console.log('🎭 Villanos con IDs cargados:', villainsData)
       } catch (error) {
         console.error('Error cargando villanos:', error)
         showToast('Error al cargar la lista de villanos', 'error')
@@ -46,7 +47,7 @@ const ConfigureGamePage: React.FC = () => {
       return
     }
 
-    if (!villain) {
+    if (!villainId) {
       showToast('Por favor selecciona un villano', 'error')
       return
     }
@@ -67,7 +68,7 @@ const ConfigureGamePage: React.FC = () => {
       const gameConfig = {
         deck_id: deckId,
         difficulty: difficulty,
-        villain: villain,
+        villain_id: villainId,  // ← Usar villain_id en lugar de villain
         result: gameResult,
         played_at: new Date().toISOString()
       }
@@ -173,16 +174,22 @@ const ConfigureGamePage: React.FC = () => {
                 </label>
                 <select
                   value={villain}
-                  onChange={(e) => setVillain(e.target.value)}
+                  onChange={(e) => {
+                    const selectedVillainName = e.target.value
+                    setVillain(selectedVillainName)
+                    // Encontrar el ID del villano seleccionado
+                    const selectedVillain = villains.find(v => v.name === selectedVillainName)
+                    setVillainId(selectedVillain?.id || null)
+                  }}
                   disabled={loadingVillains}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
                   <option value="">
                     {loadingVillains ? 'Cargando villanos...' : 'Selecciona un villano...'}
                   </option>
-                  {villains.map((villainName, index) => (
-                    <option key={index} value={villainName.toLowerCase().replace(/\s+/g, '-')}>
-                      {villainName}
+                  {villains.map((villain) => (
+                    <option key={villain.id} value={villain.name}>
+                      {villain.name}
                     </option>
                   ))}
                 </select>
@@ -194,8 +201,8 @@ const ConfigureGamePage: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="text-sm text-blue-800">
-                    <p className="font-medium">Villanos dinámicos</p>
-                    <p>Los villanos se cargan automáticamente desde la base de datos. Si hay algún problema, se mostrarán los villanos básicos.</p>
+                    <p className="font-medium">Villanos con IDs únicos</p>
+                    <p>Los villanos se cargan con sus IDs únicos para evitar errores de espacios o caracteres especiales.</p>
                   </div>
                 </div>
               </div>
@@ -294,7 +301,7 @@ const ConfigureGamePage: React.FC = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleSave}
-                  disabled={saving || !villain || !gameResult}
+                  disabled={saving || !villainId || !gameResult}
                   className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium flex items-center justify-center"
                 >
                   {saving ? (

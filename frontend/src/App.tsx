@@ -15,6 +15,7 @@ import DeckDetailPage from './pages/DeckDetailPage'
 import EditDeckPage from './pages/EditDeckPage'
 import ConfigureGamePage from './pages/ConfigureGamePage'
 import FavoritesPage from './pages/FavoritesPage'
+import GamesHistoryPage from './pages/GamesHistoryPage'
 
 function App() {
   return (
@@ -61,6 +62,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <FavoritesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/games-history"
+                element={
+                  <ProtectedRoute>
+                    <GamesHistoryPage />
                   </ProtectedRoute>
                 }
               />

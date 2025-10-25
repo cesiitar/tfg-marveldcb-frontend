@@ -313,7 +313,22 @@ class ApiService {
     }
   }
 
-  // Obtener lista de villanos
+  // Obtener lista de villanos con IDs (RECOMENDADO)
+  async getVillainsWithIds(): Promise<{ id: number; name: string }[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/villains/with-ids`)
+      if (!response.ok) {
+        throw new Error('Error al obtener los villanos con IDs')
+      }
+      const data = await response.json()
+      return Array.isArray(data) ? data : []
+    } catch (error) {
+      console.error('Error fetching villains with IDs:', error)
+      throw error
+    }
+  }
+
+  // Obtener lista de villanos (solo nombres - para compatibilidad)
   async getVillains(): Promise<string[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/villains`)
@@ -333,7 +348,7 @@ class ApiService {
   async saveGameConfiguration(gameConfig: {
     deck_id: number
     difficulty: 'normal' | 'expert'
-    villain: string
+    villain_id: number  // ← Cambiado de villain (string) a villain_id (number)
     result: 'win' | 'loss'
     played_at: string
   }, auth0Id: string): Promise<any> {
@@ -402,6 +417,40 @@ class ApiService {
     } catch (error) {
       console.error('Error checking if favorite:', error)
       return false // En caso de error, asumir que no es favorito
+    }
+  }
+
+  // Obtener historial de partidas del usuario
+  async getGameHistory(auth0Id: string): Promise<{
+    games: Array<{
+      id: number
+      deck_id: number
+      deck_name: string
+      hero_name: string
+      aspect: string
+      villain_id: number
+      villain_name: string
+      difficulty: 'normal' | 'expert'
+      result: 'win' | 'loss'
+      played_at: string
+    }>
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/game-configurations`, {
+        headers: {
+          'X-Auth0-ID': auth0Id,
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error('Error al obtener el historial de partidas')
+      }
+      
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error fetching game history:', error)
+      throw error
     }
   }
 
