@@ -57,7 +57,7 @@ const FavoritesPage: React.FC = () => {
   }
 
   const handleViewDeck = (deckId: number) => {
-    navigate(`/deck/${deckId}`)
+    navigate(`/decks/${deckId}`)
   }
 
   if (!isAuthenticated) {

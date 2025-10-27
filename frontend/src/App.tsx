@@ -65,14 +65,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/games-history"
-                element={
-                  <ProtectedRoute>
-                    <GamesHistoryPage />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/games-history" element={<GamesHistoryPage />} />
               <Route path="/cards" element={<CardsPage />} />
               <Route path="/cards/set/:setId" element={<SetCardsPage />} />
               <Route path="/cards/search" element={<CardSearchPage />} />

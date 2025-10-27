@@ -420,8 +420,8 @@ class ApiService {
     }
   }
 
-  // Obtener historial de partidas del usuario
-  async getGameHistory(auth0Id: string): Promise<{
+  // Obtener historial de partidas del usuario (o todas las partidas públicas)
+  async getGameHistory(auth0Id: string | null, myGamesOnly: boolean = false): Promise<{
     games: Array<{
       id: number
       deck_id: number
@@ -433,13 +433,24 @@ class ApiService {
       difficulty: 'normal' | 'expert'
       result: 'win' | 'loss'
       played_at: string
+      creator_name?: string  // Autor del mazo/usuario que jugó la partida
     }>
   }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/game-configurations`, {
-        headers: {
-          'X-Auth0-ID': auth0Id,
-        },
+      const headers: Record<string, string> = {}
+      
+      // Si se proporciona auth0Id, añadirlo al header
+      if (auth0Id) {
+        headers['X-Auth0-ID'] = auth0Id
+      }
+      
+      // Definir la URL
+      const url = myGamesOnly 
+        ? `${API_BASE_URL}/game-configurations` 
+        : `${API_BASE_URL}/game-configurations/all`
+      
+      const response = await fetch(url, {
+        headers,
       })
       
       if (!response.ok) {

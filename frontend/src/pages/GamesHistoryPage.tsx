@@ -15,24 +15,43 @@ interface GameHistory {
   difficulty: 'normal' | 'expert'
   result: 'win' | 'loss'
   played_at: string
+  creator_name?: string  // Autor del mazo/usuario que jugó la partida
 }
 
 const GamesHistoryPage: React.FC = () => {
-  const { user } = useAuth0()
+  const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
   const [games, setGames] = useState<GameHistory[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterResult, setFilterResult] = useState<'all' | 'win' | 'loss'>('all')
   const [filterDifficulty, setFilterDifficulty] = useState<'all' | 'normal' | 'expert'>('all')
+  const [filterVillain, setFilterVillain] = useState<string>('all')
+  const [filterMyGames, setFilterMyGames] = useState(false)
+  
+  // Obtener lista única de villanos
+  const availableVillains = Array.from(new Set(games.map(game => game.villain_name))).sort()
 
   // Cargar historial de partidas
   const loadGameHistory = async () => {
-    if (!user?.sub) return
-
     setLoading(true)
     try {
-      const historyData = await apiService.getGameHistory(user.sub)
+      let historyData
+      
+      if (!isAuthenticated || !user?.sub) {
+        // Si no está logueado, cargar TODAS las partidas públicas
+        historyData = await apiService.getGameHistory(null, false)
+      } else {
+        // Si está logueado
+        if (filterMyGames) {
+          // Filtrar solo por mis partidas
+          historyData = await apiService.getGameHistory(user.sub, true)
+        } else {
+          // Cargar todas las partidas (públicas)
+          historyData = await apiService.getGameHistory(user.sub, false)
+        }
+      }
+      
       setGames(historyData.games || [])
       console.log('🎮 Historial de partidas cargado:', historyData.games)
     } catch (err) {
@@ -46,7 +65,7 @@ const GamesHistoryPage: React.FC = () => {
 
   useEffect(() => {
     loadGameHistory()
-  }, [user?.sub])
+  }, [user?.sub, filterMyGames, isAuthenticated])
 
   // Filtrar partidas
   const filteredGames = games.filter(game => {
@@ -56,8 +75,9 @@ const GamesHistoryPage: React.FC = () => {
     
     const matchesResult = filterResult === 'all' || game.result === filterResult
     const matchesDifficulty = filterDifficulty === 'all' || game.difficulty === filterDifficulty
+    const matchesVillain = filterVillain === 'all' || game.villain_name === filterVillain
     
-    return matchesSearch && matchesResult && matchesDifficulty
+    return matchesSearch && matchesResult && matchesDifficulty && matchesVillain
   })
 
   // Formatear fecha
@@ -111,22 +131,25 @@ const GamesHistoryPage: React.FC = () => {
               <div className="flex-1">
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Game History</h1>
                 <p className="text-purple-100 text-lg">
-                  Registro de todas tus partidas jugadas
+                  {isAuthenticated && filterMyGames ? 'Tus partidas jugadas' : 'Registro de todas las partidas jugadas'}
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-purple-100">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              <Link 
+                to="/decks" 
+                className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span className="font-medium">Historial</span>
-              </div>
+                Volver a Decklists
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Búsqueda */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -177,6 +200,42 @@ const GamesHistoryPage: React.FC = () => {
                 <option value="expert">Experto</option>
               </select>
             </div>
+
+            {/* Filtro por Villano */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Villano
+              </label>
+              <select
+                value={filterVillain}
+                onChange={(e) => setFilterVillain(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="all">Todos</option>
+                {availableVillains.map(villain => (
+                  <option key={villain} value={villain}>{villain}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro por Mis Partidas (solo si está autenticado) */}
+            {isAuthenticated && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Filtro
+                </label>
+                <button
+                  onClick={() => setFilterMyGames(!filterMyGames)}
+                  className={`w-full px-3 py-2 border rounded-lg transition-colors duration-200 ${
+                    filterMyGames
+                      ? 'border-purple-500 bg-purple-50 text-purple-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {filterMyGames ? '✓ Mis Partidas' : 'Todas las Partidas'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -320,6 +379,9 @@ const GamesHistoryPage: React.FC = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-900">{game.deck_name}</p>
                           <p className="text-sm text-gray-600">{game.hero_name}</p>
+                          {game.creator_name && (
+                            <p className="text-xs text-gray-500 mt-1">by {game.creator_name}</p>
+                          )}
                         </div>
 
                         {/* Villano */}
@@ -339,7 +401,7 @@ const GamesHistoryPage: React.FC = () => {
                     {/* Botón ver mazo */}
                     <div className="ml-6">
                       <Link
-                        to={`/deck/${game.deck_id}`}
+                        to={`/decks/${game.deck_id}`}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                       >
                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -356,18 +418,6 @@ const GamesHistoryPage: React.FC = () => {
           )}
         </div>
 
-        {/* Botón volver */}
-        <div className="mt-8 text-center">
-          <Link
-            to="/mydecks"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Volver a Mis Mazos
-          </Link>
-        </div>
       </div>
       
       {/* Toast Container */}
