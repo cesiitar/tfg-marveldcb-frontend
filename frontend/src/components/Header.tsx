@@ -31,9 +31,9 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-accent-500 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-white font-display font-bold text-2xl">M</span>
+              <span className="text-white font-display font-bold text-2xl">A</span>
             </div>
-            <span className="text-accent-400 font-display font-bold text-3xl">MarvelCDB</span>
+            <span className="text-accent-400 font-display font-bold text-3xl">AIForge</span>
           </Link>
 
           {/* Desktop Navigation */}

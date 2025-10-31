@@ -4,8 +4,8 @@ const FAQPage: React.FC = () => {
   
   const faqs = [
     {
-      question: "¿Qué es MarvelDCB?",
-      answer: "MarvelDCB es una plataforma web diseñada para coleccionistas de cartas Marvel. Permite crear mazos, explorar cartas y conectar con otros fans."
+      question: "¿Qué es AIForge?",
+      answer: "AIForge es una plataforma web diseñada para crear y optimizar mazos usando inteligencia artificial. Permite crear mazos, explorar cartas, registrar partidas y obtener recomendaciones personalizadas basadas en tu historial de juego."
     },
     {
       question: "¿Cómo puedo crear mi primer mazo?",
@@ -13,7 +13,7 @@ const FAQPage: React.FC = () => {
     },
     {
       question: "¿Es gratis usar la plataforma?",
-      answer: "Sí, MarvelDCB es completamente gratuito para todos los usuarios. No hay costos ocultos ni suscripciones premium."
+      answer: "Sí, AIForge es completamente gratuito para todos los usuarios. No hay costos ocultos ni suscripciones premium."
     },
     {
       question: "¿Puedo compartir mis mazos con otros usuarios?",
@@ -30,7 +30,7 @@ const FAQPage: React.FC = () => {
       <div className="text-center py-12">
         <h1 className="text-4xl font-bold text-secondary-800 mb-4">Preguntas Frecuentes</h1>
         <p className="text-xl text-secondary-600 mb-8">
-          Encuentra respuestas a las preguntas más comunes sobre MarvelDCB
+          Encuentra respuestas a las preguntas más comunes sobre AIForge
         </p>
       </div>
 
@@ -52,7 +52,7 @@ const FAQPage: React.FC = () => {
           ¿No encuentras tu pregunta?
         </h2>
         <p className="text-secondary-600 mb-6">
-          Si tienes alguna pregunta específica sobre MarvelDCB, no dudes en contactarnos.
+          Si tienes alguna pregunta específica sobre AIForge, no dudes en contactarnos.
         </p>
         <button className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 font-medium">
           Contactar Soporte

@@ -42,6 +42,10 @@ const DeckDetailPage: React.FC = () => {
   const [loadingComments, setLoadingComments] = useState(false)
   const [newComment, setNewComment] = useState('')
   const [savingComment, setSavingComment] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
+  const [editingText, setEditingText] = useState('')
+  const [updatingComment, setUpdatingComment] = useState(false)
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null)
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -151,6 +155,80 @@ const DeckDetailPage: React.FC = () => {
     } finally {
       setSavingComment(false)
     }
+  }
+
+  // Iniciar edición de comentario
+  const handleStartEdit = (comment: DeckComment) => {
+    setEditingCommentId(comment.id)
+    setEditingText(comment.comment_text)
+  }
+
+  // Cancelar edición
+  const handleCancelEdit = () => {
+    setEditingCommentId(null)
+    setEditingText('')
+  }
+
+  // Guardar edición de comentario
+  const handleSaveEdit = async (commentId: number) => {
+    if (!isAuthenticated || !user?.sub) {
+      showToast('Debes iniciar sesión para editar comentarios', 'error')
+      return
+    }
+
+    const trimmedText = editingText.trim()
+    if (!trimmedText) {
+      showToast('El comentario no puede estar vacío', 'error')
+      return
+    }
+
+    if (trimmedText.length > 1000) {
+      showToast('El comentario no puede exceder 1000 caracteres', 'error')
+      return
+    }
+
+    try {
+      setUpdatingComment(true)
+      const updatedComment = await apiService.updateDeckComment(commentId, trimmedText, user.sub)
+      setComments(comments.map(c => c.id === commentId ? updatedComment : c))
+      setEditingCommentId(null)
+      setEditingText('')
+      showToast('Comentario actualizado correctamente', 'success')
+    } catch (err) {
+      console.error('Error updating comment:', err)
+      showToast('Error al actualizar el comentario', 'error')
+    } finally {
+      setUpdatingComment(false)
+    }
+  }
+
+  // Eliminar comentario
+  const handleDeleteComment = async (commentId: number) => {
+    if (!isAuthenticated || !user?.sub) {
+      showToast('Debes iniciar sesión para eliminar comentarios', 'error')
+      return
+    }
+
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
+      return
+    }
+
+    try {
+      setDeletingCommentId(commentId)
+      await apiService.deleteDeckComment(commentId, user.sub)
+      setComments(comments.filter(c => c.id !== commentId))
+      showToast('Comentario eliminado correctamente', 'success')
+    } catch (err) {
+      console.error('Error deleting comment:', err)
+      showToast('Error al eliminar el comentario', 'error')
+    } finally {
+      setDeletingCommentId(null)
+    }
+  }
+
+  // Verificar si un comentario es del usuario actual
+  const isOwnComment = (comment: DeckComment): boolean => {
+    return isAuthenticated && user?.sub === comment.auth0_id
   }
 
   if (loading) {
@@ -366,36 +444,118 @@ const DeckDetailPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                            <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
+                  {comments.map((comment) => {
+                    const isEditing = editingCommentId === comment.id
+                    const isOwn = isOwnComment(comment)
+                    const isDeleting = deletingCommentId === comment.id
+
+                    return (
+                      <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                              <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-gray-900 text-sm">
+                                  {comment.author_name || 'Usuario anónimo'}
+                                </p>
+                                {isOwn && (
+                                  <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
+                                    Tú
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500">
+                                {new Date(comment.created_at).toLocaleDateString('es-ES', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                                {comment.updated_at && comment.updated_at !== comment.created_at && (
+                                  <span className="ml-1 text-gray-400">(editado)</span>
+                                )}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold text-gray-900 text-sm">
-                              {comment.author_name || 'Usuario anónimo'}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {new Date(comment.created_at).toLocaleDateString('es-ES', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                          </div>
+                          {isOwn && !isEditing && (
+                            <div className="flex items-center gap-2 ml-4">
+                              <button
+                                onClick={() => handleStartEdit(comment)}
+                                disabled={isDeleting}
+                                className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+                                title="Editar comentario"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                disabled={isDeleting}
+                                className="p-1.5 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                                title="Eliminar comentario"
+                              >
+                                {isDeleting ? (
+                                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                ) : (
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
+                        
+                        {isEditing ? (
+                          <div className="ml-10 mt-2">
+                            <textarea
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                              rows={3}
+                              disabled={updatingComment}
+                              maxLength={1000}
+                            />
+                            <div className="flex items-center justify-between mt-1">
+                              <span className={`text-xs ${editingText.length > 900 ? 'text-red-500' : 'text-gray-500'}`}>
+                                {editingText.length}/1000 caracteres
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={handleCancelEdit}
+                                  disabled={updatingComment}
+                                  className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  onClick={() => handleSaveEdit(comment.id)}
+                                  disabled={updatingComment || !editingText.trim() || editingText.length > 1000}
+                                  className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {updatingComment ? 'Guardando...' : 'Guardar'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-700 text-sm leading-relaxed ml-10">
+                            {comment.comment_text}
+                          </p>
+                        )}
                       </div>
-                      <p className="text-gray-700 text-sm leading-relaxed ml-10">
-                        {comment.comment_text}
-                      </p>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>

@@ -9,13 +9,13 @@ const Footer: React.FC = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-8 h-8 bg-accent-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-display font-bold">M</span>
+                <span className="text-white font-display font-bold">A</span>
               </div>
-              <span className="text-xl font-display font-bold text-accent-400">MarvelCDB</span>
+              <span className="text-xl font-display font-bold text-accent-400">AIForge</span>
             </div>
             <p className="text-gray-300 mb-4">
-              Tu plataforma definitiva para gestionar y explorar tu colección de cartas Marvel. 
-              Crea mazos, descubre nuevas cartas y conecta con otros coleccionistas.
+              Tu plataforma definitiva para crear mazos con inteligencia artificial. 
+              Forja mazos, aprende de tus partidas y obtén recomendaciones personalizadas basadas en IA.
             </p>
           </div>
 
@@ -42,7 +42,7 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-primary-700 mt-8 pt-8 text-center">
           <p className="text-gray-400">
-            © 2024 MarvelCDB. Proyecto TFG - Todos los derechos reservados.
+            © 2024 AIForge. Proyecto TFG - Todos los derechos reservados.
           </p>
         </div>
       </div>

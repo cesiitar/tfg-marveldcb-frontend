@@ -165,7 +165,7 @@ const MyDecksPage: React.FC = () => {
               Mis Mazos
             </h1>
             <p className="text-lg text-gray-300 mb-6">
-              Gestiona tus mazos personales de Marvel Champions
+              Gestiona tus mazos personales y obtén recomendaciones de IA
             </p>
             {isAuthenticated && (
               <div className="flex justify-center gap-4">

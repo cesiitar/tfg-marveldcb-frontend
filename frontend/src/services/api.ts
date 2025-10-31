@@ -543,6 +543,55 @@ class ApiService {
       throw error
     }
   }
+
+  // Actualizar un comentario existente
+  async updateDeckComment(commentId: number, commentText: string, auth0Id: string): Promise<DeckComment> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id,
+        },
+        body: JSON.stringify({
+          comment_text: commentText
+        }),
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al actualizar el comentario: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return data.comment || data
+    } catch (error) {
+      console.error('Error updating deck comment:', error)
+      throw error
+    }
+  }
+
+  // Eliminar un comentario
+  async deleteDeckComment(commentId: number, auth0Id: string): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-Auth0-ID': auth0Id,
+        },
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al eliminar el comentario: ${response.status}`)
+      }
+    } catch (error) {
+      console.error('Error deleting deck comment:', error)
+      throw error
+    }
+  }
 }
 
 export const apiService = new ApiService()

@@ -121,10 +121,10 @@ const CardsPage: React.FC = () => {
         <div className="relative z-10 text-center py-12 px-4">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold text-white mb-4">
-              Marvel<span className="text-blue-400">CDB</span>
+              AI<span className="text-blue-400">Forge</span>
             </h1>
             <p className="text-lg text-gray-300 mb-6">
-              Explora el universo de Marvel Champions
+              Explora y construye mazos con inteligencia artificial
             </p>
             
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">

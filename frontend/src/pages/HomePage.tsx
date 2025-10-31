@@ -7,11 +7,11 @@ const HomePage: React.FC = () => {
       {/* Hero Section */}
       <section className="text-center py-16">
         <h1 className="text-5xl md:text-6xl font-display font-bold text-primary-800 mb-6">
-          Bienvenido a <span className="text-accent-500">MarvelCDB</span>
+          Bienvenido a <span className="text-accent-500">AIForge</span>
         </h1>
         <p className="text-xl text-secondary-600 mb-8 max-w-3xl mx-auto">
-          La plataforma definitiva para coleccionistas de cartas Marvel. 
-          Crea mazos, explora cartas y conecta con otros fans.
+          La plataforma definitiva para crear mazos con inteligencia artificial. 
+          Forja mazos, aprende de tus partidas y obtén recomendaciones basadas en IA.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link 

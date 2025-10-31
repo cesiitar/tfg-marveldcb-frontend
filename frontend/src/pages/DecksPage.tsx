@@ -153,7 +153,7 @@ const DecksPage: React.FC = () => {
               Decklists Públicos
             </h1>
             <p className="text-lg text-gray-300 mb-6">
-              Explora los mazos públicos de Marvel Champions
+              Explora los mazos públicos creados por la comunidad
             </p>
           </div>
         </div>
