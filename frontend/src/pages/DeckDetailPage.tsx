@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
-import { Deck } from '../types/card'
+import { Deck, DeckComment } from '../types/card'
 import { getClassPillClasses } from '../utils/classColors'
 import { useToast } from '../components/Toast'
 
@@ -38,6 +38,10 @@ const DeckDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
   const [loadingFavorite, setLoadingFavorite] = useState(false)
+  const [comments, setComments] = useState<DeckComment[]>([])
+  const [loadingComments, setLoadingComments] = useState(false)
+  const [newComment, setNewComment] = useState('')
+  const [savingComment, setSavingComment] = useState(false)
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -73,6 +77,25 @@ const DeckDetailPage: React.FC = () => {
     checkFavorite()
   }, [isAuthenticated, user?.sub, deck?.id])
 
+  // Cargar comentarios del mazo
+  useEffect(() => {
+    const loadComments = async () => {
+      if (!deck?.id) return
+
+      try {
+        setLoadingComments(true)
+        const commentsData = await apiService.getDeckComments(deck.id)
+        setComments(commentsData)
+      } catch (err) {
+        console.error('Error loading comments:', err)
+      } finally {
+        setLoadingComments(false)
+      }
+    }
+
+    loadComments()
+  }, [deck?.id])
+
   // Manejar toggle de favorito
   const handleToggleFavorite = async () => {
     if (!user?.sub || !deck?.id) {
@@ -90,6 +113,43 @@ const DeckDetailPage: React.FC = () => {
       showToast('Error al actualizar favorito', 'error')
     } finally {
       setLoadingFavorite(false)
+    }
+  }
+
+  // Manejar envío de comentario
+  const handleSubmitComment = async () => {
+    if (!isAuthenticated || !user?.sub) {
+      showToast('Debes iniciar sesión para comentar', 'error')
+      return
+    }
+
+    if (!deck?.id) {
+      showToast('Error: No se pudo identificar el mazo', 'error')
+      return
+    }
+
+    const trimmedComment = newComment.trim()
+    if (!trimmedComment) {
+      showToast('El comentario no puede estar vacío', 'error')
+      return
+    }
+
+    if (trimmedComment.length > 1000) {
+      showToast('El comentario no puede exceder 1000 caracteres', 'error')
+      return
+    }
+
+    try {
+      setSavingComment(true)
+      const newCommentData = await apiService.createDeckComment(deck.id, trimmedComment, user.sub)
+      setComments([newCommentData, ...comments]) // Añadir al principio
+      setNewComment('')
+      showToast('Comentario añadido correctamente', 'success')
+    } catch (err) {
+      console.error('Error creating comment:', err)
+      showToast('Error al crear el comentario', 'error')
+    } finally {
+      setSavingComment(false)
     }
   }
 
@@ -237,6 +297,107 @@ const DeckDetailPage: React.FC = () => {
               <p className="text-gray-700 leading-relaxed">
                 {deck.description || 'Sin descripción'}
               </p>
+            </div>
+
+            {/* Comentarios */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Comentarios ({comments.length})
+              </h3>
+
+              {/* Formulario para añadir comentario (solo si está autenticado) */}
+              {isAuthenticated ? (
+                <div className="mb-6">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Escribe tu comentario..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    rows={3}
+                    disabled={savingComment}
+                    maxLength={1000}
+                  />
+                  <div className="flex items-center justify-between mt-1">
+                    <span className={`text-xs ${newComment.length > 900 ? 'text-red-500' : 'text-gray-500'}`}>
+                      {newComment.length}/1000 caracteres
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleSubmitComment}
+                    disabled={savingComment || !newComment.trim() || newComment.length > 1000}
+                    className="mt-2 w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {savingComment ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Publicando...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Publicar comentario
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg text-center text-sm text-gray-600">
+                  <p>Debes iniciar sesión para comentar</p>
+                </div>
+              )}
+
+              {/* Lista de comentarios */}
+              {loadingComments ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                  <p className="text-gray-600 text-sm">Cargando comentarios...</p>
+                </div>
+              ) : comments.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 text-sm">
+                  <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 text-sm">
+                              {comment.author_name || 'Usuario anónimo'}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(comment.created_at).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 text-sm leading-relaxed ml-10">
+                        {comment.comment_text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Estadísticas de cartas */}

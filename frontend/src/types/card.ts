@@ -44,3 +44,13 @@ export interface Deck {
   created_at?: string
   updated_at?: string
 }
+
+export interface DeckComment {
+  id: number
+  deck_id: number
+  auth0_id: string
+  author_name?: string  // Nombre del usuario que escribió el comentario
+  comment_text: string
+  created_at: string
+  updated_at?: string
+}

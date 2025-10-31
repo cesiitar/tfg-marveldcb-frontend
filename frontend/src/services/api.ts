@@ -1,4 +1,4 @@
-import { Card, CardSet, Hero, Deck } from '../types/card'
+import { Card, CardSet, Hero, Deck, DeckComment } from '../types/card'
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
@@ -497,6 +497,49 @@ class ApiService {
       }
     } catch (error) {
       console.error('Error toggling favorite:', error)
+      throw error
+    }
+  }
+
+  // Obtener comentarios de un mazo
+  async getDeckComments(deckId: number): Promise<DeckComment[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/decks/${deckId}/comments`)
+      if (!response.ok) {
+        throw new Error('Error al obtener los comentarios')
+      }
+      const data = await response.json()
+      return data.comments || data || []
+    } catch (error) {
+      console.error('Error fetching deck comments:', error)
+      throw error
+    }
+  }
+
+  // Crear un nuevo comentario en un mazo
+  async createDeckComment(deckId: number, commentText: string, auth0Id: string): Promise<DeckComment> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/decks/${deckId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id,
+        },
+        body: JSON.stringify({
+          comment_text: commentText
+        }),
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response body:', errorText)
+        throw new Error(`Error al crear el comentario: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return data.comment || data
+    } catch (error) {
+      console.error('Error creating deck comment:', error)
       throw error
     }
   }
