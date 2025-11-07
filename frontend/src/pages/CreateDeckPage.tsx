@@ -17,6 +17,7 @@ const CreateDeckPage: React.FC = () => {
   const [heroCards, setHeroCards] = useState<Card[]>([])
   const [deckName, setDeckName] = useState<string>('')
   const [deckDescription, setDeckDescription] = useState<string>('')
+  const [useAI, setUseAI] = useState<boolean>(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState<'setup' | 'cards'>('setup')
@@ -79,7 +80,7 @@ const CreateDeckPage: React.FC = () => {
     setCurrentStep('setup')
   }
 
-  const handleCompleteDeck = async (selectedCards: DeckCard[]) => {
+  const handleCompleteDeck = (selectedCards: DeckCard[]) => {
     console.log('🎯 handleCompleteDeck llamado con:', selectedCards)
     
     if (!isAuthenticated || !user?.sub) {
@@ -87,58 +88,26 @@ const CreateDeckPage: React.FC = () => {
       return
     }
 
-    setLoading(true)
-    setError(null)
-
-    try {
-      // Crear el mazo con todas las cartas
-      const selectedHeroObj = heroes.find(h => h.id === selectedHero)
-      const newDeck: Omit<Deck, 'id' | 'created_at' | 'updated_at'> = {
-        name: deckName,
-        description: deckDescription,
-        hero_name: selectedHeroName, // Usar el nombre completo del héroe
-        hero_id: selectedHero, // Usar el ID del héroe
-        aspect: selectedAspect as any,
-        cards: selectedCards
-      }
-
-      console.log('📤 Enviando mazo al backend:', newDeck)
-      console.log('📤 Descripción enviada:', deckDescription)
-
-      const createdDeck = await apiService.createDeck(newDeck, user.sub)
-      console.log('✅ Mazo creado exitosamente:', createdDeck)
-      
-      // Mostrar mensaje de éxito
-      showToast(`🎉 ¡Mazo "${deckName}" creado exitosamente!`, 'success')
-      
-      // Navegar a la página de configuración de partida
-      console.log('🚀 Navegando a configure-game con deckId:', createdDeck.id)
-      try {
-        navigate('/configure-game', { state: { deckId: createdDeck.id } })
-        console.log('✅ Navegación ejecutada')
-      } catch (navError) {
-        console.error('❌ Error en navegación:', navError)
-      }
-      
-      // Resetear loading después de crear el mazo exitosamente
-      setLoading(false)
-      
-    } catch (err: any) {
-      console.error('Error creating deck:', err)
-      
-      // Mostrar el mensaje exacto del backend si viene
-      if (err && err.message) {
-        showToast(`❌ ${err.message}`, 'error')
-      } else if (err.message && err.message.includes('401')) {
-        showToast('❌ No tienes permisos para crear mazos. Inicia sesión nuevamente.', 'error')
-      } else if (err.message && err.message.includes('422')) {
-        showToast('❌ Los datos del mazo no son válidos. Verifica que todas las cartas existan.', 'error')
-      } else {
-        showToast('❌ Error al crear el mazo. Inténtalo de nuevo.', 'error')
-      }
-    } finally {
-      setLoading(false)
+    // Preparar los datos del mazo (sin crearlo todavía)
+    const deckData: Omit<Deck, 'id' | 'created_at' | 'updated_at'> = {
+      name: deckName,
+      description: deckDescription,
+      hero_name: selectedHeroName,
+      hero_id: selectedHero!,
+      aspect: selectedAspect as any,
+      cards: selectedCards
     }
+
+    console.log('📤 Navegando a configure-game con datos del mazo:', deckData)
+    
+    // Navegar a la página de configuración de partida con los datos del mazo
+    // El mazo se creará cuando se guarde la configuración de la partida
+    navigate('/configure-game', { 
+      state: { 
+        deckData: deckData, // Pasar los datos del mazo en lugar del deckId
+        useAI: useAI // Pasar si el usuario quiere usar IA
+      } 
+    })
   }
 
   if (!isAuthenticated) {
@@ -275,6 +244,30 @@ const CreateDeckPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Opción de IA */}
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <label className="flex items-start space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useAI}
+                onChange={(e) => setUseAI(e.target.checked)}
+                className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">🤖</span>
+                  <span className="font-medium text-gray-900">
+                    Usar ayuda de IA para recomendaciones
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mt-1">
+                  La IA analizará tu mazo y te recomendará los mejores villanos para enfrentar, 
+                  basándose en partidas similares jugadas por otros usuarios.
+                </p>
+              </div>
+            </label>
+          </div>
 
           {/* Botón continuar */}
           <button

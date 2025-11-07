@@ -112,7 +112,7 @@ const GamesHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando historial de partidas...</p>
@@ -122,21 +122,25 @@ const GamesHistoryPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-8">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Game History</h1>
-                <p className="text-purple-100 text-lg">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      {/* Header */}
+      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
+        <div className="absolute inset-0 bg-black opacity-30"></div>
+        
+        <div className="relative z-10 py-12 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="relative">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-white mb-4">
+                  Historial de Partidas
+                </h1>
+                <p className="text-lg text-gray-300">
                   {isAuthenticated && filterMyGames ? 'Tus partidas jugadas' : 'Registro de todas las partidas jugadas'}
                 </p>
               </div>
               <Link 
                 to="/decks" 
-                className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
+                className="absolute top-0 right-0 inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
               >
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -146,8 +150,12 @@ const GamesHistoryPage: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Filtros */}
+      {/* Main Content */}
+      <div className="relative -mt-8 z-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Filtros */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Búsqueda */}
@@ -417,7 +425,7 @@ const GamesHistoryPage: React.FC = () => {
             </div>
           )}
         </div>
-
+        </div>
       </div>
       
       {/* Toast Container */}
