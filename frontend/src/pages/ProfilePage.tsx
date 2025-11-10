@@ -125,7 +125,7 @@ const ProfilePage: React.FC = () => {
 
             {!loading && (
               <div className="bg-gray-50 p-6 rounded-lg text-center">
-                <div className="text-3xl font-bold text-accent-500 mb-2">{deckCount}</div>
+                <div className="text-3xl font-bold text-blue-600 mb-2">{deckCount}</div>
                 <div className="text-lg text-gray-600">Mazos Creados</div>
                 <div className="text-sm text-gray-500 mt-2">
                   {deckCount === 0 ? 'Aún no has creado ningún mazo' : 'Total de mazos en tu colección'}

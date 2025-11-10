@@ -2,16 +2,16 @@ import React from 'react'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-primary-800 text-white py-12 mt-16">
+    <footer className="bg-slate-800 text-white py-12 mt-16">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo y descripción */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-8 h-8 bg-accent-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-display font-bold">A</span>
               </div>
-              <span className="text-xl font-display font-bold text-accent-400">AIForge</span>
+              <span className="text-xl font-display font-bold text-white">AI<span className="text-blue-400">Forge</span></span>
             </div>
             <p className="text-gray-300 mb-4">
               Tu plataforma definitiva para crear mazos con inteligencia artificial. 
@@ -21,17 +21,17 @@ const Footer: React.FC = () => {
 
           {/* Enlaces rápidos */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-accent-400">Enlaces Rápidos</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Enlaces Rápidos</h3>
             <ul className="space-y-2">
-              <li><a href="/decks" className="text-gray-300 hover:text-accent-400 transition-colors">My Decks</a></li>
-              <li><a href="/cards" className="text-gray-300 hover:text-accent-400 transition-colors">Cards</a></li>
-              <li><a href="/faq" className="text-gray-300 hover:text-accent-400 transition-colors">FAQs</a></li>
+              <li><a href="/mydecks" className="text-gray-300 hover:text-blue-400 transition-colors">My Decks</a></li>
+              <li><a href="/cards" className="text-gray-300 hover:text-blue-400 transition-colors">Cards</a></li>
+              <li><a href="/faq" className="text-gray-300 hover:text-blue-400 transition-colors">FAQs</a></li>
             </ul>
           </div>
 
           {/* Contacto */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-accent-400">Contacto</h3>
+            <h3 className="text-lg font-semibold mb-4 text-blue-400">Contacto</h3>
             <ul className="space-y-2">
               <li className="text-gray-300">Soporte</li>
               <li className="text-gray-300">Comunidad</li>
@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-primary-700 mt-8 pt-8 text-center">
+        <div className="border-t border-slate-700 mt-8 pt-8 text-center">
           <p className="text-gray-400">
             © 2024 AIForge. Proyecto TFG - Todos los derechos reservados.
           </p>

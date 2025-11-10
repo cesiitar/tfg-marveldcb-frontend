@@ -12,7 +12,7 @@ export function getClassColor(cls?: string): string {
     case 'protection':
       return 'bg-green-600'
     case 'hero':
-      return 'bg-violet-500'
+      return 'bg-purple-600'
     case 'encounter':
       return 'bg-red-900'
     case 'campaign':
@@ -33,9 +33,9 @@ export function getClassPillClasses(cls?: string): string {
     case 'leadership':
       return 'bg-blue-50 text-blue-700 border border-blue-200'
     case 'protection':
-      return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+      return 'bg-green-50 text-green-700 border border-green-200'
     case 'hero':
-      return 'bg-violet-50 text-violet-700 border border-violet-200'
+      return 'bg-purple-50 text-purple-700 border border-purple-200'
     case 'encounter':
       return 'bg-red-50 text-red-900 border border-red-300'
     case 'campaign':
@@ -56,9 +56,9 @@ export function getClassGradientClasses(cls?: string): string {
     case 'leadership':
       return 'from-blue-100 to-blue-200 border-blue-300'
     case 'protection':
-      return 'from-emerald-100 to-emerald-200 border-emerald-300'
+      return 'from-green-100 to-green-200 border-green-300'
     case 'hero':
-      return 'from-violet-100 to-violet-200 border-violet-300'
+      return 'from-purple-100 to-purple-200 border-purple-300'
     case 'encounter':
       return 'from-red-200 to-red-300 border-red-400'
     case 'campaign':
@@ -79,9 +79,9 @@ export function getClassBadgeStyle(cls?: string): string {
     case 'leadership':
       return 'text-blue-800 bg-blue-200'
     case 'protection':
-      return 'text-emerald-800 bg-emerald-200'
+      return 'text-green-800 bg-green-200'
     case 'hero':
-      return 'text-violet-800 bg-violet-200'
+      return 'text-purple-800 bg-purple-200'
     case 'encounter':
       return 'text-red-900 bg-red-300'
     case 'campaign':
@@ -89,6 +89,22 @@ export function getClassBadgeStyle(cls?: string): string {
     case 'basic':
     default:
       return 'text-gray-800 bg-gray-200'
+  }
+}
+
+export function getAspectHeaderGradient(aspect?: string): string {
+  const a = (aspect || '').toLowerCase()
+  switch (a) {
+    case 'aggression':
+      return 'from-red-600 to-red-700'
+    case 'justice':
+      return 'from-amber-600 to-amber-700'
+    case 'leadership':
+      return 'from-blue-600 to-blue-700'
+    case 'protection':
+      return 'from-green-600 to-green-700'
+    default:
+      return 'from-slate-600 to-slate-700'
   }
 }
 

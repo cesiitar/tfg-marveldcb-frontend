@@ -104,7 +104,7 @@ const CardsPage: React.FC = () => {
         <p className="text-secondary-600 mb-6">{error}</p>
         <button 
           onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium"
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
         >
           Reintentar
         </button>

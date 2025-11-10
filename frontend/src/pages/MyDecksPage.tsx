@@ -5,6 +5,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
+import { getClassColor } from '../utils/classColors'
 
 const MyDecksPage: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
@@ -227,7 +228,7 @@ const MyDecksPage: React.FC = () => {
                 </Link>
                     <button
                   onClick={() => logout()}
-                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium flex items-center gap-2"
+                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center gap-2"
                     >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -329,7 +330,7 @@ const MyDecksPage: React.FC = () => {
                 </div>
                         {getDeckAspect(deck) && (
                           <div className="flex items-center gap-1 ml-auto">
-                            <div className={`w-3 h-3 rounded-full shadow-sm ${getDeckAspect(deck) === 'aggression' ? 'bg-red-500' : getDeckAspect(deck) === 'justice' ? 'bg-amber-500' : getDeckAspect(deck) === 'leadership' ? 'bg-blue-500' : getDeckAspect(deck) === 'protection' ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+                            <div className={`w-3 h-3 rounded-full shadow-sm ${getClassColor(getDeckAspect(deck))}`}></div>
                             <span className="text-sm font-semibold text-gray-700 capitalize px-2 py-1 rounded-full bg-gray-100">
                               {getDeckAspect(deck)}
                             </span>

@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useToast } from '../components/Toast'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
+import { getClassColor } from '../utils/classColors'
 
 const FavoritesPage: React.FC = () => {
   const navigate = useNavigate()
@@ -26,8 +27,25 @@ const FavoritesPage: React.FC = () => {
         setLoading(true)
         setError(null)
         const favoritesData = await apiService.getUserFavorites(user.sub)
-        setFavorites(favoritesData)
-        console.log('❤️ Favoritos cargados:', favoritesData)
+        // Obtener el favorite_count real de cada mazo desde la API de decks
+        const favoritesWithCount = await Promise.all(
+          favoritesData.map(async (deck) => {
+            try {
+              // Obtener el mazo completo desde la API para tener el favorite_count actualizado
+              const fullDeck = await apiService.getDeckById(deck.id!)
+              return {
+                ...deck,
+                favorite_count: fullDeck.favorite_count ?? 0
+              }
+            } catch (err) {
+              console.error(`Error obteniendo detalles del mazo ${deck.id}:`, err)
+              // Si falla, mantener el valor que viene del backend
+              return deck
+            }
+          })
+        )
+        setFavorites(favoritesWithCount)
+        console.log('❤️ Favoritos cargados con contadores reales:', favoritesWithCount)
       } catch (err) {
         console.error('Error loading favorites:', err)
         setError('Error al cargar los favoritos')
@@ -50,7 +68,7 @@ const FavoritesPage: React.FC = () => {
         setFavorites(prev => 
           prev.map(deck => {
             if (deck.id === deckId) {
-              const currentCount = deck.favorite_count ?? 0
+              const currentCount = deck.favorite_count ?? 1
               return {
                 ...deck,
                 favorite_count: Math.max(0, currentCount - 1)
@@ -241,7 +259,7 @@ const FavoritesPage: React.FC = () => {
                       </div>
                       {deck.aspect && (
                         <div className="flex items-center gap-1 ml-auto">
-                          <div className={`w-3 h-3 rounded-full shadow-sm ${deck.aspect === 'aggression' ? 'bg-red-500' : deck.aspect === 'justice' ? 'bg-amber-500' : deck.aspect === 'leadership' ? 'bg-blue-500' : deck.aspect === 'protection' ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+                          <div className={`w-3 h-3 rounded-full shadow-sm ${getClassColor(deck.aspect)}`}></div>
                           <span className="text-sm font-semibold text-gray-700 capitalize px-2 py-1 rounded-full bg-gray-100">
                             {deck.aspect}
                           </span>

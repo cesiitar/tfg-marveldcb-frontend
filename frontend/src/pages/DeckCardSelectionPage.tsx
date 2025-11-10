@@ -275,7 +275,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                             <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                             <button
                               onClick={() => handleCardQuantityChange(cardKey, quantity + 1, maxQuantity)}
-                              className="w-6 h-6 bg-accent-500 text-white rounded-full hover:bg-accent-600 flex items-center justify-center text-sm"
+                              className="w-6 h-6 bg-blue-600 text-white rounded-full hover:bg-blue-700 flex items-center justify-center text-sm"
                               disabled={!canAddMore}
                             >
                               +
@@ -355,7 +355,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                             <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                             <button
                               onClick={() => handleCardQuantityChange(cardKey, quantity + 1, maxQuantity)}
-                              className="w-6 h-6 bg-accent-500 text-white rounded-full hover:bg-accent-600 flex items-center justify-center text-sm"
+                              className="w-6 h-6 bg-blue-600 text-white rounded-full hover:bg-blue-700 flex items-center justify-center text-sm"
                               disabled={!canAddMore}
                             >
                               +

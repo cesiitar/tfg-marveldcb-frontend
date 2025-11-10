@@ -3,6 +3,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
+import { getClassColor } from '../utils/classColors'
 
 const DecksPage: React.FC = () => {
   const { user, isAuthenticated } = useAuth0()
@@ -13,6 +14,7 @@ const DecksPage: React.FC = () => {
   const [search, setSearch] = useState('')
   const [heroFilter, setHeroFilter] = useState('')
   const [aspectFilter, setAspectFilter] = useState('')
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_favorites' | 'alphabetical'>('newest')
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
 
   useEffect(() => {
@@ -116,13 +118,53 @@ const DecksPage: React.FC = () => {
   }, [decks])
 
   const filteredDecks = useMemo(() => {
-    return decks.filter(d => {
+    let filtered = decks.filter(d => {
       const matchesText = !search || d.name.toLowerCase().startsWith(search.toLowerCase())
       const matchesHero = !heroFilter || getDeckHeroName(d) === heroFilter
       const matchesAspect = !aspectFilter || getDeckAspect(d) === aspectFilter
       return matchesText && matchesHero && matchesAspect
     })
-  }, [decks, search, heroFilter, aspectFilter])
+
+    // Aplicar ordenamiento
+    filtered = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          // Más nuevos primero (created_at descendente)
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0
+          return dateB - dateA
+        
+        case 'oldest':
+          // Más antiguos primero (created_at ascendente)
+          const dateAOld = a.created_at ? new Date(a.created_at).getTime() : 0
+          const dateBOld = b.created_at ? new Date(b.created_at).getTime() : 0
+          return dateAOld - dateBOld
+        
+        case 'most_favorites':
+          // Más favoritos primero
+          const favA = a.favorite_count ?? 0
+          const favB = b.favorite_count ?? 0
+          if (favB !== favA) return favB - favA
+          // Si tienen los mismos favoritos, ordenar por fecha (más nuevos primero)
+          const dateAFav = a.created_at ? new Date(a.created_at).getTime() : 0
+          const dateBFav = b.created_at ? new Date(b.created_at).getTime() : 0
+          return dateBFav - dateAFav
+        
+        case 'alphabetical':
+          // Orden alfabético por nombre (ignorando comillas y caracteres especiales al inicio)
+          const normalizeName = (name: string) => {
+            // Eliminar comillas y espacios al inicio/final, y convertir a minúsculas para comparación
+            return name.replace(/^["'\s]+|["'\s]+$/g, '').toLowerCase()
+          }
+          return normalizeName(a.name).localeCompare(normalizeName(b.name))
+        
+        default:
+          return 0
+      }
+    })
+
+    return filtered
+  }, [decks, search, heroFilter, aspectFilter, sortBy])
 
   if (loading) {
     return (
@@ -180,24 +222,24 @@ const DecksPage: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           {/* Filters */}
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <input
-                    type="text"
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <input
+                type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre de mazo"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               />
-                  <select
+              <select
                 value={heroFilter}
                 onChange={(e) => setHeroFilter(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
                 <option value="">Todos los héroes</option>
                 {availableHeroes.map(h => (
                   <option key={h} value={h}>{h}</option>
-                    ))}
-                  </select>
+                ))}
+              </select>
               <select
                 value={aspectFilter}
                 onChange={(e) => setAspectFilter(e.target.value)}
@@ -207,6 +249,16 @@ const DecksPage: React.FC = () => {
                 {availableAspects.map(a => (
                   <option key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</option>
                 ))}
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'most_favorites' | 'alphabetical')}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              >
+                <option value="newest">Más nuevos</option>
+                <option value="oldest">Más antiguos</option>
+                <option value="most_favorites">Más gustados</option>
+                <option value="alphabetical">Alfabético</option>
               </select>
             </div>
           </div>
@@ -295,7 +347,7 @@ const DecksPage: React.FC = () => {
                         </div>
                         {getDeckAspect(deck) && (
                           <div className="flex items-center gap-1 ml-auto">
-                            <div className={`w-3 h-3 rounded-full shadow-sm ${getDeckAspect(deck) === 'aggression' ? 'bg-red-500' : getDeckAspect(deck) === 'justice' ? 'bg-amber-500' : getDeckAspect(deck) === 'leadership' ? 'bg-blue-500' : getDeckAspect(deck) === 'protection' ? 'bg-green-600' : 'bg-gray-400'}`}></div>
+                            <div className={`w-3 h-3 rounded-full shadow-sm ${getClassColor(getDeckAspect(deck))}`}></div>
                             <span className="text-sm font-semibold text-gray-700 capitalize px-2 py-1 rounded-full bg-gray-100">
                               {getDeckAspect(deck)}
                             </span>

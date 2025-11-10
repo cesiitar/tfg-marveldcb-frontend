@@ -3,31 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck, DeckComment } from '../types/card'
-import { getClassPillClasses } from '../utils/classColors'
+import { getClassPillClasses, getClassColor, getAspectHeaderGradient } from '../utils/classColors'
 import { useToast } from '../components/Toast'
-
-const getClassColor = (clase: string): string => {
-  const c = clase.toLowerCase()
-  switch (c) {
-    case 'aggression':
-      return 'bg-red-500'
-    case 'justice':
-      return 'bg-amber-500'
-    case 'leadership':
-      return 'bg-blue-500'
-    case 'protection':
-      return 'bg-emerald-500'
-    case 'hero':
-      return 'bg-violet-500'
-    case 'encounter':
-      return 'bg-red-700'
-    case 'campaign':
-      return 'bg-indigo-500'
-    case 'basic':
-    default:
-      return 'bg-gray-400'
-  }
-}
 
 const DeckDetailPage: React.FC = () => {
   const { id } = useParams()
@@ -274,36 +251,13 @@ const DeckDetailPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header mejorado */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8">
+          <div className={`bg-gradient-to-r ${getAspectHeaderGradient((deck as any).aspect)} px-6 py-8`}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3">
                   <h1 className="text-3xl md:text-4xl font-bold text-white">{deck.name}</h1>
-                  {isAuthenticated && (
-                    <button
-                      onClick={handleToggleFavorite}
-                      disabled={loadingFavorite}
-                      className={`p-3 rounded-full transition-colors ${
-                        isFavorite 
-                          ? 'text-red-400 hover:text-red-300 hover:bg-red-500/20' 
-                          : 'text-blue-200 hover:text-red-400 hover:bg-red-500/20'
-                      } ${loadingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      title={isFavorite ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
-                    >
-                      {loadingFavorite ? (
-                        <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      ) : (
-                        <svg className="w-6 h-6" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      )}
-                    </button>
-                  )}
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-blue-100">
+                <div className="flex flex-wrap items-center gap-3 text-white">
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -347,16 +301,43 @@ const DeckDetailPage: React.FC = () => {
           </div>
           
           {/* Información adicional en el header */}
-          <div className="px-6 py-4 bg-gray-50 border-t">
-            <div className="flex flex-wrap items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">Creador:</span>
-                <span className="font-medium text-gray-900">{deck.creator_name || 'Anónimo'}</span>
+          <div className="px-6 py-4 bg-white border-t">
+            <div className="flex flex-wrap items-center justify-between gap-6 text-sm">
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600">Creador:</span>
+                  <span className="font-medium text-gray-900">{deck.creator_name || 'Anónimo'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600">Total:</span>
+                  <span className="font-medium text-gray-900">{totalCards}/50 cartas</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">Total:</span>
-                <span className="font-medium text-gray-900">{totalCards}/50 cartas</span>
-              </div>
+              {isAuthenticated && (
+                <button
+                  onClick={handleToggleFavorite}
+                  disabled={loadingFavorite}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    isFavorite 
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100 border border-red-200' 
+                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                  } ${loadingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {loadingFavorite ? (
+                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill={isFavorite ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  )}
+                  <span className="font-medium">
+                    {isFavorite ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -367,7 +348,7 @@ const DeckDetailPage: React.FC = () => {
             {/* Descripción del mazo */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Descripción
@@ -380,7 +361,7 @@ const DeckDetailPage: React.FC = () => {
             {/* Comentarios */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 Comentarios ({comments.length})
@@ -393,7 +374,7 @@ const DeckDetailPage: React.FC = () => {
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Escribe tu comentario..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     rows={3}
                     disabled={savingComment}
                     maxLength={1000}
@@ -406,7 +387,7 @@ const DeckDetailPage: React.FC = () => {
                   <button
                     onClick={handleSubmitComment}
                     disabled={savingComment || !newComment.trim() || newComment.length > 1000}
-                    className="mt-2 w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="mt-2 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {savingComment ? (
                       <>
@@ -435,7 +416,7 @@ const DeckDetailPage: React.FC = () => {
               {/* Lista de comentarios */}
               {loadingComments ? (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
                   <p className="text-gray-600 text-sm">Cargando comentarios...</p>
                 </div>
               ) : comments.length === 0 ? (
@@ -453,8 +434,8 @@ const DeckDetailPage: React.FC = () => {
                       <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2 flex-1">
-                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                              <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
                             </div>
@@ -464,7 +445,7 @@ const DeckDetailPage: React.FC = () => {
                                   {comment.author_name || 'Usuario anónimo'}
                                 </p>
                                 {isOwn && (
-                                  <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
+                                  <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full">
                                     Tú
                                   </span>
                                 )}
@@ -488,7 +469,7 @@ const DeckDetailPage: React.FC = () => {
                               <button
                                 onClick={() => handleStartEdit(comment)}
                                 disabled={isDeleting}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors disabled:opacity-50"
+                                className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
                                 title="Editar comentario"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -521,7 +502,7 @@ const DeckDetailPage: React.FC = () => {
                             <textarea
                               value={editingText}
                               onChange={(e) => setEditingText(e.target.value)}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                               rows={3}
                               disabled={updatingComment}
                               maxLength={1000}
@@ -541,7 +522,7 @@ const DeckDetailPage: React.FC = () => {
                                 <button
                                   onClick={() => handleSaveEdit(comment.id)}
                                   disabled={updatingComment || !editingText.trim() || editingText.length > 1000}
-                                  className="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   {updatingComment ? 'Guardando...' : 'Guardar'}
                                 </button>
@@ -563,7 +544,7 @@ const DeckDetailPage: React.FC = () => {
             {/* Estadísticas de cartas */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 Distribución por Clase
@@ -609,7 +590,7 @@ const DeckDetailPage: React.FC = () => {
             {/* Gráfico de tipos de cartas */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
                 Tipos de Cartas
@@ -634,7 +615,7 @@ const DeckDetailPage: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <div className="w-20 bg-gray-200 rounded-full h-2">
                             <div 
-                              className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full"
+                              className="bg-gradient-to-r from-gray-400 to-gray-500 h-2 rounded-full"
                               style={{ width: `${(count / totalCards) * 100}%` }}
                             ></div>
                           </div>
@@ -653,10 +634,10 @@ const DeckDetailPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-6 py-4 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  Lista de Cartas ({totalCards})
+                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Lista de Cartas ({totalCards})
                 </h2>
               </div>
               
@@ -709,7 +690,7 @@ const DeckDetailPage: React.FC = () => {
                       return (
                         <div key={type} className="mb-3 last:mb-0">
                           <h3 className="text-sm font-semibold text-gray-800 mb-1 flex items-center">
-                            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full mr-2">
+                            <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full mr-2">
                               {cards.length}
                             </span>
                             {typeLabel} ({cards.length})
@@ -728,7 +709,7 @@ const DeckDetailPage: React.FC = () => {
                                     
                                     {/* Indicador de carta automática del héroe */}
                                     {isHeroCard && (
-                                      <div className="w-1.5 h-1.5 bg-violet-500 rounded-full flex-shrink-0" title="Carta automática del héroe"></div>
+                                      <div className="w-1.5 h-1.5 bg-purple-600 rounded-full flex-shrink-0" title="Carta automática del héroe"></div>
                                     )}
                                     
                                     {/* Punto de color según clase */}

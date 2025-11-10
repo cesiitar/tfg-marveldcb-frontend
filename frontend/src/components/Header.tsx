@@ -25,58 +25,58 @@ const Header: React.FC = () => {
   }
 
   return (
-    <header className="bg-primary-800 shadow-lg">
+    <header className="bg-slate-800 shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-accent-500 rounded-lg flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
               <span className="text-white font-display font-bold text-2xl">A</span>
             </div>
-            <span className="text-accent-400 font-display font-bold text-3xl">AIForge</span>
+            <span className="text-white font-display font-bold text-3xl">AI<span className="text-blue-400">Forge</span></span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <Link 
               to="/mydecks" 
-              className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               My Decks
             </Link>
             <Link 
               to="/decks" 
-              className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               Decklists
             </Link>
             <Link 
               to="/games-history" 
-              className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               Game History
             </Link>
             <Link 
               to="/cards" 
-              className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               Cards
             </Link>
             <Link 
               to="/reviews" 
-              className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               Reviews
             </Link>
             <Link 
               to="/rules" 
-              className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               Rules
             </Link>
             <Link 
               to="/faq" 
-              className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-lg"
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               FAQs
             </Link>
@@ -88,7 +88,7 @@ const Header: React.FC = () => {
               <>
                 <Link 
                   to="/profile" 
-                  className="flex items-center space-x-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                  className="flex items-center space-x-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 >
                   {user?.picture && (
                     <img
@@ -101,7 +101,7 @@ const Header: React.FC = () => {
                 </Link>
                 <button 
                   onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                  className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                  className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 >
                   Logout
                 </button>
@@ -110,13 +110,13 @@ const Header: React.FC = () => {
               <>
                 <button 
                   onClick={handleLoginClick}
-                  className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                  className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 >
                   Login
                 </button>
                 <button 
                   onClick={handleSignupClick}
-                  className="px-6 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
                 >
                   Sign Up
                 </button>
@@ -126,7 +126,7 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden p-2 text-gray-300 hover:text-accent-400"
+            className="md:hidden p-2 text-gray-300 hover:text-blue-400"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,63 +137,63 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-primary-700">
+          <div className="md:hidden py-4 border-t border-slate-700">
             <nav className="flex flex-col space-y-4">
               <Link 
                 to="/mydecks" 
-                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 My Decks
               </Link>
               <Link 
                 to="/decks" 
-                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Decklists
               </Link>
               <Link 
                 to="/games-history" 
-                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Game History
               </Link>
               <Link 
                 to="/cards" 
-                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Cards
               </Link>
               <Link 
                 to="/reviews" 
-                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Reviews
               </Link>
               <Link 
                 to="/rules" 
-                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Rules
               </Link>
               <Link 
                 to="/faq" 
-                className="text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200"
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 FAQs
               </Link>
-              <div className="flex flex-col space-y-2 pt-4 border-t border-primary-700">
+              <div className="flex flex-col space-y-2 pt-4 border-t border-slate-700">
                 {isAuthenticated ? (
                   <>
                     <Link 
                       to="/profile" 
-                      className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left flex items-center space-x-2"
+                      className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-left flex items-center space-x-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {user?.picture && (
@@ -207,7 +207,7 @@ const Header: React.FC = () => {
                     </Link>
                     <button 
                       onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                      className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left"
+                      className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-left"
                     >
                       Logout
                     </button>
@@ -216,13 +216,13 @@ const Header: React.FC = () => {
                   <>
                     <button 
                       onClick={handleLoginClick}
-                      className="px-4 py-2 text-gray-300 hover:text-accent-400 font-medium transition-colors duration-200 text-left"
+                      className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-left"
                     >
                       Login
                     </button>
                     <button 
                       onClick={handleSignupClick}
-                      className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors duration-200 font-medium text-left"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-left"
                     >
                       Sign Up
                     </button>

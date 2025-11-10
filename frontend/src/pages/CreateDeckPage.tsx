@@ -246,13 +246,13 @@ const CreateDeckPage: React.FC = () => {
           )}
 
           {/* Opción de IA */}
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <label className="flex items-start space-x-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={useAI}
                 onChange={(e) => setUseAI(e.target.checked)}
-                className="mt-1 w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
@@ -273,7 +273,7 @@ const CreateDeckPage: React.FC = () => {
           <button
             onClick={handleContinueToCards}
             disabled={loading || !selectedHero || !selectedAspect || !deckName.trim()}
-            className="w-full px-6 py-3 bg-accent-500 text-white rounded-lg hover:bg-accent-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
           >
             {loading ? 'Cargando...' : 'Continuar a Selección de Cartas'}
           </button>
