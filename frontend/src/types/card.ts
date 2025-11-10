@@ -43,6 +43,7 @@ export interface Deck {
   creator_name?: string
   created_at?: string
   updated_at?: string
+  favorite_count?: number  // Número de usuarios que han marcado este mazo como favorito
 }
 
 export interface DeckComment {

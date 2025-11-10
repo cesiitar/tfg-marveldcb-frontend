@@ -46,8 +46,19 @@ const FavoritesPage: React.FC = () => {
     try {
       const result = await apiService.toggleFavorite(deckId, user.sub)
       if (!result.is_favorite) {
-        // Actualizar la lista local removiendo el mazo
-        setFavorites(prev => prev.filter(deck => deck.id !== deckId))
+        // Actualizar el contador de favoritos del mazo antes de eliminarlo
+        setFavorites(prev => 
+          prev.map(deck => {
+            if (deck.id === deckId) {
+              const currentCount = deck.favorite_count ?? 0
+              return {
+                ...deck,
+                favorite_count: Math.max(0, currentCount - 1)
+              }
+            }
+            return deck
+          }).filter(deck => deck.id !== deckId)
+        )
         showToast('❤️ Favorito eliminado', 'success')
       }
     } catch (err) {
@@ -123,30 +134,33 @@ const FavoritesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-red-500 to-pink-500 px-6 py-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <svg className="w-8 h-8 text-white mr-3" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-                <div>
-                  <h1 className="text-3xl font-bold text-white">Mis Favoritos</h1>
-                  <p className="text-red-100">{favorites.length} mazos guardados</p>
+        <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 mb-8">
+          <div className="absolute inset-0 bg-black opacity-30"></div>
+          
+          <div className="relative z-10 py-12 px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="relative">
+                <div className="text-center">
+                  <h1 className="text-4xl font-bold text-white mb-4">
+                    Mis Favoritos
+                  </h1>
+                  <p className="text-lg text-gray-300">
+                    {favorites.length} mazos guardados
+                  </p>
                 </div>
+                <button
+                  onClick={() => navigate('/mydecks')}
+                  className="absolute top-0 right-0 inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Volver a Mis Mazos
+                </button>
               </div>
-              <button
-                onClick={() => navigate('/mydecks')}
-                className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Volver a Mis Mazos
-              </button>
             </div>
           </div>
         </div>
@@ -180,21 +194,33 @@ const FavoritesPage: React.FC = () => {
                     <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
                       {deck.name}
                     </h3>
-                    {isAuthenticated && (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleRemoveFavorite(deck.id!)
-                        }}
-                        className="p-1 rounded-full transition-colors text-red-500 hover:text-red-700 hover:bg-red-50"
-                        title="Eliminar de favoritos"
-                      >
-                        <svg className="w-5 h-5" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <div className="flex items-center gap-2">
+                      {/* Contador de favoritos */}
+                      <div className="flex items-center gap-1 text-red-500">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
-                      </button>
-                    )}
+                        <span className="text-sm font-semibold">
+                          {deck.favorite_count !== undefined ? deck.favorite_count : 0}
+                        </span>
+                      </div>
+                      {/* Botón de eliminar favorito */}
+                      {isAuthenticated && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleRemoveFavorite(deck.id!)
+                          }}
+                          className="p-1 rounded-full transition-colors text-red-500 hover:text-red-700 hover:bg-red-50"
+                          title="Eliminar de favoritos"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 

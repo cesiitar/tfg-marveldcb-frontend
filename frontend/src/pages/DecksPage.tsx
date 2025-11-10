@@ -56,7 +56,7 @@ const DecksPage: React.FC = () => {
     try {
       const result = await apiService.toggleFavorite(deckId, user.sub)
       
-      // Actualizar el estado local
+      // Actualizar el estado local de favoritos
       setFavorites(prev => {
         const newFavorites = new Set(prev)
         if (result.is_favorite) {
@@ -66,6 +66,22 @@ const DecksPage: React.FC = () => {
         }
         return newFavorites
       })
+
+      // Actualizar el contador de favoritos del mazo
+      setDecks(prevDecks => 
+        prevDecks.map(deck => {
+          if (deck.id === deckId) {
+            const currentCount = deck.favorite_count ?? 0
+            return {
+              ...deck,
+              favorite_count: result.is_favorite 
+                ? currentCount + 1 
+                : Math.max(0, currentCount - 1)
+            }
+          }
+          return deck
+        })
+      )
 
       showToast(result.message, 'success')
     } catch (err) {
@@ -165,23 +181,23 @@ const DecksPage: React.FC = () => {
           {/* Filters */}
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <input
-                type="text"
+                  <input
+                    type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre de mazo"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               />
-              <select
+                  <select
                 value={heroFilter}
                 onChange={(e) => setHeroFilter(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
                 <option value="">Todos los héroes</option>
                 {availableHeroes.map(h => (
                   <option key={h} value={h}>{h}</option>
-                ))}
-              </select>
+                    ))}
+                  </select>
               <select
                 value={aspectFilter}
                 onChange={(e) => setAspectFilter(e.target.value)}
@@ -224,25 +240,41 @@ const DecksPage: React.FC = () => {
                       <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
                         {deck.name}
                       </h3>
-                      {isAuthenticated && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            handleToggleFavorite(deck.id!)
-                          }}
-                          className={`p-1 rounded-full transition-colors ${
-                            favorites.has(deck.id!) 
-                              ? 'text-red-500 hover:text-red-700 hover:bg-red-50' 
-                              : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
-                          }`}
-                          title={favorites.has(deck.id!) ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
-                        >
-                          <svg className="w-5 h-5" fill={favorites.has(deck.id!) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {/* Botón de favorito con contador - solo si está autenticado */}
+                        {isAuthenticated ? (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleToggleFavorite(deck.id!)
+                            }}
+                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors ${
+                              favorites.has(deck.id!) 
+                                ? 'text-red-500 hover:text-red-700 hover:bg-red-50' 
+                                : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+                            }`}
+                            title={favorites.has(deck.id!) ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
+                          >
+                            <svg className="w-5 h-5" fill={favorites.has(deck.id!) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <span className="text-sm font-semibold">
+                              {deck.favorite_count !== undefined ? deck.favorite_count : 0}
+                            </span>
+                          </button>
+                        ) : (
+                          /* Contador de favoritos - solo si no está autenticado */
+                          deck.favorite_count !== undefined && (
+                            <div className="flex items-center gap-1 text-red-500">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                              </svg>
+                              <span className="text-sm font-semibold">{deck.favorite_count}</span>
+                            </div>
+                          )
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -291,7 +323,7 @@ const DecksPage: React.FC = () => {
                       <div className="flex items-center gap-1 text-gray-500">
                         <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
-                        </svg>
+                      </svg>
                         <span>
                           {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                         </span>
