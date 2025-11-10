@@ -322,12 +322,25 @@ const ConfigureGamePage: React.FC = () => {
                     </div>
                   ) : aiRecommendations.length > 0 ? (
                     <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                        <span className="text-lg mr-2">🤖</span>
-                        Recomendaciones de IA
-                      </h3>
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {aiRecommendations.slice(0, 5).map((rec) => {
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-semibold text-gray-700 flex items-center">
+                          <span className="text-lg mr-2">🤖</span>
+                          Recomendaciones de IA ({aiRecommendations.length} villanos)
+                        </h3>
+                        <div className="flex gap-2 text-xs">
+                          <span className="px-2 py-1 bg-green-100 text-green-700 rounded">
+                            ✅ {aiRecommendations.filter(r => r.recommendation === 'recommended').length}
+                          </span>
+                          <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
+                            ⚠️ {aiRecommendations.filter(r => r.recommendation === 'neutral').length}
+                          </span>
+                          <span className="px-2 py-1 bg-red-100 text-red-700 rounded">
+                            ❌ {aiRecommendations.filter(r => r.recommendation === 'not_recommended').length}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                        {aiRecommendations.map((rec) => {
                           const isSelected = rec.villain_id === villainId
                           const bgColor = rec.recommendation === 'recommended'
                             ? 'bg-green-50 border-green-200'
@@ -350,7 +363,7 @@ const ConfigureGamePage: React.FC = () => {
                           return (
                             <div
                               key={rec.villain_id}
-                              className={`p-3 rounded-lg border cursor-pointer transition-all ${bgColor} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+                              className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${bgColor} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
                               onClick={() => {
                                 setVillain(rec.villain_name)
                                 setVillainId(rec.villain_id)
