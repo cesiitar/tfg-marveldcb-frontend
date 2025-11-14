@@ -16,6 +16,7 @@ import EditDeckPage from './pages/EditDeckPage'
 import ConfigureGamePage from './pages/ConfigureGamePage'
 import FavoritesPage from './pages/FavoritesPage'
 import GamesHistoryPage from './pages/GamesHistoryPage'
+import AIRecommendationPage from './pages/AIRecommendationPage'
 
 function App() {
   return (
@@ -66,6 +67,14 @@ function App() {
                 }
               />
               <Route path="/games-history" element={<GamesHistoryPage />} />
+              <Route
+                path="/ai-recommendation"
+                element={
+                  <ProtectedRoute>
+                    <AIRecommendationPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/cards" element={<CardsPage />} />
               <Route path="/cards/set/:setId" element={<SetCardsPage />} />
               <Route path="/cards/search" element={<CardSearchPage />} />

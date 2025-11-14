@@ -51,22 +51,22 @@ const Header: React.FC = () => {
               Decklists
             </Link>
             <Link 
-              to="/games-history" 
-              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
-            >
-              Game History
-            </Link>
-            <Link 
               to="/cards" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
               Cards
             </Link>
             <Link 
-              to="/reviews" 
+              to="/games-history" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
-              Reviews
+              Game History
+            </Link>
+            <Link 
+              to="/ai-recommendation" 
+              className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
+            >
+              Recomendación IA
             </Link>
             <Link 
               to="/rules" 
@@ -154,13 +154,6 @@ const Header: React.FC = () => {
                 Decklists
               </Link>
               <Link 
-                to="/games-history" 
-                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Game History
-              </Link>
-              <Link 
                 to="/cards" 
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
@@ -168,11 +161,18 @@ const Header: React.FC = () => {
                 Cards
               </Link>
               <Link 
-                to="/reviews" 
+                to="/games-history" 
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Reviews
+                Game History
+              </Link>
+              <Link 
+                to="/ai-recommendation" 
+                className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Recomendación IA
               </Link>
               <Link 
                 to="/rules" 

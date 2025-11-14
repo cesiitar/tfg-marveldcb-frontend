@@ -638,6 +638,50 @@ class ApiService {
       throw error
     }
   }
+
+  // Generar mazo basado en villano (nuevo enfoque)
+  async generateDeckForVillain(
+    data: {
+      villain_id: number
+      difficulty: 'normal' | 'expert'
+      patches?: string[]
+    },
+    auth0Id: string
+  ): Promise<{
+    deck: Deck
+    message?: string
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recommendations/deck`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Auth0-ID': auth0Id,
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        if (response.status === 503) {
+          const errorData = await response.json().catch(() => ({ detail: 'Modelo de IA no disponible' }))
+          throw new Error(errorData.detail || 'Modelo de IA no disponible. Necesita ser entrenado primero.')
+        }
+        const errorText = await response.text()
+        let errorMessage = 'Error al generar el mazo con IA'
+        try {
+          const parsed = JSON.parse(errorText)
+          errorMessage = parsed.detail || parsed.message || errorMessage
+        } catch {}
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      return result
+    } catch (error) {
+      console.error('Error generating deck for villain:', error)
+      throw error
+    }
+  }
 }
 
 export const apiService = new ApiService()

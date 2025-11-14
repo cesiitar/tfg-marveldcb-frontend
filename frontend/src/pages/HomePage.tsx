@@ -124,7 +124,7 @@ const HomePage: React.FC = () => {
                 to="/create-deck" 
                 className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
-                Crear Mi Primer Mazo
+                Crear Mazo
               </Link>
               <Link 
                 to="/decks" 

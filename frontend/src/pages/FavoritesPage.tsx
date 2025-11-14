@@ -213,16 +213,7 @@ const FavoritesPage: React.FC = () => {
                       {deck.name}
                     </h3>
                     <div className="flex items-center gap-2">
-                      {/* Contador de favoritos */}
-                      <div className="flex items-center gap-1 text-red-500">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        <span className="text-sm font-semibold">
-                          {deck.favorite_count !== undefined ? deck.favorite_count : 0}
-                        </span>
-                      </div>
-                      {/* Botón de eliminar favorito */}
+                      {/* Botón de eliminar favorito con contador */}
                       {isAuthenticated && (
                         <button
                           onClick={(e) => {
@@ -230,12 +221,15 @@ const FavoritesPage: React.FC = () => {
                             e.stopPropagation()
                             handleRemoveFavorite(deck.id!)
                           }}
-                          className="p-1 rounded-full transition-colors text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors text-red-500 hover:text-red-700 hover:bg-red-50"
                           title="Eliminar de favoritos"
                         >
                           <svg className="w-5 h-5" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                           </svg>
+                          <span className="text-sm font-semibold">
+                            {deck.favorite_count !== undefined ? deck.favorite_count : 0}
+                          </span>
                         </button>
                       )}
                     </div>
