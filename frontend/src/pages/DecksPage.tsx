@@ -16,6 +16,10 @@ const DecksPage: React.FC = () => {
   const [aspectFilter, setAspectFilter] = useState('')
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_favorites' | 'alphabetical'>('newest')
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [decksPerPage] = useState(16)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -166,6 +170,27 @@ const DecksPage: React.FC = () => {
     return filtered
   }, [decks, search, heroFilter, aspectFilter, sortBy])
 
+  // Funciones de paginación
+  const getCurrentPageDecks = () => {
+    const startIndex = (currentPage - 1) * decksPerPage
+    const endIndex = startIndex + decksPerPage
+    return filteredDecks.slice(startIndex, endIndex)
+  }
+
+  const getTotalPages = () => {
+    return Math.ceil(filteredDecks.length / decksPerPage)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Resetear página cuando cambien los filtros
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, heroFilter, aspectFilter, sortBy])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
@@ -279,8 +304,9 @@ const DecksPage: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredDecks.map((deck) => (
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+                {getCurrentPageDecks().map((deck) => (
                 <div 
                   key={deck.id}
                   className="group bg-white border border-gray-200 hover:border-blue-300 transition-all duration-200 overflow-hidden hover:shadow-lg cursor-pointer"
@@ -384,6 +410,63 @@ const DecksPage: React.FC = () => {
                   </div>
                 </div>
               ))}
+              </div>
+              
+              {getTotalPages() > 1 && (
+                <div className="mt-8 flex items-center justify-center">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
+                      const showPage = page === 1 || page === getTotalPages() || 
+                                     (page >= currentPage - 2 && page <= currentPage + 2)
+                      
+                      if (!showPage) {
+                        if (page === currentPage - 3 || page === currentPage + 3) {
+                          return <span key={page} className="px-2 text-gray-400">...</span>
+                        }
+                        return null
+                      }
+                      
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                            currentPage === page
+                              ? 'bg-blue-600 text-white'
+                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    })}
+                    
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === getTotalPages()}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="ml-6 text-sm text-gray-500">
+                    Mostrando {((currentPage - 1) * decksPerPage) + 1} - {Math.min(currentPage * decksPerPage, filteredDecks.length)} de {filteredDecks.length} mazos
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

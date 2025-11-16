@@ -28,8 +28,10 @@ export interface DeckCard {
   card_id: number
   card_name: string
   card_set?: string
+  set?: string  // Nuevo campo del backend
   quantity: number
-  clase?: string
+  type?: string  // Nuevo campo del backend
+  clase?: string  // Aspecto de la carta (nuevo campo del backend)
 }
 
 export interface Deck {

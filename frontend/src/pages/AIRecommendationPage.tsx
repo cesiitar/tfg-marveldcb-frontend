@@ -356,13 +356,19 @@ const AIRecommendationPage: React.FC = () => {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-medium text-gray-900">{card.card_name}</span>
-                                {card.clase && card.clase !== 'basic' && (
-                                  <span className={`text-xs px-2 py-0.5 rounded-full ${getClassPillClasses(card.clase)}`}>
-                                    {card.clase}
-                                  </span>
+                                {card.clase && (
+                                  card.clase === 'basic' ? (
+                                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                                      basic
+                                    </span>
+                                  ) : (
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${getClassPillClasses(card.clase)}`}>
+                                      {card.clase}
+                                    </span>
+                                  )
                                 )}
-                                {card.card_set && (
-                                  <span className="text-xs text-gray-500">({card.card_set})</span>
+                                {(card.card_set || card.set) && (
+                                  <span className="text-xs text-gray-500">({card.card_set || card.set})</span>
                                 )}
                               </div>
                             </div>

@@ -30,6 +30,10 @@ const GamesHistoryPage: React.FC = () => {
   const [filterVillain, setFilterVillain] = useState<string>('all')
   const [filterMyGames, setFilterMyGames] = useState(false)
   
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [gamesPerPage] = useState(15)
+  
   // Obtener lista única de villanos
   const availableVillains = Array.from(new Set(games.map(game => game.villain_name))).sort()
 
@@ -80,6 +84,27 @@ const GamesHistoryPage: React.FC = () => {
     
     return matchesSearch && matchesResult && matchesDifficulty && matchesVillain
   })
+
+  // Funciones de paginación
+  const getCurrentPageGames = () => {
+    const startIndex = (currentPage - 1) * gamesPerPage
+    const endIndex = startIndex + gamesPerPage
+    return filteredGames.slice(startIndex, endIndex)
+  }
+
+  const getTotalPages = () => {
+    return Math.ceil(filteredGames.length / gamesPerPage)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Resetear página cuando cambien los filtros
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [search, filterResult, filterDifficulty, filterVillain, filterMyGames])
 
   // Formatear fecha
   const formatDate = (dateString: string) => {
@@ -344,8 +369,9 @@ const GamesHistoryPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
-              {filteredGames.map((game) => (
+            <div>
+              <div className="divide-y divide-gray-200">
+                {getCurrentPageGames().map((game) => (
                 <div key={game.id} className="p-6 hover:bg-gray-50 transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -417,6 +443,63 @@ const GamesHistoryPage: React.FC = () => {
                   </div>
                 </div>
               ))}
+              </div>
+              
+              {getTotalPages() > 1 && (
+                <div className="mt-8 flex items-center justify-center border-t border-gray-200 pt-6">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    
+                    {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
+                      const showPage = page === 1 || page === getTotalPages() || 
+                                     (page >= currentPage - 2 && page <= currentPage + 2)
+                      
+                      if (!showPage) {
+                        if (page === currentPage - 3 || page === currentPage + 3) {
+                          return <span key={page} className="px-2 text-gray-400">...</span>
+                        }
+                        return null
+                      }
+                      
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                            currentPage === page
+                              ? 'bg-blue-600 text-white'
+                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    })}
+                    
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === getTotalPages()}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="ml-6 text-sm text-gray-500">
+                    Mostrando {((currentPage - 1) * gamesPerPage) + 1} - {Math.min(currentPage * gamesPerPage, filteredGames.length)} de {filteredGames.length} partidas
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
