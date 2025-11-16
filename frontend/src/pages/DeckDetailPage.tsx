@@ -33,6 +33,20 @@ const DeckDetailPage: React.FC = () => {
         console.log('🔍 Deck recibido del backend:', d)
         console.log('🔍 Descripción:', d.description)
         setDeck(d)
+        
+        // Guardar el ID del mazo visto para restaurar la vista al volver
+        if (d.id) {
+          try {
+            localStorage.setItem('lastViewedDeckId', d.id.toString())
+            // También guardar desde qué página vino (para saber a dónde volver)
+            const referrer = document.referrer
+            if (referrer && !referrer.includes('/decks/')) {
+              localStorage.setItem('lastViewedDeckFrom', referrer)
+            }
+          } catch (err) {
+            console.error('Error guardando último mazo visto:', err)
+          }
+        }
       } catch (err) {
         setError('No se pudo cargar el mazo')
       } finally {

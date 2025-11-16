@@ -20,6 +20,8 @@ const AIRecommendationPage: React.FC = () => {
   const [generatingDeck, setGeneratingDeck] = useState(false)
   const [generatedDeck, setGeneratedDeck] = useState<Deck | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [deckName, setDeckName] = useState<string>('')
+  const [deckDescription, setDeckDescription] = useState<string>('')
 
   // Cargar villanos al montar
   useEffect(() => {
@@ -66,6 +68,9 @@ const AIRecommendationPage: React.FC = () => {
       )
 
       setGeneratedDeck(response.deck)
+      // Inicializar nombre y descripción con los valores del mazo generado
+      setDeckName(response.deck.name || '')
+      setDeckDescription(response.deck.description || '')
       showToast('✅ Mazo generado exitosamente', 'success')
     } catch (err: any) {
       console.error('Error generando mazo:', err)
@@ -92,14 +97,25 @@ const AIRecommendationPage: React.FC = () => {
   const handleUseDeck = async () => {
     if (!generatedDeck || !user?.sub) return
     
+    // Validar que nombre y descripción estén rellenados
+    if (!deckName.trim()) {
+      showToast('Por favor, ingresa un nombre para el mazo', 'error')
+      return
+    }
+    
+    if (!deckDescription.trim()) {
+      showToast('Por favor, ingresa una descripción para el mazo', 'error')
+      return
+    }
+    
     // Si el mazo no tiene ID, guardarlo primero
     if (!generatedDeck.id) {
       try {
         setGeneratingDeck(true)
         const savedDeck = await apiService.createDeck(
           {
-            name: generatedDeck.name,
-            description: generatedDeck.description,
+            name: deckName.trim(),
+            description: deckDescription.trim(),
             hero_name: generatedDeck.hero_name,
             hero_id: generatedDeck.hero_id,
             aspect: generatedDeck.aspect,
@@ -298,8 +314,31 @@ const AIRecommendationPage: React.FC = () => {
                 
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Nombre del Mazo</h3>
-                    <p className="text-lg text-gray-900">{generatedDeck.name}</p>
+                    <label className="block font-semibold text-gray-700 mb-2">
+                      Nombre del Mazo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={deckName}
+                      onChange={(e) => setDeckName(e.target.value)}
+                      placeholder="Ingresa un nombre para tu mazo"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Personaliza el nombre de tu mazo</p>
+                  </div>
+                  
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-2">
+                      Descripción <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={deckDescription}
+                      onChange={(e) => setDeckDescription(e.target.value)}
+                      placeholder="Describe tu mazo o estrategia..."
+                      rows={3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Añade una descripción para tu mazo</p>
                   </div>
                   
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -321,13 +360,6 @@ const AIRecommendationPage: React.FC = () => {
                         {generatedDeck.aspect}
                       </span>
                       <p className="text-xs text-gray-500 mt-1">Seleccionado automáticamente por la IA</p>
-                    </div>
-                  )}
-                  
-                  {generatedDeck.description && (
-                    <div>
-                      <h3 className="font-semibold text-gray-700 mb-2">Descripción</h3>
-                      <p className="text-gray-600">{generatedDeck.description}</p>
                     </div>
                   )}
                   
@@ -384,9 +416,9 @@ const AIRecommendationPage: React.FC = () => {
                   <div className="pt-4 border-t border-gray-200 flex gap-3">
                     <button
                       onClick={handleUseDeck}
-                      disabled={generatingDeck}
+                      disabled={generatingDeck || !deckName.trim() || !deckDescription.trim()}
                       className={`flex-1 py-3 px-6 rounded-lg transition-colors font-medium ${
-                        generatingDeck
+                        generatingDeck || !deckName.trim() || !deckDescription.trim()
                           ? 'bg-gray-400 cursor-not-allowed text-white'
                           : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
@@ -396,6 +428,8 @@ const AIRecommendationPage: React.FC = () => {
                     <button
                       onClick={() => {
                         setGeneratedDeck(null)
+                        setDeckName('')
+                        setDeckDescription('')
                         setSelectedVillainId(null)
                         setSelectedVillainName('')
                         setError(null)

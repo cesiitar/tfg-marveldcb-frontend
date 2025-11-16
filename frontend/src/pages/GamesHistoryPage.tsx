@@ -24,11 +24,54 @@ const GamesHistoryPage: React.FC = () => {
   const { showToast, ToastContainer } = useToast()
   const [games, setGames] = useState<GameHistory[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [filterResult, setFilterResult] = useState<'all' | 'win' | 'loss'>('all')
-  const [filterDifficulty, setFilterDifficulty] = useState<'all' | 'normal' | 'expert'>('all')
-  const [filterVillain, setFilterVillain] = useState<string>('all')
-  const [filterMyGames, setFilterMyGames] = useState(false)
+  
+  // Cargar filtros desde localStorage al inicializar
+  const loadFiltersFromStorage = () => {
+    try {
+      const savedSearch = localStorage.getItem('gameHistory_search') || ''
+      const savedFilterResult = (localStorage.getItem('gameHistory_filterResult') || 'all') as 'all' | 'win' | 'loss'
+      const savedFilterDifficulty = (localStorage.getItem('gameHistory_filterDifficulty') || 'all') as 'all' | 'normal' | 'expert'
+      const savedFilterVillain = localStorage.getItem('gameHistory_filterVillain') || 'all'
+      const savedFilterMyGames = localStorage.getItem('gameHistory_filterMyGames') === 'true'
+      
+      return {
+        search: savedSearch,
+        filterResult: savedFilterResult,
+        filterDifficulty: savedFilterDifficulty,
+        filterVillain: savedFilterVillain,
+        filterMyGames: savedFilterMyGames
+      }
+    } catch (err) {
+      console.error('Error cargando filtros desde localStorage:', err)
+      return {
+        search: '',
+        filterResult: 'all' as const,
+        filterDifficulty: 'all' as const,
+        filterVillain: 'all',
+        filterMyGames: false
+      }
+    }
+  }
+  
+  const initialFilters = loadFiltersFromStorage()
+  const [search, setSearch] = useState(initialFilters.search)
+  const [filterResult, setFilterResult] = useState<'all' | 'win' | 'loss'>(initialFilters.filterResult)
+  const [filterDifficulty, setFilterDifficulty] = useState<'all' | 'normal' | 'expert'>(initialFilters.filterDifficulty)
+  const [filterVillain, setFilterVillain] = useState<string>(initialFilters.filterVillain)
+  const [filterMyGames, setFilterMyGames] = useState(initialFilters.filterMyGames)
+  
+  // Guardar filtros en localStorage cuando cambien
+  useEffect(() => {
+    try {
+      localStorage.setItem('gameHistory_search', search)
+      localStorage.setItem('gameHistory_filterResult', filterResult)
+      localStorage.setItem('gameHistory_filterDifficulty', filterDifficulty)
+      localStorage.setItem('gameHistory_filterVillain', filterVillain)
+      localStorage.setItem('gameHistory_filterMyGames', filterMyGames.toString())
+    } catch (err) {
+      console.error('Error guardando filtros en localStorage:', err)
+    }
+  }, [search, filterResult, filterDifficulty, filterVillain, filterMyGames])
   
   // Paginación
   const [currentPage, setCurrentPage] = useState(1)

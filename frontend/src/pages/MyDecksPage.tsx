@@ -364,7 +364,17 @@ const MyDecksPage: React.FC = () => {
                     {/* Action Buttons */}
                     <div className="mt-4 flex gap-2">
                       <button 
-                        onClick={() => window.location.href = `/decks/${deck.id || 0}`}
+                        onClick={() => {
+                          // Guardar el ID antes de navegar
+                          if (deck.id) {
+                            try {
+                              localStorage.setItem('lastViewedDeckId', deck.id.toString())
+                            } catch (err) {
+                              console.error('Error guardando último mazo visto:', err)
+                            }
+                          }
+                          window.location.href = `/decks/${deck.id || 0}`
+                        }}
                         className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

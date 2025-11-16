@@ -11,15 +11,58 @@ const DecksPage: React.FC = () => {
   const [decks, setDecks] = useState<Deck[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [search, setSearch] = useState('')
-  const [heroFilter, setHeroFilter] = useState('')
-  const [aspectFilter, setAspectFilter] = useState('')
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_favorites' | 'alphabetical'>('newest')
+  
+  // Cargar filtros desde localStorage al inicializar
+  const loadFiltersFromStorage = () => {
+    try {
+      const savedSearch = localStorage.getItem('decksPage_search') || ''
+      const savedHeroFilter = localStorage.getItem('decksPage_heroFilter') || ''
+      const savedAspectFilter = localStorage.getItem('decksPage_aspectFilter') || ''
+      const savedSortBy = (localStorage.getItem('decksPage_sortBy') || 'newest') as 'newest' | 'oldest' | 'most_favorites' | 'alphabetical'
+      const savedCurrentPage = parseInt(localStorage.getItem('decksPage_currentPage') || '1', 10)
+      
+      return {
+        search: savedSearch,
+        heroFilter: savedHeroFilter,
+        aspectFilter: savedAspectFilter,
+        sortBy: savedSortBy,
+        currentPage: savedCurrentPage
+      }
+    } catch (err) {
+      console.error('Error cargando filtros desde localStorage:', err)
+      return {
+        search: '',
+        heroFilter: '',
+        aspectFilter: '',
+        sortBy: 'newest' as const,
+        currentPage: 1
+      }
+    }
+  }
+  
+  const initialFilters = loadFiltersFromStorage()
+  const [search, setSearch] = useState(initialFilters.search)
+  const [heroFilter, setHeroFilter] = useState(initialFilters.heroFilter)
+  const [aspectFilter, setAspectFilter] = useState(initialFilters.aspectFilter)
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_favorites' | 'alphabetical'>(initialFilters.sortBy)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   
   // Paginación
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(initialFilters.currentPage)
   const [decksPerPage] = useState(16)
+  
+  // Guardar filtros en localStorage cuando cambien
+  useEffect(() => {
+    try {
+      localStorage.setItem('decksPage_search', search)
+      localStorage.setItem('decksPage_heroFilter', heroFilter)
+      localStorage.setItem('decksPage_aspectFilter', aspectFilter)
+      localStorage.setItem('decksPage_sortBy', sortBy)
+      localStorage.setItem('decksPage_currentPage', currentPage.toString())
+    } catch (err) {
+      console.error('Error guardando filtros en localStorage:', err)
+    }
+  }, [search, heroFilter, aspectFilter, sortBy, currentPage])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -170,6 +213,45 @@ const DecksPage: React.FC = () => {
     return filtered
   }, [decks, search, heroFilter, aspectFilter, sortBy])
 
+  // Restaurar la vista del último mazo visto
+  useEffect(() => {
+    if (decks.length === 0 || filteredDecks.length === 0) return
+    
+    try {
+      const lastViewedDeckId = localStorage.getItem('lastViewedDeckId')
+      if (!lastViewedDeckId) return
+      
+      const deckId = parseInt(lastViewedDeckId, 10)
+      const deckIndex = filteredDecks.findIndex(d => d.id === deckId)
+      
+      if (deckIndex !== -1) {
+        // Calcular en qué página está ese mazo
+        const pageForDeck = Math.ceil((deckIndex + 1) / decksPerPage)
+        
+        // Solo ajustar la página si no está ya en la página correcta
+        // y si no hay filtros activos que puedan haber cambiado la posición
+        const hasActiveFilters = search || heroFilter || aspectFilter
+        if (!hasActiveFilters && pageForDeck !== currentPage) {
+          setCurrentPage(pageForDeck)
+        }
+        
+        // Hacer scroll al mazo destacado después de que se renderice
+        setTimeout(() => {
+          const deckElement = document.getElementById(`deck-${deckId}`)
+          if (deckElement) {
+            deckElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // Limpiar el último mazo visto después de restaurarlo
+            setTimeout(() => {
+              localStorage.removeItem('lastViewedDeckId')
+            }, 2000)
+          }
+        }, 300)
+      }
+    } catch (err) {
+      console.error('Error restaurando último mazo visto:', err)
+    }
+  }, [decks, filteredDecks, decksPerPage, currentPage, search, heroFilter, aspectFilter])
+
   // Funciones de paginación
   const getCurrentPageDecks = () => {
     const startIndex = (currentPage - 1) * decksPerPage
@@ -248,23 +330,23 @@ const DecksPage: React.FC = () => {
           {/* Filters */}
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <input
-                type="text"
+                  <input
+                    type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre de mazo"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               />
-              <select
+                  <select
                 value={heroFilter}
                 onChange={(e) => setHeroFilter(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
                 <option value="">Todos los héroes</option>
                 {availableHeroes.map(h => (
                   <option key={h} value={h}>{h}</option>
-                ))}
-              </select>
+                    ))}
+                  </select>
               <select
                 value={aspectFilter}
                 onChange={(e) => setAspectFilter(e.target.value)}
@@ -306,11 +388,37 @@ const DecksPage: React.FC = () => {
           ) : (
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
-                {getCurrentPageDecks().map((deck) => (
+                {getCurrentPageDecks().map((deck) => {
+                  // Verificar si este es el último mazo visto
+                  const isLastViewed = (() => {
+                    try {
+                      const lastViewedId = localStorage.getItem('lastViewedDeckId')
+                      return lastViewedId && parseInt(lastViewedId, 10) === deck.id
+                    } catch {
+                      return false
+                    }
+                  })()
+                  
+                  return (
                 <div 
                   key={deck.id}
-                  className="group bg-white border border-gray-200 hover:border-blue-300 transition-all duration-200 overflow-hidden hover:shadow-lg cursor-pointer"
-                  onClick={() => window.location.href = `/decks/${deck.id}`}
+                  id={isLastViewed ? `deck-${deck.id}` : undefined}
+                  className={`group bg-white border transition-all duration-200 overflow-hidden hover:shadow-lg cursor-pointer ${
+                    isLastViewed 
+                      ? 'border-blue-500 border-2 shadow-lg ring-2 ring-blue-200' 
+                      : 'border-gray-200 hover:border-blue-300'
+                  }`}
+                  onClick={() => {
+                    // Guardar el ID antes de navegar
+                    if (deck.id) {
+                      try {
+                        localStorage.setItem('lastViewedDeckId', deck.id.toString())
+                      } catch (err) {
+                        console.error('Error guardando último mazo visto:', err)
+                      }
+                    }
+                    window.location.href = `/decks/${deck.id}`
+                  }}
                 >
                   {/* Header Section - Clean and Professional */}
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
@@ -396,7 +504,7 @@ const DecksPage: React.FC = () => {
                         <span className="text-gray-400">·</span>
                         <span className="font-semibold text-blue-600">
                           {deck.cards.length} cartas
-                        </span>
+                      </span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-500">
                         <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,7 +517,8 @@ const DecksPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+                )
+                })}
               </div>
               
               {getTotalPages() > 1 && (

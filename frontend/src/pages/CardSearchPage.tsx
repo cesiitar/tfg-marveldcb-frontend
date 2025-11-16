@@ -4,18 +4,64 @@ import { Card, CardSet } from '../types/card'
 import { getClassGradientClasses, getClassBadgeStyle } from '../utils/classColors'
 
 const CardSearchPage: React.FC = () => {
+  // Cargar filtros desde localStorage al inicializar
+  const loadFiltersFromStorage = () => {
+    try {
+      const savedName = localStorage.getItem('cardSearch_name') || ''
+      const savedAspect = localStorage.getItem('cardSearch_aspect') || ''
+      const savedType = localStorage.getItem('cardSearch_type') || ''
+      const savedCost = localStorage.getItem('cardSearch_cost') || ''
+      const savedSetName = localStorage.getItem('cardSearch_set_name') || ''
+      const savedHasSearched = localStorage.getItem('cardSearch_hasSearched') === 'true'
+      
+      return {
+        name: savedName,
+        aspect: savedAspect,
+        type: savedType,
+        cost: savedCost,
+        set_name: savedSetName,
+        hasSearched: savedHasSearched
+      }
+    } catch (err) {
+      console.error('Error cargando filtros desde localStorage:', err)
+      return {
+        name: '',
+        aspect: '',
+        type: '',
+        cost: '',
+        set_name: '',
+        hasSearched: false
+      }
+    }
+  }
+  
+  const initialFilters = loadFiltersFromStorage()
   const [searchForm, setSearchForm] = useState({
-    name: '',
-    aspect: '',
-    type: '',
-    cost: '',
-    set_name: ''
+    name: initialFilters.name,
+    aspect: initialFilters.aspect,
+    type: initialFilters.type,
+    cost: initialFilters.cost,
+    set_name: initialFilters.set_name
   })
   
   const [sets, setSets] = useState<CardSet[]>([])
   const [searchResults, setSearchResults] = useState<Card[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [hasSearched, setHasSearched] = useState(false)
+  const [hasSearched, setHasSearched] = useState(initialFilters.hasSearched)
+  
+  // Guardar filtros en localStorage cuando cambien
+  useEffect(() => {
+    try {
+      localStorage.setItem('cardSearch_name', searchForm.name)
+      localStorage.setItem('cardSearch_aspect', searchForm.aspect)
+      localStorage.setItem('cardSearch_type', searchForm.type)
+      localStorage.setItem('cardSearch_cost', searchForm.cost)
+      localStorage.setItem('cardSearch_set_name', searchForm.set_name)
+      localStorage.setItem('cardSearch_hasSearched', hasSearched.toString())
+    } catch (err) {
+      console.error('Error guardando filtros en localStorage:', err)
+    }
+  }, [searchForm.name, searchForm.aspect, searchForm.type, searchForm.cost, searchForm.set_name, hasSearched])
 
   // Cargar sets al montar el componente
   useEffect(() => {
@@ -72,6 +118,17 @@ const CardSearchPage: React.FC = () => {
     })
     setSearchResults([])
     setHasSearched(false)
+    // Limpiar también localStorage
+    try {
+      localStorage.removeItem('cardSearch_name')
+      localStorage.removeItem('cardSearch_aspect')
+      localStorage.removeItem('cardSearch_type')
+      localStorage.removeItem('cardSearch_cost')
+      localStorage.removeItem('cardSearch_set_name')
+      localStorage.removeItem('cardSearch_hasSearched')
+    } catch (err) {
+      console.error('Error limpiando localStorage:', err)
+    }
   }
 
   const getCardGradient = (clase: string) => {
