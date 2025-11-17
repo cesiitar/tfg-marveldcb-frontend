@@ -204,14 +204,31 @@ const EditDeckPage: React.FC = () => {
       return
     }
     
+    // Verificar que tenemos el Auth0 SUB del usuario
+    if (!user?.sub) {
+      showToast('❌ No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
+      return
+    }
+    
+    // Validar nombre duplicado (globalmente, case-insensitive, excluyendo el mazo actual)
     try {
-      setSaving(true)
+      const allDecks = await apiService.getDecks()
+      const normalizedNewName = deckName.trim().toLowerCase()
+      const duplicateDeck = allDecks.find(d => 
+        d.id !== deck.id && d.name.trim().toLowerCase() === normalizedNewName
+      )
       
-      // Verificar que tenemos el Auth0 SUB del usuario
-      if (!user?.sub) {
-        showToast('❌ No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
+      if (duplicateDeck) {
+        showToast(`❌ Ya existe un mazo con el nombre "${deckName}". Por favor, elige otro nombre.`, 'error')
         return
       }
+    } catch (err) {
+      console.error('Error verificando nombres duplicados:', err)
+      // Continuar con la actualización si falla la verificación (no bloquear)
+    }
+    
+    try {
+      setSaving(true)
       
       // Convertir Map a array de cartas usando IDs únicos
       const editableCardsArray = Array.from(selectedCards.entries()).map(([cardKey, quantity]) => {

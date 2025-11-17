@@ -69,11 +69,30 @@ const CreateDeckPage: React.FC = () => {
     setSelectedAspect(aspect)
   }
 
-  const handleContinueToCards = () => {
+  const handleContinueToCards = async () => {
     if (!selectedHero || !selectedAspect || !deckName.trim()) {
       setError('Por favor completa todos los campos obligatorios')
       return
     }
+    
+    // Validar nombre duplicado antes de continuar (globalmente, case-insensitive)
+    try {
+      const allDecks = await apiService.getDecks()
+      const normalizedNewName = deckName.trim().toLowerCase()
+      const duplicateDeck = allDecks.find(deck => 
+        deck.name.trim().toLowerCase() === normalizedNewName
+      )
+      
+      if (duplicateDeck) {
+        setError(`Ya existe un mazo con el nombre "${deckName}". Por favor, elige otro nombre.`)
+        return
+      }
+    } catch (err) {
+      console.error('Error verificando nombres duplicados:', err)
+      // Continuar si falla la verificación (no bloquear)
+    }
+    
+    setError(null)
     setCurrentStep('cards')
   }
 

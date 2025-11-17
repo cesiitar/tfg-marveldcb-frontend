@@ -97,6 +97,11 @@ const ConfigureGamePage: React.FC = () => {
       showToast('Error: No se encontraron los datos del mazo', 'error')
       return
     }
+    
+    if (!user?.sub) {
+      showToast('Error: Debes estar autenticado', 'error')
+      return
+    }
 
     if (!villainId) {
       showToast('Por favor selecciona un villano', 'error')

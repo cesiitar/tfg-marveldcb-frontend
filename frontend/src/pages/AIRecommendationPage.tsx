@@ -110,6 +110,23 @@ const AIRecommendationPage: React.FC = () => {
     
     // Si el mazo no tiene ID, guardarlo primero
     if (!generatedDeck.id) {
+      // Validar nombre duplicado antes de crear el mazo (globalmente, case-insensitive)
+      try {
+        const allDecks = await apiService.getDecks()
+        const normalizedNewName = deckName.trim().toLowerCase()
+        const duplicateDeck = allDecks.find(deck => 
+          deck.name.trim().toLowerCase() === normalizedNewName
+        )
+        
+        if (duplicateDeck) {
+          showToast(`Ya existe un mazo con el nombre "${deckName}". Por favor, elige otro nombre.`, 'error')
+          return
+        }
+      } catch (err) {
+        console.error('Error verificando nombres duplicados:', err)
+        // Continuar con la creación si falla la verificación (no bloquear)
+      }
+      
       try {
         setGeneratingDeck(true)
         const savedDeck = await apiService.createDeck(
