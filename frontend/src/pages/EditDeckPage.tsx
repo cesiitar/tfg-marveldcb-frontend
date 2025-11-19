@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { apiService } from '../services/api'
 import { Deck, Card } from '../types/card'
 import { useToast } from '../components/Toast'
+import { getAspectHeaderGradient } from '../utils/classColors'
 
 const EditDeckPage: React.FC = () => {
   const { id } = useParams()
@@ -25,6 +26,8 @@ const EditDeckPage: React.FC = () => {
   const [heroCards, setHeroCards] = useState<Card[]>([])
   const [basicSearchTerm, setBasicSearchTerm] = useState('')
   const [aspectSearchTerm, setAspectSearchTerm] = useState('')
+  const [basicSetFilter, setBasicSetFilter] = useState<string>('')
+  const [aspectSetFilter, setAspectSetFilter] = useState<string>('')
   const [filteredBasicCards, setFilteredBasicCards] = useState<Card[]>([])
   const [filteredAspectCards, setFilteredAspectCards] = useState<Card[]>([])
 
@@ -110,33 +113,53 @@ const EditDeckPage: React.FC = () => {
     loadDeck()
   }, [id, isAuthenticated])
 
-  // Filtrar cartas básicas cuando cambie el término de búsqueda
-  useEffect(() => {
-    if (basicSearchTerm.trim() === '') {
-      setFilteredBasicCards(basicCards)
-    } else {
-      const filtered = basicCards.filter(card => 
-        card.name.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
-        card.set.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
-        card.type.toLowerCase().startsWith(basicSearchTerm.toLowerCase())
-      )
-      setFilteredBasicCards(filtered)
-    }
-  }, [basicSearchTerm, basicCards])
+  // Obtener sets únicos de cartas básicas
+  const uniqueBasicSets = Array.from(new Set(basicCards.map(card => card.set).filter(Boolean))).sort()
+  
+  // Obtener sets únicos de cartas del aspecto
+  const uniqueAspectSets = Array.from(new Set(aspectCards.map(card => card.set).filter(Boolean))).sort()
 
-  // Filtrar cartas del aspecto cuando cambie el término de búsqueda
+  // Filtrar cartas básicas cuando cambie el término de búsqueda o el filtro de set
   useEffect(() => {
-    if (aspectSearchTerm.trim() === '') {
-      setFilteredAspectCards(aspectCards)
-    } else {
-      const filtered = aspectCards.filter(card => 
-        card.name.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
-        card.set.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
-        card.type.toLowerCase().startsWith(aspectSearchTerm.toLowerCase())
+    let filtered = basicCards
+
+    // Aplicar filtro de nombre
+    if (basicSearchTerm.trim() !== '') {
+      filtered = filtered.filter(card => 
+        card.name.toLowerCase().includes(basicSearchTerm.toLowerCase()) ||
+        card.set.toLowerCase().includes(basicSearchTerm.toLowerCase()) ||
+        card.type.toLowerCase().includes(basicSearchTerm.toLowerCase())
       )
-      setFilteredAspectCards(filtered)
     }
-  }, [aspectSearchTerm, aspectCards])
+
+    // Aplicar filtro de set
+    if (basicSetFilter !== '') {
+      filtered = filtered.filter(card => card.set === basicSetFilter)
+    }
+
+    setFilteredBasicCards(filtered)
+  }, [basicSearchTerm, basicSetFilter, basicCards])
+
+  // Filtrar cartas del aspecto cuando cambie el término de búsqueda o el filtro de set
+  useEffect(() => {
+    let filtered = aspectCards
+
+    // Aplicar filtro de nombre
+    if (aspectSearchTerm.trim() !== '') {
+      filtered = filtered.filter(card => 
+        card.name.toLowerCase().includes(aspectSearchTerm.toLowerCase()) ||
+        card.set.toLowerCase().includes(aspectSearchTerm.toLowerCase()) ||
+        card.type.toLowerCase().includes(aspectSearchTerm.toLowerCase())
+      )
+    }
+
+    // Aplicar filtro de set
+    if (aspectSetFilter !== '') {
+      filtered = filtered.filter(card => card.set === aspectSetFilter)
+    }
+
+    setFilteredAspectCards(filtered)
+  }, [aspectSearchTerm, aspectSetFilter, aspectCards])
 
   // Calcular total de cartas seleccionadas
   const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
@@ -336,7 +359,7 @@ const EditDeckPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header mejorado */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8">
+          <div className={`bg-gradient-to-r ${getAspectHeaderGradient(deck.aspect)} px-6 py-8`}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Editar Mazo</h1>
@@ -494,14 +517,14 @@ const EditDeckPage: React.FC = () => {
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">
                     Cartas Básicas
-                    {basicSearchTerm && (
+                    {(basicSearchTerm || basicSetFilter) && (
                       <span className="text-sm text-gray-500 ml-2">
                         ({filteredBasicCards.length})
                       </span>
                     )}
                   </h3>
                   
-                  <div className="mb-3">
+                  <div className="mb-3 space-y-2">
                     <input
                       type="text"
                       value={basicSearchTerm}
@@ -509,10 +532,23 @@ const EditDeckPage: React.FC = () => {
                       placeholder="Buscar cartas básicas..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
+                    {/* Filtro de set para cartas básicas */}
+                    <select
+                      value={basicSetFilter}
+                      onChange={(e) => setBasicSetFilter(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                    >
+                      <option value="">Todos los sets</option>
+                      {uniqueBasicSets.map((set) => (
+                        <option key={set} value={set}>
+                          {set}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   
                   <div className="max-h-48 overflow-y-auto space-y-2">
-                    {filteredBasicCards.length === 0 && basicSearchTerm ? (
+                    {filteredBasicCards.length === 0 && (basicSearchTerm || basicSetFilter) ? (
                       <p className="text-gray-500 text-center py-4">No se encontraron cartas básicas</p>
                     ) : (
                       filteredBasicCards.map((card) => {
@@ -525,7 +561,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set}
+                                {card.type} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
                               </p>
                             </div>
                             
@@ -557,14 +593,14 @@ const EditDeckPage: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">
                     Cartas de {deck?.aspect || 'Aspecto'}
-                    {aspectSearchTerm && (
+                    {(aspectSearchTerm || aspectSetFilter) && (
                       <span className="text-sm text-gray-500 ml-2">
                         ({filteredAspectCards.length})
                       </span>
                     )}
                   </h3>
                   
-                  <div className="mb-3">
+                  <div className="mb-3 space-y-2">
                     <input
                       type="text"
                       value={aspectSearchTerm}
@@ -572,10 +608,23 @@ const EditDeckPage: React.FC = () => {
                       placeholder="Buscar cartas del aspecto..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
+                    {/* Filtro de set para cartas del aspecto */}
+                    <select
+                      value={aspectSetFilter}
+                      onChange={(e) => setAspectSetFilter(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                    >
+                      <option value="">Todos los sets</option>
+                      {uniqueAspectSets.map((set) => (
+                        <option key={set} value={set}>
+                          {set}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   
                   <div className="max-h-48 overflow-y-auto space-y-2">
-                    {filteredAspectCards.length === 0 && aspectSearchTerm ? (
+                    {filteredAspectCards.length === 0 && (aspectSearchTerm || aspectSetFilter) ? (
                       <p className="text-gray-500 text-center py-4">No se encontraron cartas del aspecto</p>
                     ) : (
                       filteredAspectCards.map((card) => {
@@ -588,7 +637,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set}
+                                {card.type} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
                               </p>
                             </div>
                             

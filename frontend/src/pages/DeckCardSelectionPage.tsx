@@ -27,6 +27,8 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   const [searchTerm, setSearchTerm] = useState('')
   const [basicSearchTerm, setBasicSearchTerm] = useState('')
   const [aspectSearchTerm, setAspectSearchTerm] = useState('')
+  const [basicSetFilter, setBasicSetFilter] = useState<string>('')
+  const [aspectSetFilter, setAspectSetFilter] = useState<string>('')
   const [filteredBasicCards, setFilteredBasicCards] = useState<Card[]>([])
   const [filteredAspectCards, setFilteredAspectCards] = useState<Card[]>([])
 
@@ -36,33 +38,53 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   const totalCards = heroCardsCount + totalSelectedCards
   const remainingCards = 50 - totalCards
 
-  // Filtrar cartas básicas cuando cambie el término de búsqueda
-  useEffect(() => {
-    if (basicSearchTerm.trim() === '') {
-      setFilteredBasicCards(basicCards)
-    } else {
-      const filtered = basicCards.filter(card => 
-        card.name.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
-        card.set.toLowerCase().startsWith(basicSearchTerm.toLowerCase()) ||
-        card.type.toLowerCase().startsWith(basicSearchTerm.toLowerCase())
-      )
-      setFilteredBasicCards(filtered)
-    }
-  }, [basicSearchTerm, basicCards])
+  // Obtener sets únicos de cartas básicas
+  const uniqueBasicSets = Array.from(new Set(basicCards.map(card => card.set).filter(Boolean))).sort()
+  
+  // Obtener sets únicos de cartas del aspecto
+  const uniqueAspectSets = Array.from(new Set(aspectCards.map(card => card.set).filter(Boolean))).sort()
 
-  // Filtrar cartas del aspecto cuando cambie el término de búsqueda
+  // Filtrar cartas básicas cuando cambie el término de búsqueda o el filtro de set
   useEffect(() => {
-    if (aspectSearchTerm.trim() === '') {
-      setFilteredAspectCards(aspectCards)
-    } else {
-      const filtered = aspectCards.filter(card => 
-        card.name.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
-        card.set.toLowerCase().startsWith(aspectSearchTerm.toLowerCase()) ||
-        card.type.toLowerCase().startsWith(aspectSearchTerm.toLowerCase())
+    let filtered = basicCards
+
+    // Aplicar filtro de nombre
+    if (basicSearchTerm.trim() !== '') {
+      filtered = filtered.filter(card => 
+        card.name.toLowerCase().includes(basicSearchTerm.toLowerCase()) ||
+        card.set.toLowerCase().includes(basicSearchTerm.toLowerCase()) ||
+        card.type.toLowerCase().includes(basicSearchTerm.toLowerCase())
       )
-      setFilteredAspectCards(filtered)
     }
-  }, [aspectSearchTerm, aspectCards])
+
+    // Aplicar filtro de set
+    if (basicSetFilter !== '') {
+      filtered = filtered.filter(card => card.set === basicSetFilter)
+    }
+
+    setFilteredBasicCards(filtered)
+  }, [basicSearchTerm, basicSetFilter, basicCards])
+
+  // Filtrar cartas del aspecto cuando cambie el término de búsqueda o el filtro de set
+  useEffect(() => {
+    let filtered = aspectCards
+
+    // Aplicar filtro de nombre
+    if (aspectSearchTerm.trim() !== '') {
+      filtered = filtered.filter(card => 
+        card.name.toLowerCase().includes(aspectSearchTerm.toLowerCase()) ||
+        card.set.toLowerCase().includes(aspectSearchTerm.toLowerCase()) ||
+        card.type.toLowerCase().includes(aspectSearchTerm.toLowerCase())
+      )
+    }
+
+    // Aplicar filtro de set
+    if (aspectSetFilter !== '') {
+      filtered = filtered.filter(card => card.set === aspectSetFilter)
+    }
+
+    setFilteredAspectCards(filtered)
+  }, [aspectSearchTerm, aspectSetFilter, aspectCards])
 
   // Cargar cartas básicas y del aspecto
   useEffect(() => {
@@ -212,7 +234,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
               <div>
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
                   Cartas Básicas
-                  {basicSearchTerm && (
+                  {(basicSearchTerm || basicSetFilter) && (
                     <span className="text-sm text-gray-500 ml-2">
                       ({filteredBasicCards.length})
                     </span>
@@ -220,7 +242,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                 </h2>
                 
                 {/* Buscador para cartas básicas */}
-                <div className="mb-4">
+                <div className="mb-4 space-y-2">
                   <div className="relative">
                     <input
                       type="text"
@@ -245,10 +267,23 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                       </button>
                     )}
                   </div>
+                  {/* Filtro de set para cartas básicas */}
+                  <select
+                    value={basicSetFilter}
+                    onChange={(e) => setBasicSetFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-sm bg-white"
+                  >
+                    <option value="">Todos los sets</option>
+                    {uniqueBasicSets.map((set) => (
+                      <option key={set} value={set}>
+                        {set}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="max-h-96 overflow-y-auto space-y-2">
-                  {filteredBasicCards.length === 0 && basicSearchTerm ? (
+                  {filteredBasicCards.length === 0 && (basicSearchTerm || basicSetFilter) ? (
                     <p className="text-gray-500 text-center py-4">No se encontraron cartas básicas</p>
                   ) : (
                     filteredBasicCards.map((card) => {
@@ -292,7 +327,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
               <div>
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
                   Cartas de {aspectName}
-                  {aspectSearchTerm && (
+                  {(aspectSearchTerm || aspectSetFilter) && (
                     <span className="text-sm text-gray-500 ml-2">
                       ({filteredAspectCards.length})
                     </span>
@@ -300,7 +335,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                 </h2>
                 
                 {/* Buscador para cartas del aspecto */}
-                <div className="mb-4">
+                <div className="mb-4 space-y-2">
                   <div className="relative">
                     <input
                       type="text"
@@ -325,10 +360,23 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                       </button>
                     )}
                   </div>
+                  {/* Filtro de set para cartas del aspecto */}
+                  <select
+                    value={aspectSetFilter}
+                    onChange={(e) => setAspectSetFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-sm bg-white"
+                  >
+                    <option value="">Todos los sets</option>
+                    {uniqueAspectSets.map((set) => (
+                      <option key={set} value={set}>
+                        {set}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="max-h-96 overflow-y-auto space-y-2">
-                  {filteredAspectCards.length === 0 && aspectSearchTerm ? (
+                  {filteredAspectCards.length === 0 && (aspectSearchTerm || aspectSetFilter) ? (
                     <p className="text-gray-500 text-center py-4">No se encontraron cartas del aspecto</p>
                   ) : (
                     filteredAspectCards.map((card) => {
