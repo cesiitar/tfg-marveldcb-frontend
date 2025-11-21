@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck, DeckComment } from '../types/card'
+import { translateCardType } from '../utils/typeTranslations'
 import { getClassPillClasses, getClassColor, getAspectHeaderGradient } from '../utils/classColors'
 import { useToast } from '../components/Toast'
 
@@ -669,24 +670,6 @@ const DeckDetailPage: React.FC = () => {
                   }, {})
 
                   const typeOrder = ['hero', 'ally', 'event', 'upgrade', 'support', 'resource', 'player_side_scheme', 'attachment', 'environment', 'minion', 'obligation', 'side_scheme', 'treachery', 'villain', 'main_scheme', 'evidence']
-                  const typeLabels: { [key: string]: string } = {
-                    hero: 'Hero',
-                    ally: 'Ally',
-                    event: 'Event',
-                    upgrade: 'Upgrade',
-                    support: 'Support',
-                    resource: 'Resource',
-                    player_side_scheme: 'Player Side Scheme',
-                    attachment: 'Attachment',
-                    environment: 'Environment',
-                    minion: 'Minion',
-                    obligation: 'Obligation',
-                    side_scheme: 'Side Scheme',
-                    treachery: 'Treachery',
-                    villain: 'Villain',
-                    main_scheme: 'Main Scheme',
-                    evidence: 'Evidence'
-                  }
 
                   return Object.keys(cardsByType)
                     .sort((a, b) => {
@@ -699,7 +682,7 @@ const DeckDetailPage: React.FC = () => {
                     })
                     .map(type => {
                       const cards = cardsByType[type]
-                      const typeLabel = typeLabels[type] || type.charAt(0).toUpperCase() + type.slice(1)
+                      const typeLabel = translateCardType(type)
                       
                       return (
                         <div key={type} className="mb-3 last:mb-0">

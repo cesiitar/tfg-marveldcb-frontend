@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { apiService } from '../services/api'
 import { Card, CardSet } from '../types/card'
+import { translateCardType } from '../utils/typeTranslations'
 import { getClassBadgeStyle, getClassGradientClasses } from '../utils/classColors'
 
 const SetCardsPage: React.FC = () => {
@@ -364,7 +365,7 @@ const SetCardsPage: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600 text-sm">Tipo:</span>
-                        <span className="font-medium capitalize text-gray-800">{card.type}</span>
+                        <span className="font-medium text-gray-800">{translateCardType(card.type)}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-600 text-sm">Coste:</span>

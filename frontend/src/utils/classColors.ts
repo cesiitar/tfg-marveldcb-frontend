@@ -1,4 +1,4 @@
-export type CardClass = 'basic' | 'aggression' | 'justice' | 'leadership' | 'protection' | 'hero' | 'encounter' | 'campaign'
+export type CardClass = 'basic' | 'aggression' | 'justice' | 'leadership' | 'protection' | 'hero' | 'encounter' | 'campaign' | 'pool'
 
 export function getClassColor(cls?: string): string {
   const c = (cls || '').toLowerCase() as CardClass
@@ -17,6 +17,8 @@ export function getClassColor(cls?: string): string {
       return 'bg-red-900'
     case 'campaign':
       return 'bg-indigo-600'
+    case 'pool':
+      return 'bg-teal-500'
     case 'basic':
     default:
       return 'bg-gray-400'
@@ -40,6 +42,8 @@ export function getClassPillClasses(cls?: string): string {
       return 'bg-red-50 text-red-900 border border-red-300'
     case 'campaign':
       return 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+    case 'pool':
+      return 'bg-teal-50 text-teal-700 border border-teal-200'
     case 'basic':
     default:
       return 'bg-white text-slate-700 border border-slate-200'
@@ -63,6 +67,8 @@ export function getClassGradientClasses(cls?: string): string {
       return 'from-red-200 to-red-300 border-red-400'
     case 'campaign':
       return 'from-indigo-100 to-indigo-200 border-indigo-300'
+    case 'pool':
+      return 'from-teal-100 to-teal-200 border-teal-300'
     case 'basic':
     default:
       return 'from-gray-100 to-gray-200 border-gray-300'
@@ -86,6 +92,8 @@ export function getClassBadgeStyle(cls?: string): string {
       return 'text-red-900 bg-red-300'
     case 'campaign':
       return 'text-indigo-800 bg-indigo-200'
+    case 'pool':
+      return 'text-teal-800 bg-teal-200'
     case 'basic':
     default:
       return 'text-gray-800 bg-gray-200'
@@ -103,6 +111,8 @@ export function getAspectHeaderGradient(aspect?: string): string {
       return 'from-blue-600 to-blue-700'
     case 'protection':
       return 'from-green-600 to-green-700'
+    case 'pool':
+      return 'from-teal-600 to-teal-700'
     default:
       return 'from-slate-600 to-slate-700'
   }

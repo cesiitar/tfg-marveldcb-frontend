@@ -158,7 +158,7 @@ const DecksPage: React.FC = () => {
     const set = new Set<string>()
     decks.forEach(d => { const a = getDeckAspect(d); if (a) set.add(a) })
     // Si el backend aún no manda aspect, ofrecemos las 4 por defecto
-    const base = ['aggression', 'justice', 'leadership', 'protection']
+    const base = ['aggression', 'justice', 'leadership', 'protection', 'pool']
     const derived = Array.from(set)
     const merged = new Set([...base, ...derived])
     return Array.from(merged).sort((a, b) => a.localeCompare(b))
@@ -352,7 +352,7 @@ const DecksPage: React.FC = () => {
                 onChange={(e) => setAspectFilter(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
-                <option value="">Todos los aspectos</option>
+                <option value="">Todas las clases</option>
                 {availableAspects.map(a => (
                   <option key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</option>
                 ))}
@@ -569,7 +569,7 @@ const DecksPage: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
-                  </div>
+                    </div>
                   
                   <div className="ml-6 text-sm text-gray-500">
                     Mostrando {((currentPage - 1) * decksPerPage) + 1} - {Math.min(currentPage * decksPerPage, filteredDecks.length)} de {filteredDecks.length} mazos

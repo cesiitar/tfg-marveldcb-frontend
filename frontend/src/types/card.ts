@@ -40,7 +40,7 @@ export interface Deck {
   description?: string
   hero_name: string
   hero_id?: number
-  aspect?: 'aggression' | 'justice' | 'leadership' | 'protection'
+  aspect?: 'aggression' | 'justice' | 'leadership' | 'protection' | 'pool'
   cards: DeckCard[]
   creator_name?: string
   created_at?: string

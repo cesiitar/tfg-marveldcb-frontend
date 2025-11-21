@@ -41,7 +41,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   // Obtener sets únicos de cartas básicas
   const uniqueBasicSets = Array.from(new Set(basicCards.map(card => card.set).filter(Boolean))).sort()
   
-  // Obtener sets únicos de cartas del aspecto
+  // Obtener sets únicos de cartas de la clase
   const uniqueAspectSets = Array.from(new Set(aspectCards.map(card => card.set).filter(Boolean))).sort()
 
   // Filtrar cartas básicas cuando cambie el término de búsqueda o el filtro de set
@@ -65,7 +65,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
     setFilteredBasicCards(filtered)
   }, [basicSearchTerm, basicSetFilter, basicCards])
 
-  // Filtrar cartas del aspecto cuando cambie el término de búsqueda o el filtro de set
+  // Filtrar cartas de la clase cuando cambie el término de búsqueda o el filtro de set
   useEffect(() => {
     let filtered = aspectCards
 
@@ -96,7 +96,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
         setBasicCards(basicCardsData)
         setFilteredBasicCards(basicCardsData)
         
-        // Cargar cartas del aspecto seleccionado
+        // Cargar cartas de la clase seleccionada
         const aspectCardsData = await apiService.getCardsByAspect(aspectName)
         setAspectCards(aspectCardsData)
         setFilteredAspectCards(aspectCardsData)
@@ -211,7 +211,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
           <h2 className="text-lg font-medium text-blue-800 mb-2">Información del Mazo</h2>
           <div className="text-sm text-blue-700 space-y-1">
             <p><strong>Héroe:</strong> {heroName}</p>
-            <p><strong>Aspecto:</strong> {aspectName}</p>
+            <p><strong>Clase:</strong> {aspectName}</p>
             <p><strong>Cartas del héroe:</strong> {heroCardsCount}</p>
             <p><strong>Cartas seleccionadas:</strong> {totalSelectedCards}</p>
             <p><strong>Total de cartas:</strong> {totalCards}/50</p>
@@ -323,7 +323,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                 </div>
               </div>
 
-              {/* Cartas del aspecto */}
+              {/* Cartas de la clase */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-700 mb-4">
                   Cartas de {aspectName}
@@ -334,7 +334,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                   )}
                 </h2>
                 
-                {/* Buscador para cartas del aspecto */}
+                {/* Buscador para cartas de la clase */}
                 <div className="mb-4 space-y-2">
                   <div className="relative">
                     <input
@@ -360,7 +360,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                       </button>
                     )}
                   </div>
-                  {/* Filtro de set para cartas del aspecto */}
+                  {/* Filtro de set para cartas de la clase */}
                   <select
                     value={aspectSetFilter}
                     onChange={(e) => setAspectSetFilter(e.target.value)}
@@ -377,7 +377,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
 
                 <div className="max-h-96 overflow-y-auto space-y-2">
                   {filteredAspectCards.length === 0 && (aspectSearchTerm || aspectSetFilter) ? (
-                    <p className="text-gray-500 text-center py-4">No se encontraron cartas del aspecto</p>
+                    <p className="text-gray-500 text-center py-4">No se encontraron cartas de la clase</p>
                   ) : (
                     filteredAspectCards.map((card) => {
                       const cardKey = getCardKey(card)

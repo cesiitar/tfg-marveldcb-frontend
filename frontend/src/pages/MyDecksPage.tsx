@@ -147,13 +147,7 @@ const MyDecksPage: React.FC = () => {
             </svg>
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h2>
-          <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tus mazos</p>
-          <Link 
-            to="/"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-          >
-            Ir al Inicio
-          </Link>
+          <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tus mazos. Por favor, usa el botón de Login en el header para acceder.</p>
         </div>
       </div>
     )

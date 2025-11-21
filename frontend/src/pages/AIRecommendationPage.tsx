@@ -160,13 +160,7 @@ const AIRecommendationPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 py-12">
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
-            <p className="text-gray-600 mb-6">Debes iniciar sesión para usar la recomendación de IA.</p>
-            <button
-              onClick={() => navigate('/')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Ir al inicio
-            </button>
+            <p className="text-gray-600 mb-6">Debes iniciar sesión para usar la recomendación de IA. Por favor, usa el botón de Login en el header para acceder.</p>
           </div>
         </div>
       </div>
@@ -360,7 +354,7 @@ const AIRecommendationPage: React.FC = () => {
                   
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <p className="text-sm text-blue-800">
-                      <span className="font-semibold">Seleccionado automáticamente por IA:</span> La inteligencia artificial ha elegido el mejor héroe y aspecto para enfrentar a este villano.
+                      <span className="font-semibold">Seleccionado automáticamente por IA:</span> La inteligencia artificial ha elegido el mejor héroe y clase para enfrentar a este villano.
                     </p>
                   </div>
                   
@@ -372,7 +366,7 @@ const AIRecommendationPage: React.FC = () => {
                   
                   {generatedDeck.aspect && (
                     <div>
-                      <h3 className="font-semibold text-gray-700 mb-2">Aspecto</h3>
+                      <h3 className="font-semibold text-gray-700 mb-2">Clase</h3>
                       <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                         {generatedDeck.aspect}
                       </span>

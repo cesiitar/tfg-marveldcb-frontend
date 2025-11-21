@@ -175,7 +175,7 @@ const CreateDeckPage: React.FC = () => {
                 <h2 className="text-xl font-bold text-gray-900">Crear Manualmente</h2>
               </div>
               <p className="text-gray-600">
-                Elige tu héroe, aspecto y selecciona las cartas una por una. Tú tienes el control total de tu mazo.
+                Elige tu héroe, clase y selecciona las cartas una por una. Tú tienes el control total de tu mazo.
               </p>
             </button>
 
@@ -246,10 +246,10 @@ const CreateDeckPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Selección de aspecto */}
+          {/* Selección de clase */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Selecciona un Aspecto *
+              Selecciona una Clase *
             </label>
             <select
               value={selectedAspect}
@@ -257,11 +257,12 @@ const CreateDeckPage: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
               disabled={!selectedHero}
             >
-              <option value="">Selecciona un aspecto...</option>
-              <option value="aggression">Agresión</option>
-              <option value="justice">Justicia</option>
-              <option value="leadership">Liderazgo</option>
-              <option value="protection">Protección</option>
+              <option value="">Selecciona una clase...</option>
+              <option value="aggression">Aggression</option>
+              <option value="justice">Justice</option>
+              <option value="leadership">Leadership</option>
+              <option value="protection">Protection</option>
+              <option value="pool">Pool</option>
             </select>
           </div>
 
@@ -302,7 +303,7 @@ const CreateDeckPage: React.FC = () => {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="text-sm text-blue-700 mb-3">
                   <p><strong>Héroe:</strong> {selectedHeroName}</p>
-                  <p><strong>Aspecto:</strong> {selectedAspect || 'No seleccionado'}</p>
+                  <p><strong>Clase:</strong> {selectedAspect || 'No seleccionado'}</p>
                   <p><strong>Cartas del héroe:</strong> {heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)}</p>
                 </div>
                 <div className="max-h-40 overflow-y-auto space-y-2">

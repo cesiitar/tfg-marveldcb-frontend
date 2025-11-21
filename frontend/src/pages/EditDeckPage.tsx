@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { apiService } from '../services/api'
 import { Deck, Card } from '../types/card'
 import { useToast } from '../components/Toast'
+import { translateCardType } from '../utils/typeTranslations'
 import { getAspectHeaderGradient } from '../utils/classColors'
 
 const EditDeckPage: React.FC = () => {
@@ -55,7 +56,7 @@ const EditDeckPage: React.FC = () => {
         const deckData = await apiService.getDeckById(Number(id))
         setDeck(deckData)
         
-        // Cargar cartas básicas y del aspecto
+        // Cargar cartas básicas y de la clase
         const basicCardsData = await apiService.getCardsByAspect('basic')
         setBasicCards(basicCardsData)
         setFilteredBasicCards(basicCardsData)
@@ -116,7 +117,7 @@ const EditDeckPage: React.FC = () => {
   // Obtener sets únicos de cartas básicas
   const uniqueBasicSets = Array.from(new Set(basicCards.map(card => card.set).filter(Boolean))).sort()
   
-  // Obtener sets únicos de cartas del aspecto
+  // Obtener sets únicos de cartas de la clase
   const uniqueAspectSets = Array.from(new Set(aspectCards.map(card => card.set).filter(Boolean))).sort()
 
   // Filtrar cartas básicas cuando cambie el término de búsqueda o el filtro de set
@@ -140,7 +141,7 @@ const EditDeckPage: React.FC = () => {
     setFilteredBasicCards(filtered)
   }, [basicSearchTerm, basicSetFilter, basicCards])
 
-  // Filtrar cartas del aspecto cuando cambie el término de búsqueda o el filtro de set
+  // Filtrar cartas de la clase cuando cambie el término de búsqueda o el filtro de set
   useEffect(() => {
     let filtered = aspectCards
 
@@ -463,7 +464,7 @@ const EditDeckPage: React.FC = () => {
                         <span className="font-medium">{deck.hero_name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Aspecto:</span>
+                        <span className="text-gray-600">Clase:</span>
                         <span className="font-medium capitalize">{deck.aspect}</span>
                       </div>
                       <div className="flex justify-between">
@@ -561,7 +562,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
+                                {translateCardType(card.type)} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
                               </p>
                             </div>
                             
@@ -589,10 +590,10 @@ const EditDeckPage: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Cartas del Aspecto */}
+                {/* Cartas de la Clase */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Cartas de {deck?.aspect || 'Aspecto'}
+                    Cartas de {deck?.aspect || 'Clase'}
                     {(aspectSearchTerm || aspectSetFilter) && (
                       <span className="text-sm text-gray-500 ml-2">
                         ({filteredAspectCards.length})
@@ -605,10 +606,10 @@ const EditDeckPage: React.FC = () => {
                       type="text"
                       value={aspectSearchTerm}
                       onChange={(e) => setAspectSearchTerm(e.target.value)}
-                      placeholder="Buscar cartas del aspecto..."
+                      placeholder="Buscar cartas de la clase..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                     />
-                    {/* Filtro de set para cartas del aspecto */}
+                    {/* Filtro de set para cartas de la clase */}
                     <select
                       value={aspectSetFilter}
                       onChange={(e) => setAspectSetFilter(e.target.value)}
@@ -625,7 +626,7 @@ const EditDeckPage: React.FC = () => {
                   
                   <div className="max-h-48 overflow-y-auto space-y-2">
                     {filteredAspectCards.length === 0 && (aspectSearchTerm || aspectSetFilter) ? (
-                      <p className="text-gray-500 text-center py-4">No se encontraron cartas del aspecto</p>
+                      <p className="text-gray-500 text-center py-4">No se encontraron cartas de la clase</p>
                     ) : (
                       filteredAspectCards.map((card) => {
                         const quantity = selectedCards.get(getCardKey(card)) || 0
@@ -637,7 +638,7 @@ const EditDeckPage: React.FC = () => {
                             <div className="flex-1">
                               <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
                               <p className="text-xs text-gray-600">
-                                {card.type} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
+                                {translateCardType(card.type)} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
                               </p>
                             </div>
                             
