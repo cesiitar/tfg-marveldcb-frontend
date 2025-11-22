@@ -650,6 +650,7 @@ class ApiService {
   ): Promise<{
     deck: Deck
     message?: string
+    win_probability?: number  // Porcentaje de probabilidad de victoria (0-1)
   }> {
     try {
       const response = await fetch(`${API_BASE_URL}/recommendations/deck`, {

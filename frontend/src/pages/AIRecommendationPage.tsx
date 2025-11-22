@@ -22,6 +22,7 @@ const AIRecommendationPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [deckName, setDeckName] = useState<string>('')
   const [deckDescription, setDeckDescription] = useState<string>('')
+  const [winProbability, setWinProbability] = useState<number | null>(null)
 
   // Cargar villanos al montar
   useEffect(() => {
@@ -68,9 +69,11 @@ const AIRecommendationPage: React.FC = () => {
       )
 
       setGeneratedDeck(response.deck)
-      // Inicializar nombre y descripción con los valores del mazo generado
-      setDeckName(response.deck.name || '')
-      setDeckDescription(response.deck.description || '')
+      // Inicializar nombre y descripción como vacíos para que el usuario los complete
+      setDeckName('')
+      setDeckDescription('')
+      // Guardar porcentaje de probabilidad si el backend lo proporciona
+      setWinProbability(response.win_probability ?? null)
       showToast('✅ Mazo generado exitosamente', 'success')
     } catch (err: any) {
       console.error('Error generando mazo:', err)
@@ -352,6 +355,26 @@ const AIRecommendationPage: React.FC = () => {
                     <p className="text-xs text-gray-500 mt-1">Añade una descripción para tu mazo</p>
                   </div>
                   
+                  {winProbability !== null && (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-green-800 mb-1">
+                            Probabilidad de Victoria
+                          </p>
+                          <p className="text-xs text-green-700">
+                            Estimación basada en el análisis de la IA
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-3xl font-bold text-green-700">
+                            {Math.round(winProbability * 100)}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                     <p className="text-sm text-blue-800">
                       <span className="font-semibold">Seleccionado automáticamente por IA:</span> La inteligencia artificial ha elegido el mejor héroe y clase para enfrentar a este villano.
@@ -441,14 +464,14 @@ const AIRecommendationPage: React.FC = () => {
                         setGeneratedDeck(null)
                         setDeckName('')
                         setDeckDescription('')
-                        setSelectedVillainId(null)
-                        setSelectedVillainName('')
+                        setWinProbability(null)
                         setError(null)
+                        // NO resetear el villano seleccionado - mantenerlo para generar otro mazo para el mismo villano
                       }}
-                      disabled={generatingDeck}
+                      disabled={generatingDeck || !selectedVillainId}
                       className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
                     >
-                      Generar Otro
+                      Generar Otro Mazo
                     </button>
                   </div>
                 </div>
