@@ -29,8 +29,10 @@ const ConfigureGamePage: React.FC = () => {
   const [loadingAI, setLoadingAI] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
   
-  // Obtener los datos del mazo desde la navegación (en lugar del deckId)
-  const deckData = location.state?.deckData as Omit<Deck, 'id' | 'created_at' | 'updated_at'> | undefined
+  // Obtener los datos del mazo desde la navegación
+  // Puede ser un mazo nuevo (sin ID) o un mazo existente (con ID)
+  const deckData = location.state?.deckData as Deck | Omit<Deck, 'id' | 'created_at' | 'updated_at'> | undefined
+  const existingDeckId = location.state?.existingDeckId as number | undefined
   const useAI = location.state?.useAI as boolean | undefined || false
 
   // Cargar villanos al montar el componente
@@ -121,22 +123,34 @@ const ConfigureGamePage: React.FC = () => {
     try {
       setSaving(true)
       
-      // Primero crear el mazo
-      console.log('📤 Creando mazo con datos:', deckData)
-      const createdDeck = await apiService.createDeck(deckData, user.sub)
-      console.log('✅ Mazo creado exitosamente:', createdDeck)
+      let deckId: number
       
-      // Verificar que el mazo tiene un ID
-      if (!createdDeck.id) {
-        throw new Error('El mazo se creó pero no se recibió un ID válido')
+      // Si hay un ID de mazo existente, usarlo directamente
+      if (existingDeckId) {
+        deckId = existingDeckId
+      } else {
+        // Si no, crear el mazo primero
+        if (!deckData) {
+          throw new Error('No se encontraron los datos del mazo')
+        }
+        console.log('📤 Creando mazo con datos:', deckData)
+        const createdDeck = await apiService.createDeck(deckData, user.sub)
+        console.log('✅ Mazo creado exitosamente:', createdDeck)
+        
+        // Verificar que el mazo tiene un ID
+        if (!createdDeck.id) {
+          throw new Error('El mazo se creó pero no se recibió un ID válido')
+        }
+        
+        deckId = createdDeck.id
+        
+        // Mostrar mensaje de éxito al crear el mazo
+        showToast(`Mazo "${deckData.name}" creado exitosamente`, 'success')
       }
       
-      // Mostrar mensaje de éxito al crear el mazo
-      showToast(`🎉 ¡Mazo "${deckData.name}" creado exitosamente!`, 'success')
-      
-      // Luego crear la configuración de partida con el deckId del mazo recién creado
+      // Crear la configuración de partida
       const gameConfig = {
-        deck_id: createdDeck.id,
+        deck_id: deckId,
         difficulty: difficulty,
         villain_id: villainId,
         result: gameResult,
@@ -146,15 +160,19 @@ const ConfigureGamePage: React.FC = () => {
       console.log('📤 Enviando configuración de partida:', gameConfig)
       await apiService.saveGameConfiguration(gameConfig, user.sub)
       
-      showToast(`✅ Partida guardada correctamente`, 'success')
-      navigate('/mydecks')
+      showToast('Partida guardada correctamente', 'success')
+      
+      // Esperar un momento para que el usuario vea el mensaje antes de navegar
+      setTimeout(() => {
+        navigate('/mydecks')
+      }, 1500)
       
     } catch (err: any) {
       console.error('Error guardando mazo y configuración:', err)
       
       // Mostrar el mensaje exacto del backend si viene
       if (err && err.message) {
-        showToast(`❌ ${err.message}`, 'error')
+        showToast(`${err.message}`, 'error')
       } else {
         showToast('Error al guardar el mazo y la configuración', 'error')
       }
@@ -164,7 +182,13 @@ const ConfigureGamePage: React.FC = () => {
   }
 
   const handleSkip = async () => {
-    // Si el usuario omite la configuración, crear solo el mazo
+    // Si el usuario omite la configuración, crear solo el mazo (si no existe ya)
+    if (existingDeckId) {
+      // Si ya existe el mazo, solo navegar de vuelta
+      navigate('/mydecks')
+      return
+    }
+
     if (!deckData) {
       showToast('Error: No se encontraron los datos del mazo', 'error')
       return
@@ -182,14 +206,14 @@ const ConfigureGamePage: React.FC = () => {
       const createdDeck = await apiService.createDeck(deckData, user.sub)
       console.log('✅ Mazo creado exitosamente:', createdDeck)
       
-      showToast(`🎉 ¡Mazo "${deckData.name}" creado exitosamente!`, 'success')
+      showToast(`Mazo "${deckData.name}" creado exitosamente`, 'success')
       navigate('/mydecks')
       
     } catch (err: any) {
       console.error('Error creando mazo:', err)
       
       if (err && err.message) {
-        showToast(`❌ ${err.message}`, 'error')
+        showToast(`${err.message}`, 'error')
       } else {
         showToast('Error al crear el mazo', 'error')
       }
@@ -210,7 +234,9 @@ const ConfigureGamePage: React.FC = () => {
               Configurar Partida
             </h1>
             <p className="text-lg text-gray-300 mb-6">
-              Configura los detalles de tu partida para crear el mazo
+              {existingDeckId 
+                ? 'Configura los detalles de una nueva partida con este mazo'
+                : 'Configura los detalles de tu partida para crear el mazo'}
             </p>
           </div>
         </div>
@@ -474,45 +500,49 @@ const ConfigureGamePage: React.FC = () => {
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Guardar y Crear Mazo
+                      {existingDeckId ? 'Guardar Partida' : 'Guardar y Crear Mazo'}
                     </>
                   )}
                 </button>
                 
-                <button
-                  onClick={handleSkip}
-                  disabled={saving}
-                  className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center justify-center border border-gray-300 hover:border-gray-400"
-                >
-                  {saving ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creando mazo...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                      Crear sin partida
-                    </>
-                  )}
-                </button>
+                {!existingDeckId && (
+                  <button
+                    onClick={handleSkip}
+                    disabled={saving}
+                    className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center justify-center border border-gray-300 hover:border-gray-400"
+                  >
+                    {saving ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creando mazo...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Crear sin partida
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
               
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="flex items-start space-x-2">
-                  <svg className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-xs text-gray-500">
-                    Puedes configurar la partida más tarde desde "Mis Mazos"
-                  </p>
+              {!existingDeckId && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="flex items-start space-x-2">
+                    <svg className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-xs text-gray-500">
+                      Puedes configurar la partida más tarde desde "Mis Mazos"
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

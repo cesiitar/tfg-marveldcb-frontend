@@ -16,7 +16,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 4000 }
   const getToastStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'
+        return 'bg-gradient-to-r from-green-700 to-emerald-800 text-white'
       case 'error':
         return 'bg-gradient-to-r from-red-500 to-rose-600 text-white'
       case 'info':

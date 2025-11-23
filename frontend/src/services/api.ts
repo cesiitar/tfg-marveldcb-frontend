@@ -645,12 +645,14 @@ class ApiService {
       villain_id: number
       difficulty: 'normal' | 'expert'
       patches?: string[]
+      max_decks?: number  // Opcional: número de mazos a generar (1-4, por defecto 3)
     },
     auth0Id: string
   ): Promise<{
-    deck: Deck
+    decks: Deck[]  // Array de mazos generados
     message?: string
-    win_probability?: number  // Porcentaje de probabilidad de victoria (0-1)
+    total_requested?: number  // Número de mazos solicitados
+    total_generated?: number  // Número de mazos realmente generados
   }> {
     try {
       const response = await fetch(`${API_BASE_URL}/recommendations/deck`, {

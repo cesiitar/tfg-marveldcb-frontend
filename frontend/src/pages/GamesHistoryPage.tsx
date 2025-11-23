@@ -201,15 +201,6 @@ const GamesHistoryPage: React.FC = () => {
                   {isAuthenticated && filterMyGames ? 'Tus partidas jugadas' : 'Registro de todas las partidas jugadas'}
                 </p>
               </div>
-              <Link 
-                to="/decks" 
-                className="absolute top-0 right-0 inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Volver a Decklists
-              </Link>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { Deck, DeckComment } from '../types/card'
 import { translateCardType } from '../utils/typeTranslations'
 import { getClassPillClasses, getClassColor, getAspectHeaderGradient } from '../utils/classColors'
 import { useToast } from '../components/Toast'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const DeckDetailPage: React.FC = () => {
   const { id } = useParams()
@@ -24,6 +25,8 @@ const DeckDetailPage: React.FC = () => {
   const [editingText, setEditingText] = useState('')
   const [updatingComment, setUpdatingComment] = useState(false)
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null)
+  const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(false)
+  const [commentToDelete, setCommentToDelete] = useState<number | null>(null)
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -195,26 +198,30 @@ const DeckDetailPage: React.FC = () => {
   }
 
   // Eliminar comentario
-  const handleDeleteComment = async (commentId: number) => {
+  const handleDeleteComment = (commentId: number) => {
     if (!isAuthenticated || !user?.sub) {
       showToast('Debes iniciar sesión para eliminar comentarios', 'error')
       return
     }
+    setCommentToDelete(commentId)
+    setShowDeleteCommentConfirm(true)
+  }
 
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
-      return
-    }
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete || !user?.sub) return
 
     try {
-      setDeletingCommentId(commentId)
-      await apiService.deleteDeckComment(commentId, user.sub)
-      setComments(comments.filter(c => c.id !== commentId))
+      setDeletingCommentId(commentToDelete)
+      await apiService.deleteDeckComment(commentToDelete, user.sub)
+      setComments(comments.filter(c => c.id !== commentToDelete))
       showToast('Comentario eliminado correctamente', 'success')
     } catch (err) {
       console.error('Error deleting comment:', err)
       showToast('Error al eliminar el comentario', 'error')
     } finally {
       setDeletingCommentId(null)
+      setShowDeleteCommentConfirm(false)
+      setCommentToDelete(null)
     }
   }
 
@@ -747,6 +754,21 @@ const DeckDetailPage: React.FC = () => {
       </div>
       
       <ToastContainer />
+      
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteCommentConfirm}
+        title="Eliminar Comentario"
+        message="¿Estás seguro de que quieres eliminar este comentario? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        onConfirm={confirmDeleteComment}
+        onCancel={() => {
+          setShowDeleteCommentConfirm(false)
+          setCommentToDelete(null)
+        }}
+      />
     </div>
   )
 }

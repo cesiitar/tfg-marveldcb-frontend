@@ -6,6 +6,7 @@ import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
 import { getClassColor } from '../utils/classColors'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const MyDecksPage: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
@@ -16,6 +17,8 @@ const MyDecksPage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deckToDelete, setDeckToDelete] = useState<number | null>(null)
 
   // Cargar mazos del usuario cuando se autentica
   const loadUserDecks = async () => {
@@ -113,8 +116,13 @@ const MyDecksPage: React.FC = () => {
 
 
 
-  const handleDeleteDeck = async (deckId: number) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este mazo?')) return
+  const handleDeleteDeck = (deckId: number) => {
+    setDeckToDelete(deckId)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteDeck = async () => {
+    if (!deckToDelete) return
     
     try {
       // Verificar que tenemos el Auth0 SUB del usuario
@@ -123,18 +131,42 @@ const MyDecksPage: React.FC = () => {
       return
     }
       
-      await apiService.deleteDeck(deckId, user.sub)
-      showToast('🎉 ¡Mazo eliminado exitosamente!', 'success')
+      await apiService.deleteDeck(deckToDelete, user.sub)
+      showToast('Mazo eliminado exitosamente', 'success')
       // Recargar la lista después de eliminar
       loadUserDecks()
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error al eliminar mazo:', err)
-      showToast('❌ Error al eliminar el mazo. Inténtalo de nuevo.', 'error')
+      // Mejorar el mensaje de error, quitando referencias a localhost
+      let errorMessage = 'Error al eliminar el mazo. Inténtalo de nuevo.'
+      if (err?.message) {
+        // Filtrar mensajes que contengan localhost o URLs
+        const message = err.message
+        if (message.includes('localhost') || message.includes('http://') || message.includes('https://')) {
+          errorMessage = 'Error al eliminar el mazo. Por favor, verifica tu conexión e inténtalo de nuevo.'
+        } else {
+          errorMessage = message
+        }
+      }
+      showToast(errorMessage, 'error')
+    } finally {
+      setShowDeleteConfirm(false)
+      setDeckToDelete(null)
     }
   }
 
   const handleEditDeck = (deckId: number) => {
     navigate(`/decks/${deckId}/edit`)
+  }
+
+  const handleConfigureGame = (deck: Deck) => {
+    // Navegar a la página de configuración de partida con el mazo existente
+    navigate('/configure-game', {
+      state: {
+        existingDeckId: deck.id,
+        deckData: deck // Pasar el deck completo para referencia
+      }
+    })
   }
 
   if (!isAuthenticated) {
@@ -272,7 +304,7 @@ const MyDecksPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         {/* Botón de favorito con contador */}
                         {isAuthenticated ? (
-                          <button
+                    <button
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
@@ -291,7 +323,7 @@ const MyDecksPage: React.FC = () => {
                             <span className="text-sm font-semibold">
                               {deck.favorite_count !== undefined ? deck.favorite_count : 0}
                             </span>
-                          </button>
+                    </button>
                         ) : (
                           /* Contador de favoritos - solo si no está autenticado */
                           deck.favorite_count !== undefined && (
@@ -303,8 +335,8 @@ const MyDecksPage: React.FC = () => {
                             </div>
                           )
                         )}
-                      </div>
-                    </div>
+                </div>
+              </div>
                   </div>
                   
                   {/* Content Section */}
@@ -331,8 +363,8 @@ const MyDecksPage: React.FC = () => {
               </div>
             )}
           </div>
-                    </div>
-                    
+                  </div>
+                  
                     {/* Footer */}
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
                       <div className="flex items-center gap-2">
@@ -352,47 +384,58 @@ const MyDecksPage: React.FC = () => {
                         <span>
                           {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                         </span>
-        </div>
-      </div>
-
+                  </div>
+                  </div>
+                  
                     {/* Action Buttons */}
-                    <div className="mt-4 flex gap-2">
-                      <button 
-                        onClick={() => {
-                          // Guardar el ID antes de navegar
-                          if (deck.id) {
-                            try {
-                              localStorage.setItem('lastViewedDeckId', deck.id.toString())
-                            } catch (err) {
-                              console.error('Error guardando último mazo visto:', err)
+                    <div className="mt-4 flex flex-col gap-2">
+                      <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                            // Guardar el ID antes de navegar
+                            if (deck.id) {
+                              try {
+                                localStorage.setItem('lastViewedDeckId', deck.id.toString())
+                              } catch (err) {
+                                console.error('Error guardando último mazo visto:', err)
+                              }
                             }
-                          }
-                          window.location.href = `/decks/${deck.id || 0}`
-                        }}
-                        className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        Ver
-                      </button>
-                      <button 
-                        onClick={() => handleEditDeck(deck.id || 0)}
-                        className="flex-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Editar
-                      </button>
+                            window.location.href = `/decks/${deck.id || 0}`
+                          }}
+                          className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          Ver
+                    </button>
+                  <button
+                          onClick={() => handleEditDeck(deck.id || 0)}
+                          className="flex-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
+                  >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Editar
+                  </button>
+                  <button
+                          onClick={() => handleDeleteDeck(deck.id || 0)}
+                          className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
+                  >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                  </button>
+                </div>
             <button 
-                        onClick={() => handleDeleteDeck(deck.id || 0)}
-                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
+                        onClick={() => handleConfigureGame(deck)}
+                        className="w-full px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
             >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
+                        Configurar Partida
             </button>
           </div>
         </div>
@@ -405,6 +448,21 @@ const MyDecksPage: React.FC = () => {
       
       {/* Toast Container */}
       <ToastContainer />
+      
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Eliminar Mazo"
+        message="¿Estás seguro de que quieres eliminar este mazo? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        onConfirm={confirmDeleteDeck}
+        onCancel={() => {
+          setShowDeleteConfirm(false)
+          setDeckToDelete(null)
+        }}
+      />
     </div>
   )
 }

@@ -42,25 +42,25 @@ const Header: React.FC = () => {
               to="/mydecks" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
-              My Decks
+              Mis Mazos
             </Link>
             <Link 
               to="/decks" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
-              Decklists
+              Mazos
             </Link>
             <Link 
               to="/cards" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
-              Cards
+              Cartas
             </Link>
             <Link 
               to="/games-history" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
-              Game History
+              Historial de Partidas
             </Link>
             <Link 
               to="/ai-recommendation" 
@@ -72,13 +72,13 @@ const Header: React.FC = () => {
               to="/rules" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
-              Rules
+              Reglas
             </Link>
             <Link 
               to="/faq" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
             >
-              FAQs
+              Preguntas Frecuentes
             </Link>
           </nav>
 
@@ -103,7 +103,7 @@ const Header: React.FC = () => {
                   onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                   className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 >
-                  Logout
+                  Cerrar Sesión
                 </button>
               </>
             ) : (
@@ -112,13 +112,13 @@ const Header: React.FC = () => {
                   onClick={handleLoginClick}
                   className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 >
-                  Login
+                  Iniciar Sesión
                 </button>
                 <button 
                   onClick={handleSignupClick}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
                 >
-                  Sign Up
+                  Registrarse
                 </button>
               </>
             )}
@@ -144,28 +144,28 @@ const Header: React.FC = () => {
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                My Decks
+                Mis Mazos
               </Link>
               <Link 
                 to="/decks" 
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Decklists
+                Mazos
               </Link>
               <Link 
                 to="/cards" 
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Cards
+                Cartas
               </Link>
               <Link 
                 to="/games-history" 
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Game History
+                Historial de Partidas
               </Link>
               <Link 
                 to="/ai-recommendation" 
@@ -179,14 +179,14 @@ const Header: React.FC = () => {
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Rules
+                Reglas
               </Link>
               <Link 
                 to="/faq" 
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                FAQs
+                Preguntas Frecuentes
               </Link>
               <div className="flex flex-col space-y-2 pt-4 border-t border-slate-700">
                 {isAuthenticated ? (
@@ -209,7 +209,7 @@ const Header: React.FC = () => {
                       onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                       className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-left"
                     >
-                      Logout
+                      Cerrar Sesión
                     </button>
                   </>
                 ) : (
@@ -218,13 +218,13 @@ const Header: React.FC = () => {
                       onClick={handleLoginClick}
                       className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-left"
                     >
-                      Login
+                      Iniciar Sesión
                     </button>
                     <button 
                       onClick={handleSignupClick}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-left"
                     >
-                      Sign Up
+                      Registrarse
                     </button>
                   </>
                 )}

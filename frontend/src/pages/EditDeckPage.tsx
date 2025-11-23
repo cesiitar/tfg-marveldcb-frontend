@@ -301,7 +301,7 @@ const EditDeckPage: React.FC = () => {
       
       await apiService.updateDeck(deck.id!, updatedDeck, user.sub)
       
-      showToast('🎉 ¡Mazo actualizado exitosamente!', 'success')
+      showToast('Mazo actualizado exitosamente', 'success')
       
       // Redirigir a la página de mis mazos
       setTimeout(() => {

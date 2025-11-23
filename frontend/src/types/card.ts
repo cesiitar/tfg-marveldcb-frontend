@@ -46,6 +46,7 @@ export interface Deck {
   created_at?: string
   updated_at?: string
   favorite_count?: number  // Número de usuarios que han marcado este mazo como favorito
+  win_probability?: number  // Probabilidad de victoria (0-1) para mazos generados por IA
 }
 
 export interface DeckComment {
