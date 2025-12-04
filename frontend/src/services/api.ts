@@ -639,6 +639,83 @@ class ApiService {
       throw error
     }
   }
+
+  // Importar cartas faltantes desde MarvelCDB
+  async importMissingCards(
+    cardCodes: string[],
+    auth0Id?: string
+  ): Promise<{
+    imported: number
+    failed: number
+    skipped: number
+    message: string
+    errors?: Array<{ code: string; error: string }>
+  }> {
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (auth0Id) {
+        headers['X-Auth0-ID'] = auth0Id
+      }
+
+      const response = await fetch(`${API_BASE_URL}/cards/import-missing`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          card_codes: cardCodes
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage = 'Error al importar cartas'
+        try {
+          const parsed = JSON.parse(errorText)
+          errorMessage = parsed.detail || parsed.message || errorMessage
+        } catch {}
+        throw new Error(errorMessage)
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error importing missing cards:', error)
+      throw error
+    }
+  }
+
+  // Verificar qué cartas faltan en nuestra base de datos
+  async checkMissingCards(
+    cardCodes: string[]
+  ): Promise<{
+    missing: string[]
+    existing: string[]
+    total_checked: number
+  }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cards/check-missing`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          card_codes: cardCodes
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Error al verificar cartas faltantes')
+      }
+
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error('Error checking missing cards:', error)
+      throw error
+    }
+  }
 }
 
 export const apiService = new ApiService()

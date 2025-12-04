@@ -7,6 +7,7 @@ import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
 import { getClassColor } from '../utils/classColors'
 import ConfirmDialog from '../components/ConfirmDialog'
+import ImportDeckModal from '../components/ImportDeckModal'
 
 const MyDecksPage: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
@@ -19,6 +20,7 @@ const MyDecksPage: React.FC = () => {
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deckToDelete, setDeckToDelete] = useState<number | null>(null)
+  const [showImportModal, setShowImportModal] = useState(false)
 
   // Cargar mazos del usuario cuando se autentica
   const loadUserDecks = async () => {
@@ -243,6 +245,15 @@ const MyDecksPage: React.FC = () => {
                     />
                   </div>
                   <div className="flex gap-3">
+                <button
+                  onClick={() => setShowImportModal(true)}
+                  className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 font-medium flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  Importar desde MarvelCDB
+                </button>
                 <Link
                   to="/create-deck"
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium flex items-center gap-2"
@@ -461,6 +472,16 @@ const MyDecksPage: React.FC = () => {
         onCancel={() => {
           setShowDeleteConfirm(false)
           setDeckToDelete(null)
+        }}
+      />
+
+      {/* Import Deck Modal */}
+      <ImportDeckModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportSuccess={() => {
+          loadUserDecks()
+          setShowImportModal(false)
         }}
       />
     </div>

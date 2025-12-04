@@ -1,0 +1,323 @@
+import React, { useState } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
+import { marvelcdbService } from '../services/marvelcdbService'
+import { convertMarvelCDBDeck } from '../utils/marvelcdbConverter'
+import { apiService } from '../services/api'
+import { useToast } from './Toast'
+import { Deck } from '../types/card'
+
+interface ImportDeckModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onImportSuccess: () => void
+}
+
+const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
+  isOpen,
+  onClose,
+  onImportSuccess
+}) => {
+  const { user } = useAuth0()
+  const { showToast, ToastContainer } = useToast()
+  const [deckUrlOrId, setDeckUrlOrId] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [previewDeck, setPreviewDeck] = useState<Deck | null>(null)
+  const [cardCodes, setCardCodes] = useState<string[]>([]) // Códigos de MarvelCDB de las cartas
+  const [importing, setImporting] = useState(false)
+  const [importingCards, setImportingCards] = useState(false)
+
+  const handleClose = () => {
+    setDeckUrlOrId('')
+    setError(null)
+    setPreviewDeck(null)
+    setCardCodes([])
+    onClose()
+  }
+
+  const handlePreview = async () => {
+    if (!deckUrlOrId.trim()) {
+      setError('Por favor, ingresa una URL o ID de mazo de MarvelCDB')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setPreviewDeck(null)
+
+    try {
+      // Extraer el ID del mazo
+      const deckId = marvelcdbService.extractDeckIdFromUrl(deckUrlOrId.trim())
+      
+      if (!deckId) {
+        throw new Error('No se pudo extraer el ID del mazo. Por favor, verifica la URL o ID.')
+      }
+
+      // Obtener el mazo de MarvelCDB
+      const marvelcdbDeck = await marvelcdbService.getDeckById(deckId)
+      
+      // Obtener todas las cartas de MarvelCDB para el mapeo
+      const allMarvelcdbCards = await marvelcdbService.getAllCards()
+      const cardsMap = new Map(allMarvelcdbCards.map(card => [card.code, card]))
+      
+      // Convertir el mazo a nuestro formato
+      const convertedResult = await convertMarvelCDBDeck(marvelcdbDeck, cardsMap)
+      
+      // Crear un objeto Deck para preview (sin ID)
+      const preview: Deck = {
+        ...convertedResult.deck,
+        id: undefined
+      }
+      
+      setPreviewDeck(preview)
+      setCardCodes(convertedResult.cardCodes) // Guardar los códigos de las cartas
+      showToast('Mazo cargado correctamente. Revisa la vista previa y haz clic en "Importar" para guardarlo.', 'success')
+    } catch (err: any) {
+      console.error('Error previewing deck:', err)
+      const errorMessage = err.message || 'Error al cargar el mazo de MarvelCDB'
+      setError(errorMessage)
+      showToast(errorMessage, 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleImport = async () => {
+    if (!previewDeck || !user?.sub) {
+      setError('No hay mazo para importar o no estás autenticado')
+      return
+    }
+
+    setImporting(true)
+    setError(null)
+
+    try {
+      // Verificar que el nombre no esté duplicado
+      const allDecks = await apiService.getDecks()
+      const normalizedNewName = previewDeck.name.trim().toLowerCase()
+      const duplicateDeck = allDecks.find(deck => 
+        deck.name.trim().toLowerCase() === normalizedNewName
+      )
+      
+      if (duplicateDeck) {
+        throw new Error(`Ya existe un mazo con el nombre "${previewDeck.name}". Por favor, edita el nombre antes de importar.`)
+      }
+
+      // Opción B: Verificación previa e importación de cartas faltantes
+      if (cardCodes.length > 0) {
+        setImportingCards(true)
+        
+        try {
+          // 1. Verificar qué cartas faltan
+          const checkResult = await apiService.checkMissingCards(cardCodes)
+          
+          // 2. Si hay cartas faltantes, importarlas
+          if (checkResult.missing && checkResult.missing.length > 0) {
+            showToast(`Importando ${checkResult.missing.length} carta(s) faltante(s)...`, 'info')
+            
+            const importResult = await apiService.importMissingCards(checkResult.missing, user.sub)
+            
+            if (importResult.imported > 0) {
+              showToast(`${importResult.imported} carta(s) importada(s) exitosamente`, 'success')
+            }
+            
+            if (importResult.failed > 0) {
+              const failedCards = importResult.errors?.map(e => e.code).join(', ') || ''
+              console.warn(`${importResult.failed} carta(s) no se pudieron importar:`, failedCards)
+              // No lanzar error, continuar con la creación del mazo
+            }
+          }
+        } catch (importError: any) {
+          console.error('Error importing missing cards:', importError)
+          // No bloquear la creación del mazo si falla la importación
+          showToast('Algunas cartas no se pudieron importar, pero continuaremos con la creación del mazo', 'warning')
+        } finally {
+          setImportingCards(false)
+        }
+      }
+
+      // 3. Crear el mazo (ahora todas las cartas deberían existir)
+      const createdDeck = await apiService.createDeck(previewDeck, user.sub)
+      
+      showToast(`Mazo "${createdDeck.name}" importado exitosamente`, 'success')
+      handleClose()
+      onImportSuccess()
+    } catch (err: any) {
+      console.error('Error importing deck:', err)
+      const errorMessage = err.message || 'Error al importar el mazo'
+      setError(errorMessage)
+      showToast(errorMessage, 'error')
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Importar Mazo desde MarvelCDB
+              </h2>
+              <button
+                onClick={handleClose}
+                className="text-white hover:text-gray-200 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {/* Instrucciones */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-semibold text-blue-900 mb-2">¿Cómo importar un mazo?</h3>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
+                <li>Ve a <a href="https://marvelcdb.com/decklists" target="_blank" rel="noopener noreferrer" className="underline">MarvelCDB</a> y encuentra el mazo que quieres importar</li>
+                <li>Copia la URL del mazo (ej: https://marvelcdb.com/decklist/view/12345) o solo el ID (ej: 12345)</li>
+                <li>Pega la URL o ID en el campo de abajo y haz clic en "Vista Previa"</li>
+                <li>Revisa la información del mazo y haz clic en "Importar" para guardarlo en tus mazos</li>
+              </ol>
+            </div>
+
+            {/* Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                URL o ID del mazo de MarvelCDB
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={deckUrlOrId}
+                  onChange={(e) => setDeckUrlOrId(e.target.value)}
+                  placeholder="https://marvelcdb.com/decklist/view/12345 o solo 12345"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={loading || importing}
+                />
+                <button
+                  onClick={handlePreview}
+                  disabled={loading || importing || !deckUrlOrId.trim()}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  {loading ? 'Cargando...' : 'Vista Previa'}
+                </button>
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Preview */}
+            {previewDeck && (
+              <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Vista Previa del Mazo</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <span className="font-semibold text-gray-700">Nombre:</span>
+                    <span className="ml-2 text-gray-900">{previewDeck.name}</span>
+                  </div>
+                  
+                  {previewDeck.description && (
+                    <div>
+                      <span className="font-semibold text-gray-700">Descripción:</span>
+                      <p className="mt-1 text-gray-600 text-sm whitespace-pre-wrap">{previewDeck.description}</p>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <span className="font-semibold text-gray-700">Héroe:</span>
+                    <span className="ml-2 text-gray-900">{previewDeck.hero_name}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="font-semibold text-gray-700">Aspecto:</span>
+                    <span className="ml-2 text-gray-900 capitalize">{previewDeck.aspect}</span>
+                  </div>
+                  
+                  <div>
+                    <span className="font-semibold text-gray-700">Total de cartas:</span>
+                    <span className="ml-2 text-gray-900">
+                      {previewDeck.cards.reduce((sum, card) => sum + card.quantity, 0)} cartas
+                    </span>
+                  </div>
+                  
+                  <div>
+                    <span className="font-semibold text-gray-700">Tipos de cartas:</span>
+                    <span className="ml-2 text-gray-900">{previewDeck.cards.length} tipos diferentes</span>
+                  </div>
+                  
+                  {/* Lista de cartas */}
+                  <div className="mt-4">
+                    <h4 className="font-semibold text-gray-700 mb-2">Cartas del mazo:</h4>
+                    <div className="bg-white rounded-lg p-4 max-h-60 overflow-y-auto">
+                      <div className="space-y-1">
+                        {previewDeck.cards.map((card, index) => (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span className="text-gray-700">{card.card_name}</span>
+                            <span className="text-gray-500">x{card.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Advertencia sobre cartas faltantes */}
+                  {previewDeck.description && previewDeck.description.includes('no se encontraron') && (
+                    <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <div className="text-sm text-yellow-800">
+                          <p className="font-semibold mb-1">Advertencia: Algunas cartas no se encontraron</p>
+                          <p className="text-xs">El mazo se importará pero puede estar incompleto. Revisa la descripción para más detalles.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={handleImport}
+                    disabled={importing || importingCards}
+                    className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                  >
+                    {importingCards ? 'Importando cartas...' : importing ? 'Importando mazo...' : 'Importar Mazo'}
+                  </button>
+                  <button
+                    onClick={() => setPreviewDeck(null)}
+                    disabled={importing}
+                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors font-medium"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <ToastContainer />
+    </>
+  )
+}
+
+export default ImportDeckModal
+
