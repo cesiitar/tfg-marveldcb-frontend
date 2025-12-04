@@ -38,12 +38,13 @@ function normalizeHeroName(marvelcdbHeroName?: string): string {
 }
 
 /**
- * Busca una carta en nuestra base de datos por nombre y set
+ * Busca una carta en nuestra base de datos por nombre, set y aspecto
  */
 async function findCardInOurDB(
   cardName: string,
-  packCode?: string,
-  allCards?: Card[]
+  packCode: string | undefined,
+  allCards: Card[] | undefined,
+  expectedAspect?: string // Aspecto esperado de MarvelCDB
 ): Promise<Card | null> {
   try {
     // Si no tenemos todas las cartas, buscarlas
@@ -51,28 +52,69 @@ async function findCardInOurDB(
       allCards = await apiService.getAllCards()
     }
     
-    // Buscar por nombre exacto primero
+    // Normalizar el nombre para búsqueda
+    const normalizedName = cardName.toLowerCase().trim()
+    
+    // Mapear el aspecto esperado a nuestro formato
+    const mappedAspect = expectedAspect ? mapAspect(expectedAspect) : undefined
+    
+    // 1. Buscar por nombre exacto Y aspecto (si tenemos aspecto)
+    if (mappedAspect) {
+      let foundCard = allCards.find(c => 
+        c.name.toLowerCase() === normalizedName &&
+        c.clase === mappedAspect
+      )
+      
+      if (foundCard) {
+        return foundCard
+      }
+    }
+    
+    // 2. Buscar por nombre exacto Y set (si tenemos pack_code)
+    if (packCode) {
+      const normalizedPack = packCode.toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ')
+      let foundCard = allCards.find(c => 
+        c.name.toLowerCase() === normalizedName &&
+        (c.set.toLowerCase().includes(normalizedPack) || normalizedPack.includes(c.set.toLowerCase()))
+      )
+      
+      // Si encontramos y tenemos aspecto, verificar que coincida
+      if (foundCard && mappedAspect) {
+        if (foundCard.clase === mappedAspect) {
+          return foundCard
+        }
+        // Si no coincide el aspecto, seguir buscando
+      } else if (foundCard) {
+        return foundCard
+      }
+    }
+    
+    // 3. Buscar por nombre exacto solamente
     let foundCard = allCards.find(c => 
-      c.name.toLowerCase() === cardName.toLowerCase()
+      c.name.toLowerCase() === normalizedName
     )
     
-    // Si no se encuentra y tenemos pack_code, intentar buscar por set también
-    if (!foundCard && packCode) {
-      // Normalizar el nombre del pack (MarvelCDB usa códigos como "core", "spider_man")
-      const normalizedPack = packCode.toLowerCase().replace(/_/g, ' ')
+    // Si encontramos y tenemos aspecto, verificar que coincida
+    if (foundCard && mappedAspect) {
+      if (foundCard.clase === mappedAspect) {
+        return foundCard
+      }
+      // Si no coincide, buscar otra con el mismo nombre pero aspecto correcto
       foundCard = allCards.find(c => 
-        c.name.toLowerCase() === cardName.toLowerCase() &&
-        c.set.toLowerCase().includes(normalizedPack)
+        c.name.toLowerCase() === normalizedName &&
+        c.clase === mappedAspect
       )
     }
     
-    // Si aún no se encuentra, buscar por nombre parcial
-    if (!foundCard) {
-      foundCard = allCards.find(c => 
-        c.name.toLowerCase().includes(cardName.toLowerCase()) ||
-        cardName.toLowerCase().includes(c.name.toLowerCase())
-      )
+    if (foundCard) {
+      return foundCard
     }
+    
+    // 4. Último recurso: buscar por nombre parcial
+    foundCard = allCards.find(c => 
+      c.name.toLowerCase().includes(normalizedName) ||
+      normalizedName.includes(c.name.toLowerCase())
+    )
     
     return foundCard || null
   } catch (error) {
@@ -230,25 +272,29 @@ export async function convertMarvelCDBDeck(
         }
       }
       
-      // Buscar la carta en nuestra base de datos
+      // Mapear el aspecto esperado de la carta desde MarvelCDB
+      const expectedAspect = mapAspect(marvelcdbCard.faction_code)
+      
+      // Buscar la carta en nuestra base de datos usando nombre, set Y aspecto
       const ourCard = await findCardInOurDB(
         marvelcdbCard.name,
         marvelcdbCard.pack_code,
-        allOurCards
+        allOurCards,
+        marvelcdbCard.faction_code // Pasar el faction_code para buscar por aspecto
       )
       
       if (ourCard) {
-        // Mapear el aspecto de la carta desde MarvelCDB (faction_code)
-        // Esto es importante porque nuestra BD puede no tener el aspecto correcto
-        const cardAspect = mapAspect(marvelcdbCard.faction_code) || ourCard.clase
+        // Usar el aspecto mapeado de MarvelCDB (faction_code), no el de nuestra BD
+        // Esto asegura que el aspecto sea correcto según MarvelCDB
+        const cardAspect = expectedAspect || ourCard.clase
         
         deckCards.push({
-          card_id: ourCard.id,
-          card_name: ourCard.name,
+          card_id: ourCard.id, // ID correcto de nuestra BD
+          card_name: ourCard.name, // Nombre de nuestra BD (debe coincidir)
           quantity: quantity,
           set: ourCard.set,
           type: ourCard.type,
-          clase: cardAspect // Usar el aspecto mapeado de MarvelCDB, no el de nuestra BD
+          clase: cardAspect // Aspecto mapeado desde MarvelCDB (faction_code)
         })
       } else {
         notFoundCards.push(marvelcdbCard.name)
