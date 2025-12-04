@@ -10,6 +10,44 @@ Para solucionar esto, necesitamos que el backend implemente **2 endpoints** que 
 
 ## Endpoints Requeridos
 
+### 0. Buscar Carta por Código de MarvelCDB (IMPORTANTE)
+
+**Endpoint:** `GET /api/cards/marvelcdb-code/{code}`
+
+**Headers:**
+```
+Content-Type: application/json
+```
+
+**Response (éxito):**
+```json
+{
+  "card": {
+    "id": 123,
+    "name": "Spider-Man",
+    "clase": "aggression",
+    "type": "hero",
+    "set": "Core Set",
+    "cost": 0
+  }
+}
+```
+
+**Response (no encontrada):**
+```
+Status: 404 Not Found
+```
+
+**Lógica:**
+- Recibir el código de MarvelCDB (ej: "01001")
+- Buscar en nuestra BD la carta que tenga ese código almacenado
+- Devolver la carta completa con todos sus datos
+- Si no existe, devolver 404
+
+**Nota:** Este endpoint es crítico para la importación de mazos. Cuando importas una carta desde MarvelCDB, debes guardar el `code` de MarvelCDB en tu BD para poder buscarla después.
+
+---
+
 ### 1. Verificar Cartas Faltantes
 
 **Endpoint:** `POST /api/cards/check-missing`
@@ -122,12 +160,14 @@ Cuando haces `GET https://marvelcdb.com/api/public/card/{code}`, recibes un JSON
 
 | Campo MarvelCDB | Campo Nuestra BD | Notas |
 |----------------|------------------|-------|
-| `code` | (usar como referencia única) | Código único de MarvelCDB |
+| `code` | **`marvelcdb_code`** (NUEVO CAMPO) | **CRÍTICO: Guardar este código para poder buscar cartas después** |
 | `name` | `name` | Nombre de la carta |
 | `faction_code` | `clase` | Ver mapeo de aspectos abajo |
 | `type_code` | `type` | Ver mapeo de tipos abajo |
 | `pack_code` | `set` | Nombre del pack/set |
 | `cost` | `cost` | Coste de la carta |
+
+**IMPORTANTE:** Debes guardar el `code` de MarvelCDB en un campo `marvelcdb_code` en tu tabla de cartas. Esto permite buscar cartas de forma única y precisa, evitando problemas con nombres duplicados o aspectos incorrectos.
 
 ### Mapeo de Aspectos (`faction_code` → `clase`)
 
@@ -225,7 +265,7 @@ def import_missing_cards(card_codes: List[str]):
                 "type": type_map.get(marvelcdb_card["type_code"], "event"),
                 "set": marvelcdb_card.get("pack_code", ""),
                 "cost": marvelcdb_card.get("cost", 0),
-                # Guardar también el code de MarvelCDB para referencia futura
+                # CRÍTICO: Guardar el code de MarvelCDB para poder buscar después
                 "marvelcdb_code": code
             }
             
@@ -253,10 +293,12 @@ def import_missing_cards(card_codes: List[str]):
 
 ## Consideraciones Importantes
 
-### 1. Referencia única de cartas
+### 1. Referencia única de cartas (CRÍTICO)
 - El `code` de MarvelCDB debe usarse como referencia única
-- Guardar el `code` en nuestra BD para evitar duplicados
-- Al verificar si existe, buscar por `code` (no por nombre)
+- **DEBES guardar el `code` en un campo `marvelcdb_code` en tu tabla de cartas**
+- Al verificar si existe, buscar por `marvelcdb_code` (no por nombre)
+- Al buscar cartas, usar el endpoint `GET /api/cards/marvelcdb-code/{code}` para obtener la carta correcta
+- Esto evita problemas con nombres duplicados o aspectos incorrectos
 
 ### 2. Manejo de errores
 - Si una carta no existe en MarvelCDB → `failed++`, continuar con las demás

@@ -275,13 +275,22 @@ export async function convertMarvelCDBDeck(
       // Mapear el aspecto esperado de la carta desde MarvelCDB
       const expectedAspect = mapAspect(marvelcdbCard.faction_code)
       
-      // Buscar la carta en nuestra base de datos usando nombre, set Y aspecto
-      const ourCard = await findCardInOurDB(
-        marvelcdbCard.name,
-        marvelcdbCard.pack_code,
-        allOurCards,
-        marvelcdbCard.faction_code // Pasar el faction_code para buscar por aspecto
-      )
+      // BUSCAR POR CÓDIGO DE MARVELCDB (más preciso y confiable)
+      let ourCard: Card | null = null
+      
+      // Intentar buscar por código de MarvelCDB primero
+      ourCard = await apiService.getCardByMarvelCDBCode(cardCode)
+      
+      // Si no se encuentra por código, buscar por nombre, set Y aspecto (fallback)
+      if (!ourCard) {
+        console.warn(`Carta ${cardCode} no encontrada por código, buscando por nombre...`)
+        ourCard = await findCardInOurDB(
+          marvelcdbCard.name,
+          marvelcdbCard.pack_code,
+          allOurCards,
+          marvelcdbCard.faction_code // Pasar el faction_code para buscar por aspecto
+        )
+      }
       
       if (ourCard) {
         // Usar el aspecto mapeado de MarvelCDB (faction_code), no el de nuestra BD
@@ -289,8 +298,8 @@ export async function convertMarvelCDBDeck(
         const cardAspect = expectedAspect || ourCard.clase
         
         deckCards.push({
-          card_id: ourCard.id, // ID correcto de nuestra BD
-          card_name: ourCard.name, // Nombre de nuestra BD (debe coincidir)
+          card_id: ourCard.id, // ID correcto de nuestra BD (obtenido por código de MarvelCDB)
+          card_name: ourCard.name, // Nombre de nuestra BD
           quantity: quantity,
           set: ourCard.set,
           type: ourCard.type,

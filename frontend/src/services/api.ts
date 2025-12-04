@@ -56,6 +56,24 @@ class ApiService {
     }
   }
 
+  // Buscar carta por código de MarvelCDB
+  async getCardByMarvelCDBCode(marvelcdbCode: string): Promise<Card | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/cards/marvelcdb-code/${marvelcdbCode}`)
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null // Carta no encontrada
+        }
+        throw new Error('Error al buscar la carta por código de MarvelCDB')
+      }
+      const data = await response.json()
+      return data.card || data
+    } catch (error) {
+      console.error('Error fetching card by MarvelCDB code:', error)
+      return null
+    }
+  }
+
   async searchCards(filters: {
     name?: string
     aspect?: string
