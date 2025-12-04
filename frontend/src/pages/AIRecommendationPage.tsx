@@ -460,7 +460,7 @@ const AIRecommendationPage: React.FC = () => {
                           </div>
                           {deck.aspect && (
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-gray-700">Clase:</span>
+                              <span className="font-semibold text-gray-700">Aspecto:</span>
                               <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getClassPillClasses(deck.aspect)}`}>
                                 {deck.aspect}
                               </span>
@@ -526,7 +526,7 @@ const AIRecommendationPage: React.FC = () => {
                         </div>
                         {selectedDeck.aspect && (
                           <div>
-                            <p className="text-sm font-semibold text-blue-800 mb-1">Clase</p>
+                            <p className="text-sm font-semibold text-blue-800 mb-1">Aspecto</p>
                             <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getClassPillClasses(selectedDeck.aspect)}`}>
                               {selectedDeck.aspect}
                             </span>
@@ -574,7 +574,7 @@ const AIRecommendationPage: React.FC = () => {
                       
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                         <p className="text-sm text-blue-800">
-                          <span className="font-semibold">Seleccionado automáticamente por IA:</span> La inteligencia artificial ha elegido el mejor héroe y clase para enfrentar a este villano.
+                          <span className="font-semibold">Seleccionado automáticamente por IA:</span> La inteligencia artificial ha elegido el mejor héroe y aspecto para enfrentar a este villano.
                         </p>
                       </div>
                       

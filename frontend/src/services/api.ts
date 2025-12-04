@@ -593,52 +593,6 @@ class ApiService {
     }
   }
 
-  // Obtener recomendaciones de IA para villanos
-  async getVillainRecommendations(
-    deckData: {
-      hero_id: number
-      aspect: string
-      cards: Array<{ card_id: number; card_name: string; quantity: number }>
-      villain_id?: number
-      difficulty?: 'normal' | 'expert'
-    },
-    auth0Id: string
-  ): Promise<{
-    recommendations: Array<{
-      villain_id: number
-      villain_name: string
-      win_probability: number
-      recommendation: 'recommended' | 'neutral' | 'not_recommended'
-      confidence: string
-      reason: string
-    }>
-  }> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/recommendations/villain`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Auth0-ID': auth0Id,
-        },
-        body: JSON.stringify(deckData),
-      })
-
-      if (!response.ok) {
-        if (response.status === 503) {
-          const errorData = await response.json().catch(() => ({ detail: 'Modelo de IA no disponible' }))
-          throw new Error(errorData.detail || 'Modelo de IA no disponible. Necesita ser entrenado primero.')
-        }
-        throw new Error('Error al obtener recomendaciones de IA')
-      }
-
-      const data = await response.json()
-      return data
-    } catch (error) {
-      console.error('Error fetching AI recommendations:', error)
-      throw error
-    }
-  }
-
   // Generar mazo basado en villano (nuevo enfoque)
   async generateDeckForVillain(
     data: {

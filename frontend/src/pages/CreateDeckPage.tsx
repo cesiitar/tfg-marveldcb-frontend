@@ -17,7 +17,6 @@ const CreateDeckPage: React.FC = () => {
   const [heroCards, setHeroCards] = useState<Card[]>([])
   const [deckName, setDeckName] = useState<string>('')
   const [deckDescription, setDeckDescription] = useState<string>('')
-  const [useAI, setUseAI] = useState<boolean>(false)
   const [creationMode, setCreationMode] = useState<'manual' | 'ai' | null>(null) // null = no elegido, 'manual' = crear manualmente, 'ai' = usar IA
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -124,8 +123,7 @@ const CreateDeckPage: React.FC = () => {
     // El mazo se creará cuando se guarde la configuración de la partida
     navigate('/configure-game', { 
       state: { 
-        deckData: deckData, // Pasar los datos del mazo en lugar del deckId
-        useAI: useAI // Pasar si el usuario quiere usar IA
+        deckData: deckData // Pasar los datos del mazo en lugar del deckId
       } 
     })
   }
@@ -175,7 +173,7 @@ const CreateDeckPage: React.FC = () => {
                 <h2 className="text-xl font-bold text-gray-900">Crear Manualmente</h2>
               </div>
               <p className="text-gray-600">
-                Elige tu héroe, clase y selecciona las cartas una por una. Tú tienes el control total de tu mazo.
+                Elige tu héroe, aspecto y selecciona las cartas una por una. Tú tienes el control total de tu mazo.
               </p>
             </button>
 
@@ -246,10 +244,10 @@ const CreateDeckPage: React.FC = () => {
             </select>
           </div>
 
-          {/* Selección de clase */}
+          {/* Selección de aspecto */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Selecciona una Clase *
+              Selecciona un Aspecto *
             </label>
             <select
               value={selectedAspect}
@@ -257,7 +255,7 @@ const CreateDeckPage: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
               disabled={!selectedHero}
             >
-              <option value="">Selecciona una clase...</option>
+              <option value="">Selecciona un aspecto...</option>
               <option value="aggression">Aggression</option>
               <option value="justice">Justice</option>
               <option value="leadership">Leadership</option>
@@ -303,7 +301,7 @@ const CreateDeckPage: React.FC = () => {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="text-sm text-blue-700 mb-3">
                   <p><strong>Héroe:</strong> {selectedHeroName}</p>
-                  <p><strong>Clase:</strong> {selectedAspect || 'No seleccionado'}</p>
+                  <p><strong>Aspecto:</strong> {selectedAspect || 'No seleccionado'}</p>
                   <p><strong>Cartas del héroe:</strong> {heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)}</p>
                 </div>
                 <div className="max-h-40 overflow-y-auto space-y-2">
@@ -325,30 +323,6 @@ const CreateDeckPage: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Opción de IA */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <label className="flex items-start space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={useAI}
-                onChange={(e) => setUseAI(e.target.checked)}
-                className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <div className="flex-1">
-                <div className="flex items-center space-x-2">
-                  <span className="text-lg">🤖</span>
-                  <span className="font-medium text-gray-900">
-                    Usar ayuda de IA para recomendaciones
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  La IA analizará tu mazo y te recomendará los mejores villanos para enfrentar, 
-                  basándose en partidas similares jugadas por otros usuarios.
-                </p>
-              </div>
-            </label>
-          </div>
 
           {/* Botón continuar */}
           <button

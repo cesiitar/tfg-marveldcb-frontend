@@ -8,7 +8,7 @@ const FAQPage: React.FC = () => {
   const faqs = [
     {
       question: "¿Qué es AIForge?",
-      answer: "AIForge es una plataforma web diseñada para crear y optimizar mazos de Marvel Champions usando inteligencia artificial. Permite crear mazos personalizados, explorar todas las cartas disponibles, registrar tus partidas, obtener recomendaciones de IA basadas en villanos, y compartir tus creaciones con la comunidad."
+      answer: "AIForge es una plataforma web diseñada para crear y optimizar mazos de Marvel Champions usando inteligencia artificial. Permite crear mazos personalizados, explorar todas las cartas disponibles, registrar tus partidas, generar mazos optimizados con IA, y compartir tus creaciones con la comunidad."
     },
     {
       question: "¿Cómo puedo crear mi primer mazo?",
@@ -32,7 +32,7 @@ const FAQPage: React.FC = () => {
     },
     {
       question: "¿Cómo registro una partida?",
-      answer: "Después de crear un mazo, puedes configurar una partida desde la página 'Crear Mazo' o desde 'Configurar Partida'. Selecciona el villano, la dificultad, y registra el resultado (victoria o derrota). Esto ayuda a mejorar las recomendaciones de IA."
+      answer: "Después de crear un mazo, puedes registrar una partida desde la página 'Crear Mazo' o desde 'Registrar Partida'. Selecciona el villano, la dificultad, y registra el resultado (victoria o derrota). Esto ayuda a mejorar la generación de mazos con IA."
     },
     {
       question: "¿Es gratis usar la plataforma?",

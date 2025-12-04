@@ -283,7 +283,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Inteligencia Artificial</h3>
                 <p className="text-gray-600">
-                  Obtén recomendaciones inteligentes de villanos basadas en tu mazo. La IA aprende de tus partidas para sugerirte las mejores estrategias.
+                  Genera mazos optimizados con IA para enfrentar villanos específicos. La IA aprende de tus partidas para crear las mejores combinaciones de cartas.
                 </p>
               </div>
 

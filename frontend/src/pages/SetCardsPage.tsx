@@ -100,7 +100,7 @@ const SetCardsPage: React.FC = () => {
   const generateSetStats = (cards: Card[], viewType: string = 'general') => {
     let filteredCards = cards
     
-    // Filtrar cartas por clase si se selecciona una clase específica
+      // Filtrar cartas por aspecto si se selecciona un aspecto específico
     if (viewType !== 'general') {
       filteredCards = cards.filter(c => c.clase === viewType)
     }
@@ -118,23 +118,23 @@ const SetCardsPage: React.FC = () => {
       minCost: filteredCards.length > 0 ? Math.min(...filteredCards.map(c => c.cost)) : 0
     }
 
-    // Si es vista general, mostrar distribución por CLASES
+    // Si es vista general, mostrar distribución por ASPECTOS
     if (viewType === 'general') {
       const classDistribution = getAvailableClasses(cards)
       return [
         { value: stats.total, label: 'Total Cartas', color: 'text-blue-600' },
-        { value: classDistribution.find(c => c.value === 'hero')?.count || 0, label: 'Clase Hero', color: 'text-orange-600' },
-        { value: classDistribution.find(c => c.value === 'basic')?.count || 0, label: 'Clase Basic', color: 'text-gray-600' },
-        { value: classDistribution.find(c => c.value === 'aggression')?.count || 0, label: 'Clase Aggression', color: 'text-red-600' },
-        { value: classDistribution.find(c => c.value === 'justice')?.count || 0, label: 'Clase Justice', color: 'text-blue-500' },
-        { value: classDistribution.find(c => c.value === 'leadership')?.count || 0, label: 'Clase Leadership', color: 'text-yellow-600' },
-        { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Clase Protection', color: 'text-emerald-600' },
-        { value: classDistribution.find(c => c.value === 'encounter')?.count || 0, label: 'Clase Encounter', color: 'text-red-900' },
-        { value: classDistribution.find(c => c.value === 'campaign')?.count || 0, label: 'Clase Campaign', color: 'text-indigo-600' }
+        { value: classDistribution.find(c => c.value === 'hero')?.count || 0, label: 'Aspecto Hero', color: 'text-orange-600' },
+        { value: classDistribution.find(c => c.value === 'basic')?.count || 0, label: 'Aspecto Basic', color: 'text-gray-600' },
+        { value: classDistribution.find(c => c.value === 'aggression')?.count || 0, label: 'Aspecto Aggression', color: 'text-red-600' },
+        { value: classDistribution.find(c => c.value === 'justice')?.count || 0, label: 'Aspecto Justice', color: 'text-blue-500' },
+        { value: classDistribution.find(c => c.value === 'leadership')?.count || 0, label: 'Aspecto Leadership', color: 'text-yellow-600' },
+        { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Aspecto Protection', color: 'text-emerald-600' },
+        { value: classDistribution.find(c => c.value === 'encounter')?.count || 0, label: 'Aspecto Encounter', color: 'text-red-900' },
+        { value: classDistribution.find(c => c.value === 'campaign')?.count || 0, label: 'Aspecto Campaign', color: 'text-indigo-600' }
       ].filter(stat => stat.value > 0) // Solo mostrar clases que existen
     }
     
-    // Si es vista por clase, mostrar estadísticas detalladas de esa clase
+    // Si es vista por aspecto, mostrar estadísticas detalladas de ese aspecto
     const classStats = [
       { value: stats.total, label: 'Total', color: 'text-blue-600' },
       { value: stats.heroes, label: 'Héroes', color: 'text-red-600' },
@@ -300,7 +300,7 @@ const SetCardsPage: React.FC = () => {
                   className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
                 >
                   <option value="tipo">Tipo (héroes primero)</option>
-                  <option value="clase">Clase</option>
+                  <option value="clase">Aspecto</option>
                   <option value="nombre">Nombre</option>
                   <option value="fuerza">Fuerza (coste)</option>
                 </select>
@@ -358,7 +358,7 @@ const SetCardsPage: React.FC = () => {
                     
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-600 text-sm">Clase:</span>
+                        <span className="text-gray-600 text-sm">Aspecto:</span>
                         <span className={`font-semibold capitalize px-2 py-1 rounded-full text-xs ${getClassBadgeStyle(card.clase)}`}>
                           {card.clase}
                         </span>

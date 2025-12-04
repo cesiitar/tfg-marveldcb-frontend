@@ -352,7 +352,7 @@ const DecksPage: React.FC = () => {
                 onChange={(e) => setAspectFilter(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
-                <option value="">Todas las clases</option>
+                <option value="">Todos los aspectos</option>
                 {availableAspects.map(a => (
                   <option key={a} value={a}>{a.charAt(0).toUpperCase() + a.slice(1)}</option>
                 ))}

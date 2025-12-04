@@ -18,22 +18,11 @@ const ConfigureGamePage: React.FC = () => {
   const [saving, setSaving] = useState(false)
   const [villains, setVillains] = useState<{ id: number; name: string }[]>([])
   const [loadingVillains, setLoadingVillains] = useState(true)
-  const [aiRecommendations, setAiRecommendations] = useState<Array<{
-    villain_id: number
-    villain_name: string
-    win_probability: number
-    recommendation: 'recommended' | 'neutral' | 'not_recommended'
-    confidence: string
-    reason: string
-  }>>([])
-  const [loadingAI, setLoadingAI] = useState(false)
-  const [aiError, setAiError] = useState<string | null>(null)
   
   // Obtener los datos del mazo desde la navegación
   // Puede ser un mazo nuevo (sin ID) o un mazo existente (con ID)
   const deckData = location.state?.deckData as Deck | Omit<Deck, 'id' | 'created_at' | 'updated_at'> | undefined
   const existingDeckId = location.state?.existingDeckId as number | undefined
-  const useAI = location.state?.useAI as boolean | undefined || false
 
   // Cargar villanos al montar el componente
   useEffect(() => {
@@ -54,45 +43,6 @@ const ConfigureGamePage: React.FC = () => {
 
     loadVillains()
   }, []) // ← Quitar showToast de las dependencias para evitar bucle infinito
-
-  // Cargar recomendaciones de IA si está activada
-  useEffect(() => {
-    if (useAI && deckData && user?.sub && deckData.hero_id && deckData.aspect) {
-      loadAIRecommendations()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useAI, difficulty]) // Recargar cuando cambie la dificultad
-
-  const loadAIRecommendations = async () => {
-    if (!user?.sub || !deckData || !deckData.hero_id || !deckData.aspect) return
-
-    setLoadingAI(true)
-    setAiError(null)
-    
-    try {
-      const response = await apiService.getVillainRecommendations(
-        {
-          hero_id: deckData.hero_id,
-          aspect: deckData.aspect,
-          cards: deckData.cards || [],
-          difficulty: difficulty
-        },
-        user.sub
-      )
-
-      setAiRecommendations(response.recommendations || [])
-      console.log('🤖 Recomendaciones de IA cargadas:', response.recommendations)
-    } catch (error: any) {
-      console.error('Error cargando recomendaciones IA:', error)
-      setAiError(error.message || 'Error al cargar recomendaciones de IA')
-      // No mostrar toast si el modelo no está disponible (error 503)
-      if (!error.message?.includes('no disponible')) {
-        showToast('Error al cargar recomendaciones de IA', 'error')
-      }
-    } finally {
-      setLoadingAI(false)
-    }
-  }
 
   const handleSave = async () => {
     if (!deckData) {
@@ -231,12 +181,12 @@ const ConfigureGamePage: React.FC = () => {
         <div className="relative z-10 text-center py-12 px-4">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold text-white mb-4">
-              Configurar Partida
+              Registrar Partida
             </h1>
             <p className="text-lg text-gray-300 mb-6">
               {existingDeckId 
-                ? 'Configura los detalles de una nueva partida con este mazo'
-                : 'Configura los detalles de tu partida para crear el mazo'}
+                ? 'Registra los detalles de una nueva partida con este mazo'
+                : 'Registra los detalles de tu partida para crear el mazo'}
             </p>
           </div>
         </div>
@@ -325,102 +275,6 @@ const ConfigureGamePage: React.FC = () => {
                   ))}
                 </select>
               </div>
-
-              {/* Recomendaciones de IA */}
-              {useAI && (
-                <div className="mt-4">
-                  {loadingAI ? (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-2">
-                        <svg className="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span className="text-sm font-medium text-blue-800">Analizando tu mazo con IA...</span>
-                      </div>
-                    </div>
-                  ) : aiError ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <div className="flex items-start">
-                        <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
-                        <div className="text-sm text-yellow-800">
-                          <p className="font-medium">Recomendaciones de IA no disponibles</p>
-                          <p className="mt-1">{aiError}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : aiRecommendations.length > 0 ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-                          <span className="text-lg mr-2">🤖</span>
-                          Recomendaciones de IA ({aiRecommendations.length} villanos)
-                        </h3>
-                        <div className="flex gap-2 text-xs">
-                          <span className="px-2 py-1 bg-green-100 text-green-700 rounded">
-                            ✅ {aiRecommendations.filter(r => r.recommendation === 'recommended').length}
-                          </span>
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">
-                            ⚠️ {aiRecommendations.filter(r => r.recommendation === 'neutral').length}
-                          </span>
-                          <span className="px-2 py-1 bg-red-100 text-red-700 rounded">
-                            ❌ {aiRecommendations.filter(r => r.recommendation === 'not_recommended').length}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
-                        {aiRecommendations.map((rec) => {
-                          const isSelected = rec.villain_id === villainId
-                          const bgColor = rec.recommendation === 'recommended'
-                            ? 'bg-green-50 border-green-200'
-                            : rec.recommendation === 'not_recommended'
-                            ? 'bg-red-50 border-red-200'
-                            : 'bg-yellow-50 border-yellow-200'
-                          
-                          const textColor = rec.recommendation === 'recommended'
-                            ? 'text-green-800'
-                            : rec.recommendation === 'not_recommended'
-                            ? 'text-red-800'
-                            : 'text-yellow-800'
-                          
-                          const icon = rec.recommendation === 'recommended'
-                            ? '✅'
-                            : rec.recommendation === 'not_recommended'
-                            ? '❌'
-                            : '⚠️'
-                          
-                          return (
-                            <div
-                              key={rec.villain_id}
-                              className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md ${bgColor} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-                              onClick={() => {
-                                setVillain(rec.villain_name)
-                                setVillainId(rec.villain_id)
-                              }}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-lg">{icon}</span>
-                                  <span className={`font-medium ${textColor}`}>{rec.villain_name}</span>
-                                </div>
-                                <span className={`text-sm font-semibold ${textColor}`}>
-                                  {Math.round(rec.win_probability * 100)}%
-                                </span>
-                              </div>
-                              <p className="text-xs text-gray-600 mt-1 ml-7">{rec.reason}</p>
-                            </div>
-                          )
-                        })}
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Haz clic en una recomendación para seleccionarla automáticamente
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              )}
             </div>
 
             {/* Resultado de la partida */}
@@ -538,7 +392,7 @@ const ConfigureGamePage: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <p className="text-xs text-gray-500">
-                      Puedes configurar la partida más tarde desde "Mis Mazos"
+                      Puedes registrar la partida más tarde desde "Mis Mazos"
                     </p>
                   </div>
                 </div>
