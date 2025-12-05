@@ -17,8 +17,10 @@ export interface MarvelCDBDeck {
   name: string
   description_md?: string
   description?: string
-  investigator_code?: string
-  investigator_name?: string
+  investigator_code?: string  // Campo antiguo (puede no estar presente)
+  investigator_name?: string  // Campo antiguo (puede no estar presente)
+  hero_code?: string         // Campo actual de la API
+  hero_name?: string         // Campo actual de la API
   aspect?: string
   slots: Record<string, number> // { card_code: quantity }
   version?: string
@@ -26,6 +28,7 @@ export interface MarvelCDBDeck {
   date_update?: string
   // Campos adicionales que pueden venir de la API
   slots_json?: string // Algunos mazos pueden tener slots como JSON string
+  meta?: string       // JSON string con metadata adicional (ej: {"aspect":"justice"})
 }
 
 export interface MarvelCDBDecklist {
@@ -56,15 +59,15 @@ class MarvelCDBService {
       }
       const data = await response.json()
       
-      // Debug: mostrar todos los campos que vienen de la API para identificar el héroe
-      console.log('=== MarvelCDB Deck Response ===')
-      console.log('Todos los campos:', Object.keys(data))
-      console.log('Datos completos:', JSON.stringify(data, null, 2))
-      console.log('investigator_name:', data.investigator_name)
-      console.log('investigator_code:', data.investigator_code)
-      console.log('investigator:', (data as any).investigator)
-      console.log('hero:', (data as any).hero)
-      console.log('================================')
+      // Debug: mostrar campos del héroe (solo si es necesario)
+      if (!data.hero_name && !data.investigator_name) {
+        console.warn('=== MarvelCDB Deck Response - Sin héroe ===')
+        console.warn('Campos disponibles:', Object.keys(data))
+        console.warn('hero_name:', data.hero_name)
+        console.warn('hero_code:', data.hero_code)
+        console.warn('investigator_name:', data.investigator_name)
+        console.warn('investigator_code:', data.investigator_code)
+      }
       
       // Si slots viene como string JSON, parsearlo
       if (data.slots_json && typeof data.slots_json === 'string') {

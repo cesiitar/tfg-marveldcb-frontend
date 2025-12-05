@@ -301,31 +301,26 @@ export async function convertMarvelCDBDeck(
     const allOurCards = await apiService.getAllCards()
     
     // Obtener información del héroe
-    // La API de MarvelCDB puede devolver el héroe en diferentes campos
-    // Revisar la documentación: https://marvelcdb.com/api/doc
-    // Posibles campos: investigator_name, investigator_code, investigator, hero, etc.
-    console.log('MarvelCDB Deck data:', JSON.stringify(marvelcdbDeck, null, 2))
-    
-    // Intentar obtener el héroe de diferentes campos posibles
-    const heroName = marvelcdbDeck.investigator_name || 
-                     marvelcdbDeck.investigator_code || 
-                     (marvelcdbDeck as any).investigator ||
-                     (marvelcdbDeck as any).hero ||
-                     (marvelcdbDeck as any).hero_name ||
+    // La API de MarvelCDB devuelve el héroe en hero_name y hero_code (campos actuales)
+    // También puede venir en investigator_name/investigator_code (campos antiguos)
+    const heroName = marvelcdbDeck.hero_name ||           // Campo actual
+                     marvelcdbDeck.investigator_name ||    // Campo antiguo
+                     marvelcdbDeck.hero_code ||            // Si no hay nombre, usar código
+                     marvelcdbDeck.investigator_code ||    // Campo antiguo
                      ''
-    const heroCode = marvelcdbDeck.investigator_code || 
-                     (marvelcdbDeck as any).investigator ||
-                     (marvelcdbDeck as any).hero_code ||
+    const heroCode = marvelcdbDeck.hero_code ||            // Campo actual
+                     marvelcdbDeck.investigator_code ||    // Campo antiguo
                      ''
     
     if (!heroName) {
       // Mostrar todos los campos disponibles para debug
       const availableFields = Object.keys(marvelcdbDeck).join(', ')
+      console.error('Campos disponibles en el mazo:', availableFields)
+      console.error('Datos completos del mazo:', JSON.stringify(marvelcdbDeck, null, 2))
       throw new Error(
         `No se pudo determinar el héroe del mazo. ` +
-        `El mazo debe tener investigator_name o investigator_code. ` +
-        `Campos disponibles en la respuesta: ${availableFields}. ` +
-        `Revisa la documentación de la API: https://marvelcdb.com/api/doc`
+        `Campos disponibles: ${availableFields}. ` +
+        `Revisa la consola para más detalles.`
       )
     }
     
