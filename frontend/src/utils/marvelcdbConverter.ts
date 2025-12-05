@@ -351,6 +351,7 @@ export async function convertMarvelCDBDeck(
     const notFoundCardCodes: string[] = [] // Códigos de cartas no encontradas
     
     for (const [cardCode, quantity] of Object.entries(marvelcdbDeck.slots)) {
+      // cardCode es el 'code' de MarvelCDB (ej: "01001"), NO un 'id' numérico
       // Guardar el código para posible importación
       allCardCodes.push(cardCode)
       // Obtener información de la carta de MarvelCDB
@@ -372,9 +373,10 @@ export async function convertMarvelCDBDeck(
       const expectedAspect = mapAspect(marvelcdbCard.faction_code)
       
       // BUSCAR POR CÓDIGO DE MARVELCDB (más preciso y confiable)
+      // cardCode es el 'code' de MarvelCDB (ej: "01001"), NO un 'id' numérico
       let ourCard: Card | null = null
       
-      // Intentar buscar por código de MarvelCDB primero
+      // Intentar buscar por código de MarvelCDB primero (usando el 'code', no 'id')
       ourCard = await apiService.getCardByMarvelCDBCode(cardCode)
       
       // Si no se encuentra por código, buscar por nombre, set Y aspecto (fallback)
