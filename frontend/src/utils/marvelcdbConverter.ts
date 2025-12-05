@@ -7,7 +7,7 @@ import { apiService } from '../services/api'
 /**
  * Mapea el aspecto de MarvelCDB al formato de nuestra aplicación
  */
-function mapAspect(marvelcdbAspect?: string): 'aggression' | 'justice' | 'leadership' | 'protection' | 'pool' | undefined {
+export function mapAspect(marvelcdbAspect?: string): 'aggression' | 'justice' | 'leadership' | 'protection' | 'pool' | undefined {
   if (!marvelcdbAspect) return undefined
   
   const normalized = marvelcdbAspect.toLowerCase().trim()
@@ -286,6 +286,7 @@ export interface ConvertedDeck {
   deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'>
   cardCodes: string[] // Códigos de MarvelCDB de todas las cartas del mazo
   notFoundCardCodes: string[] // Códigos de cartas que no se encontraron en nuestra BD
+  marvelcdbCards: Map<string, MarvelCDBCard> // Datos completos de las cartas de MarvelCDB (para importación)
 }
 
 /**
@@ -300,12 +301,32 @@ export async function convertMarvelCDBDeck(
     const allOurCards = await apiService.getAllCards()
     
     // Obtener información del héroe
-    // Usar investigator_name si está disponible, sino investigator_code
-    const heroName = marvelcdbDeck.investigator_name || marvelcdbDeck.investigator_code || ''
-    const heroCode = marvelcdbDeck.investigator_code
+    // La API de MarvelCDB puede devolver el héroe en diferentes campos
+    // Revisar la documentación: https://marvelcdb.com/api/doc
+    // Posibles campos: investigator_name, investigator_code, investigator, hero, etc.
+    console.log('MarvelCDB Deck data:', JSON.stringify(marvelcdbDeck, null, 2))
+    
+    // Intentar obtener el héroe de diferentes campos posibles
+    const heroName = marvelcdbDeck.investigator_name || 
+                     marvelcdbDeck.investigator_code || 
+                     (marvelcdbDeck as any).investigator ||
+                     (marvelcdbDeck as any).hero ||
+                     (marvelcdbDeck as any).hero_name ||
+                     ''
+    const heroCode = marvelcdbDeck.investigator_code || 
+                     (marvelcdbDeck as any).investigator ||
+                     (marvelcdbDeck as any).hero_code ||
+                     ''
     
     if (!heroName) {
-      throw new Error('No se pudo determinar el héroe del mazo. El mazo debe tener investigator_name o investigator_code.')
+      // Mostrar todos los campos disponibles para debug
+      const availableFields = Object.keys(marvelcdbDeck).join(', ')
+      throw new Error(
+        `No se pudo determinar el héroe del mazo. ` +
+        `El mazo debe tener investigator_name o investigator_code. ` +
+        `Campos disponibles en la respuesta: ${availableFields}. ` +
+        `Revisa la documentación de la API: https://marvelcdb.com/api/doc`
+      )
     }
     
     const heroInfo = await findHeroInOurDB(heroName, heroCode)
@@ -429,10 +450,23 @@ export async function convertMarvelCDBDeck(
       console.warn(`Algunas cartas no se encontraron (${notFoundCards.length} de ${totalCards}):`, notFoundCards)
     }
     
+    // Función para limpiar enlaces markdown de la descripción
+    const cleanMarkdownLinks = (text: string): string => {
+      if (!text) return ''
+      
+      // Reemplazar enlaces markdown [texto](/card/12345) con solo el texto
+      // Patrón: [texto](/card/12345) o [texto](/card/12345 "tooltip")
+      return text.replace(/\[([^\]]+)\]\(\/[^\)]+\)/g, '$1')
+    }
+    
+    // Limpiar la descripción de enlaces markdown
+    const rawDescription = marvelcdbDeck.description_md || marvelcdbDeck.description || ''
+    const cleanedDescription = cleanMarkdownLinks(rawDescription)
+    
     // Crear el mazo en nuestro formato
     const deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'> = {
       name: marvelcdbDeck.name || 'Mazo importado de MarvelCDB',
-      description: marvelcdbDeck.description_md || marvelcdbDeck.description || '',
+      description: cleanedDescription,
       hero_name: heroInfo.name,
       hero_id: heroInfo.id,
       aspect: aspect,
@@ -445,7 +479,8 @@ export async function convertMarvelCDBDeck(
     return {
       deck,
       cardCodes: allCardCodes,
-      notFoundCardCodes
+      notFoundCardCodes,
+      marvelcdbCards // Devolver el mapa completo de cartas para importación
     }
   } catch (error) {
     console.error('Error converting MarvelCDB deck:', error)

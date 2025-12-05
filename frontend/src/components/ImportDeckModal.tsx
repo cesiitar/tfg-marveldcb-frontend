@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { marvelcdbService } from '../services/marvelcdbService'
-import { convertMarvelCDBDeck } from '../utils/marvelcdbConverter'
+import { convertMarvelCDBDeck, mapAspect } from '../utils/marvelcdbConverter'
 import { apiService } from '../services/api'
 import { useToast } from './Toast'
 import { Deck } from '../types/card'
@@ -24,6 +24,8 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
   const [error, setError] = useState<string | null>(null)
   const [previewDeck, setPreviewDeck] = useState<Deck | null>(null)
   const [cardCodes, setCardCodes] = useState<string[]>([]) // Códigos de MarvelCDB de las cartas
+  const [marvelcdbCardsMap, setMarvelcdbCardsMap] = useState<Map<string, any>>(new Map()) // Datos completos de cartas
+  const [originalMarvelcdbDeck, setOriginalMarvelcdbDeck] = useState<any>(null) // Mazo original de MarvelCDB para obtener cantidades
   const [importing, setImporting] = useState(false)
   const [importingCards, setImportingCards] = useState(false)
 
@@ -32,6 +34,8 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
     setError(null)
     setPreviewDeck(null)
     setCardCodes([])
+    setMarvelcdbCardsMap(new Map())
+    setOriginalMarvelcdbDeck(null)
     onClose()
   }
 
@@ -55,6 +59,7 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
 
       // Obtener el mazo de MarvelCDB
       const marvelcdbDeck = await marvelcdbService.getDeckById(deckId)
+      setOriginalMarvelcdbDeck(marvelcdbDeck) // Guardar el mazo original para obtener cantidades después
       
       // Obtener todas las cartas de MarvelCDB para el mapeo
       const allMarvelcdbCards = await marvelcdbService.getAllCards()
@@ -71,6 +76,7 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
       
       setPreviewDeck(preview)
       setCardCodes(convertedResult.cardCodes) // Guardar los códigos de las cartas
+      setMarvelcdbCardsMap(convertedResult.marvelcdbCards) // Guardar los datos completos de las cartas
       showToast('Mazo cargado correctamente. Revisa la vista previa y haz clic en "Importar" para guardarlo.', 'success')
     } catch (err: any) {
       console.error('Error previewing deck:', err)
@@ -103,19 +109,46 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
         throw new Error(`Ya existe un mazo con el nombre "${previewDeck.name}". Por favor, edita el nombre antes de importar.`)
       }
 
-      // Opción B: Verificación previa e importación de cartas faltantes
+      // 1. Verificar qué cartas faltan (esto nos dice cuáles NO existen)
       if (cardCodes.length > 0) {
         setImportingCards(true)
         
         try {
-          // 1. Verificar qué cartas faltan
+          // checkResult.missing = cartas que NO existen en nuestra BD
+          // checkResult.existing = cartas que YA existen en nuestra BD
           const checkResult = await apiService.checkMissingCards(cardCodes)
           
-          // 2. Si hay cartas faltantes, importarlas
+          // 2. Si hay cartas faltantes, importarlas pasando TODOS los datos completos
+          // Solo pasamos datos de las cartas que NO existen (checkResult.missing)
           if (checkResult.missing && checkResult.missing.length > 0) {
             showToast(`Importando ${checkResult.missing.length} carta(s) faltante(s)...`, 'info')
             
-            const importResult = await apiService.importMissingCards(checkResult.missing, user.sub)
+            // Preparar datos completos SOLO de las cartas que NO existen
+            const cardsToImport = checkResult.missing
+              .map(code => {
+                const marvelcdbCard = marvelcdbCardsMap.get(code)
+                if (!marvelcdbCard) return null
+                
+                // Pasar TODOS los datos que tenemos de MarvelCDB
+                return {
+                  code: marvelcdbCard.code,
+                  name: marvelcdbCard.name,
+                  type_code: marvelcdbCard.type_code,
+                  faction_code: marvelcdbCard.faction_code,
+                  pack_code: marvelcdbCard.pack_code,
+                  // Añadir más campos si están disponibles en MarvelCDBCard
+                }
+              })
+              .filter(card => card !== null) as Array<{
+                code: string
+                name: string
+                type_code: string
+                faction_code: string
+                pack_code: string
+              }>
+            
+            // Pasar los datos completos de las cartas que NO existen
+            const importResult = await apiService.importMissingCards(undefined, cardsToImport, user.sub)
             
             if (importResult.imported > 0) {
               showToast(`${importResult.imported} carta(s) importada(s) exitosamente`, 'success')
@@ -124,20 +157,55 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
             if (importResult.failed > 0) {
               const failedCards = importResult.errors?.map(e => e.code).join(', ') || ''
               console.warn(`${importResult.failed} carta(s) no se pudieron importar:`, failedCards)
-              // No lanzar error, continuar con la creación del mazo
+              showToast(`Algunas cartas no se pudieron importar: ${failedCards}`, 'warning')
             }
           }
         } catch (importError: any) {
           console.error('Error importing missing cards:', importError)
-          // No bloquear la creación del mazo si falla la importación
-          showToast('Algunas cartas no se pudieron importar, pero continuaremos con la creación del mazo', 'warning')
+          showToast('Error al importar cartas faltantes', 'error')
+          throw importError // Lanzar error para no continuar si falla la importación
         } finally {
           setImportingCards(false)
         }
       }
 
-      // 3. Crear el mazo (ahora todas las cartas deberían existir)
-      const createdDeck = await apiService.createDeck(previewDeck, user.sub)
+      // 3. Buscar TODAS las cartas del mazo (las que existían + las recién creadas) para obtener sus IDs
+      showToast('Buscando todas las cartas del mazo...', 'info')
+      const finalDeckCards: any[] = []
+      
+      for (const [cardCode, quantity] of Object.entries(originalMarvelcdbDeck?.slots || {})) {
+        try {
+          // Buscar la carta por código de MarvelCDB
+          const card = await apiService.getCardByMarvelCDBCode(cardCode)
+          
+          if (card) {
+            const marvelcdbCard = marvelcdbCardsMap.get(cardCode)
+            const expectedAspect = marvelcdbCard ? mapAspect(marvelcdbCard.faction_code) : undefined
+            const cardAspect = expectedAspect || card.clase
+            
+            finalDeckCards.push({
+              card_id: card.id,
+              card_name: card.name,
+              quantity: quantity,
+              set: card.set,
+              type: card.type,
+              clase: cardAspect
+            })
+          } else {
+            console.warn(`No se pudo encontrar la carta ${cardCode} después de importarla`)
+          }
+        } catch (error) {
+          console.warn(`Error buscando la carta ${cardCode}:`, error)
+        }
+      }
+      
+      // 4. Crear el mazo con todas las cartas (existentes + recién creadas)
+      const deckToCreate = {
+        ...previewDeck,
+        cards: finalDeckCards
+      }
+      
+      const createdDeck = await apiService.createDeck(deckToCreate, user.sub)
       
       showToast(`Mazo "${createdDeck.name}" importado exitosamente`, 'success')
       handleClose()

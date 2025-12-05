@@ -56,6 +56,16 @@ class MarvelCDBService {
       }
       const data = await response.json()
       
+      // Debug: mostrar todos los campos que vienen de la API para identificar el héroe
+      console.log('=== MarvelCDB Deck Response ===')
+      console.log('Todos los campos:', Object.keys(data))
+      console.log('Datos completos:', JSON.stringify(data, null, 2))
+      console.log('investigator_name:', data.investigator_name)
+      console.log('investigator_code:', data.investigator_code)
+      console.log('investigator:', (data as any).investigator)
+      console.log('hero:', (data as any).hero)
+      console.log('================================')
+      
       // Si slots viene como string JSON, parsearlo
       if (data.slots_json && typeof data.slots_json === 'string') {
         try {

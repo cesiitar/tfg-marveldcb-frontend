@@ -659,8 +659,29 @@ class ApiService {
   }
 
   // Importar cartas faltantes desde MarvelCDB
+  // Si las cartas NO existen, pasar TODOS los datos completos (cards)
+  // Si solo pasas códigos, el backend buscará los datos en MarvelCDB
   async importMissingCards(
-    cardCodes: string[],
+    cardCodes?: string[], // Solo códigos (si no tenemos datos completos)
+    cards?: Array<{      // Datos completos (SI LA CARTA NO EXISTE - RECOMENDADO)
+      code: string
+      name: string
+      type_code: string
+      faction_code: string
+      pack_code: string
+      pack_name?: string
+      cost?: number
+      deck_limit?: number
+      health?: number
+      attack?: number
+      threat?: number
+      scheme?: number
+      traits?: string
+      text?: string
+      is_unique?: boolean
+      quantity?: number
+      card_set_name?: string
+    }>,
     auth0Id?: string
   ): Promise<{
     imported: number
@@ -678,12 +699,42 @@ class ApiService {
         headers['X-Auth0-ID'] = auth0Id
       }
 
+      // Construir el body: si tenemos datos completos, pasarlos; si no, solo códigos
+      const body: {
+        card_codes?: string[]
+        cards?: Array<{
+          code: string
+          name: string
+          type_code: string
+          faction_code: string
+          pack_code: string
+          pack_name?: string
+          cost?: number
+          deck_limit?: number
+          health?: number
+          attack?: number
+          threat?: number
+          scheme?: number
+          traits?: string
+          text?: string
+          is_unique?: boolean
+          quantity?: number
+          card_set_name?: string
+        }>
+      } = {}
+
+      if (cards && cards.length > 0) {
+        // SI LA CARTA NO EXISTE: pasar TODOS los datos completos
+        body.cards = cards
+      } else if (cardCodes && cardCodes.length > 0) {
+        // Fallback: solo códigos (el backend buscará los datos)
+        body.card_codes = cardCodes
+      }
+
       const response = await fetch(`${API_BASE_URL}/cards/import-missing`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          card_codes: cardCodes
-        })
+        body: JSON.stringify(body)
       })
 
       if (!response.ok) {
