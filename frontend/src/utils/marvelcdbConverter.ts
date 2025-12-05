@@ -1,7 +1,7 @@
 // Utilidades para convertir mazos de MarvelCDB al formato de nuestra aplicación
 
 import { MarvelCDBDeck, MarvelCDBCard } from '../services/marvelcdbService'
-import { Deck, DeckCard, Card } from '../types/card'
+import { Deck, DeckCard, Card, Hero } from '../types/card'
 import { apiService } from '../services/api'
 
 /**
@@ -24,6 +24,40 @@ function mapAspect(marvelcdbAspect?: string): 'aggression' | 'justice' | 'leader
 }
 
 /**
+ * Mapeo de códigos/nombres de héroes de MarvelCDB a nombres en nuestra BD
+ * Esto evita confusiones como Captain Marvel -> Adam Warlock
+ */
+const HERO_NAME_MAP: Record<string, string[]> = {
+  'captain_marvel': ['captain marvel', 'carol danvers'],
+  'spider_man': ['spider-man', 'peter parker'],
+  'iron_man': ['iron man', 'tony stark'],
+  'black_panther': ['black panther', 't\'challa'],
+  'she_hulk': ['she-hulk', 'jennifer walters'],
+  'adam_warlock': ['adam warlock'],
+  'ant_man': ['ant-man', 'scott lang'],
+  'wasp': ['wasp', 'janet van dyne'],
+  'captain_america': ['captain america', 'steve rogers'],
+  'ms_marvel': ['ms. marvel', 'kamala khan'],
+  'hulk': ['hulk', 'bruce banner'],
+  'thor': ['thor', 'odinson'],
+  'black_widow': ['black widow', 'natasha romanoff'],
+  'hawkeye': ['hawkeye', 'clint barton'],
+  'doctor_strange': ['doctor strange', 'stephen strange'],
+  'scarlet_witch': ['scarlet witch', 'wanda maximoff'],
+  'vision': ['vision'],
+  'gamora': ['gamora'],
+  'rocket': ['rocket raccoon', 'rocket'],
+  'groot': ['groot'],
+  'star_lord': ['star-lord', 'peter quill'],
+  'drax': ['drax'],
+  'venom': ['venom', 'eddie brock'],
+  'nova': ['nova', 'sam alexander'],
+  'spectrum': ['spectrum', 'monica rambeau'],
+  'war_machine': ['war machine', 'james rhodes'],
+  'valkyrie': ['valkyrie', 'brunnhilde'],
+}
+
+/**
  * Normaliza el nombre del héroe de MarvelCDB para búsqueda
  */
 function normalizeHeroName(marvelcdbHeroName?: string): string {
@@ -38,7 +72,36 @@ function normalizeHeroName(marvelcdbHeroName?: string): string {
 }
 
 /**
+ * Obtiene posibles nombres de un héroe basado en su código/nombre de MarvelCDB
+ */
+function getHeroNameVariations(heroName: string, heroCode?: string): string[] {
+  const normalized = normalizeHeroName(heroName)
+  const codeNormalized = heroCode ? normalizeHeroName(heroCode) : null
+  
+  const variations: string[] = [normalized]
+  
+  // Si tenemos código, buscar en el mapa
+  if (codeNormalized && HERO_NAME_MAP[codeNormalized.replace(/\s/g, '_')]) {
+    variations.push(...HERO_NAME_MAP[codeNormalized.replace(/\s/g, '_')])
+  }
+  
+  // Si tenemos nombre, buscar en el mapa
+  const nameKey = normalized.replace(/\s/g, '_')
+  if (HERO_NAME_MAP[nameKey]) {
+    variations.push(...HERO_NAME_MAP[nameKey])
+  }
+  
+  // Añadir el nombre original y código normalizado
+  if (codeNormalized && !variations.includes(codeNormalized)) {
+    variations.push(codeNormalized)
+  }
+  
+  return [...new Set(variations)] // Eliminar duplicados
+}
+
+/**
  * Busca una carta en nuestra base de datos por nombre, set y aspecto
+ * PRIORIDAD: nombre + aspecto O nombre + set (ambos criterios combinados)
  */
 async function findCardInOurDB(
   cardName: string,
@@ -58,39 +121,55 @@ async function findCardInOurDB(
     // Mapear el aspecto esperado a nuestro formato
     const mappedAspect = expectedAspect ? mapAspect(expectedAspect) : undefined
     
-    // 1. Buscar por nombre exacto Y aspecto (si tenemos aspecto)
-    if (mappedAspect) {
-      let foundCard = allCards.find(c => 
-        c.name.toLowerCase() === normalizedName &&
-        c.clase === mappedAspect
-      )
-      
+    // Normalizar pack code si está disponible
+    const normalizedPack = packCode ? packCode.toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ') : null
+    
+    // 1. PRIORIDAD: Buscar por nombre exacto Y aspecto Y set (si tenemos ambos)
+    if (mappedAspect && normalizedPack) {
+      const foundCard = allCards.find(c => {
+        const cardNameMatch = c.name.toLowerCase() === normalizedName
+        const aspectMatch = c.clase === mappedAspect
+        const setMatch = c.set.toLowerCase().includes(normalizedPack) || normalizedPack.includes(c.set.toLowerCase())
+        return cardNameMatch && aspectMatch && setMatch
+      })
       if (foundCard) {
         return foundCard
       }
     }
     
-    // 2. Buscar por nombre exacto Y set (si tenemos pack_code)
-    if (packCode) {
-      const normalizedPack = packCode.toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ')
-      let foundCard = allCards.find(c => 
+    // 2. Buscar por nombre exacto Y aspecto (si tenemos aspecto)
+    if (mappedAspect) {
+      const foundCard = allCards.find(c => 
         c.name.toLowerCase() === normalizedName &&
-        (c.set.toLowerCase().includes(normalizedPack) || normalizedPack.includes(c.set.toLowerCase()))
+        c.clase === mappedAspect
       )
-      
-      // Si encontramos y tenemos aspecto, verificar que coincida
-      if (foundCard && mappedAspect) {
-        if (foundCard.clase === mappedAspect) {
-          return foundCard
-        }
-        // Si no coincide el aspecto, seguir buscando
-      } else if (foundCard) {
+      if (foundCard) {
         return foundCard
       }
     }
     
-    // 3. Buscar por nombre exacto solamente
-    let foundCard = allCards.find(c => 
+    // 3. Buscar por nombre exacto Y set (si tenemos pack_code)
+    if (normalizedPack) {
+      const foundCard = allCards.find(c => {
+        const cardNameMatch = c.name.toLowerCase() === normalizedName
+        const setMatch = c.set.toLowerCase().includes(normalizedPack) || normalizedPack.includes(c.set.toLowerCase())
+        return cardNameMatch && setMatch
+      })
+      if (foundCard) {
+        // Si encontramos y tenemos aspecto, verificar que coincida
+        if (mappedAspect) {
+          if (foundCard.clase === mappedAspect) {
+            return foundCard
+          }
+          // Si no coincide el aspecto, seguir buscando
+        } else {
+          return foundCard
+        }
+      }
+    }
+    
+    // 4. Buscar por nombre exacto solamente (último recurso)
+    const foundCard = allCards.find(c => 
       c.name.toLowerCase() === normalizedName
     )
     
@@ -100,23 +179,26 @@ async function findCardInOurDB(
         return foundCard
       }
       // Si no coincide, buscar otra con el mismo nombre pero aspecto correcto
-      foundCard = allCards.find(c => 
+      const foundWithAspect = allCards.find(c => 
         c.name.toLowerCase() === normalizedName &&
         c.clase === mappedAspect
       )
+      if (foundWithAspect) {
+        return foundWithAspect
+      }
     }
     
     if (foundCard) {
       return foundCard
     }
     
-    // 4. Último recurso: buscar por nombre parcial
-    foundCard = allCards.find(c => 
+    // 5. Último recurso: buscar por nombre parcial (solo si no hay otra opción)
+    const partialMatch = allCards.find(c => 
       c.name.toLowerCase().includes(normalizedName) ||
       normalizedName.includes(c.name.toLowerCase())
     )
     
-    return foundCard || null
+    return partialMatch || null
   } catch (error) {
     console.error('Error finding card in our DB:', error)
     return null
@@ -125,6 +207,7 @@ async function findCardInOurDB(
 
 /**
  * Busca un héroe en nuestra base de datos por nombre o código
+ * Usa mapeo de nombres conocidos para evitar confusiones
  */
 async function findHeroInOurDB(
   heroName: string,
@@ -132,44 +215,57 @@ async function findHeroInOurDB(
 ): Promise<{ id: number; name: string } | null> {
   try {
     const heroes = await apiService.getHeroes()
-    const normalizedHeroName = normalizeHeroName(heroName)
     
     // Función helper para normalizar nombres de héroes
     const normalizeForComparison = (name: string): string => {
       return name.toLowerCase().replace(/[_-]/g, ' ').trim()
     }
     
-    // 1. Buscar por nombre exacto (normalizado)
-    let foundHero = heroes.find(h => {
-      const hName = normalizeForComparison(h.name)
-      const hHeroName = normalizeForComparison(h.hero_name)
-      return hName === normalizedHeroName || hHeroName === normalizedHeroName
-    })
+    // Obtener todas las variaciones posibles del nombre del héroe
+    const nameVariations = getHeroNameVariations(heroName, heroCode)
     
-    // 2. Si no se encuentra, buscar por nombre parcial
-    if (!foundHero) {
+    // 1. Buscar por todas las variaciones del nombre (exacto)
+    let foundHero: Hero | null = null
+    
+    for (const variation of nameVariations) {
       foundHero = heroes.find(h => {
         const hName = normalizeForComparison(h.name)
         const hHeroName = normalizeForComparison(h.hero_name)
-        return hName.includes(normalizedHeroName) || 
-               normalizedHeroName.includes(hName) ||
-               hHeroName.includes(normalizedHeroName) ||
-               normalizedHeroName.includes(hHeroName)
-      })
+        const hAlterEgo = normalizeForComparison(h.alter_ego || '')
+        const normalizedVariation = normalizeForComparison(variation)
+        
+        return hName === normalizedVariation || 
+               hHeroName === normalizedVariation ||
+               hAlterEgo === normalizedVariation
+      }) || null
+      
+      if (foundHero) {
+        break
+      }
     }
     
-    // 3. Si tenemos código y aún no encontramos, buscar por alter_ego o pack_name
-    if (!foundHero && heroCode) {
-      // Intentar buscar por código en el pack_name o alter_ego
-      const codeNormalized = heroCode.toLowerCase().replace(/_/g, ' ')
-      foundHero = heroes.find(h => {
-        const packName = normalizeForComparison(h.pack_name || '')
-        const alterEgo = normalizeForComparison(h.alter_ego || '')
-        return packName.includes(codeNormalized) || 
-               alterEgo.includes(codeNormalized) ||
-               codeNormalized.includes(packName) ||
-               codeNormalized.includes(alterEgo)
-      })
+    // 2. Si no se encuentra, buscar por nombre parcial (pero más estricto)
+    if (!foundHero) {
+      for (const variation of nameVariations) {
+        const normalizedVariation = normalizeForComparison(variation)
+        foundHero = heroes.find(h => {
+          const hName = normalizeForComparison(h.name)
+          const hHeroName = normalizeForComparison(h.hero_name)
+          const hAlterEgo = normalizeForComparison(h.alter_ego || '')
+          
+          // Buscar coincidencias parciales pero más estrictas
+          return (hName.includes(normalizedVariation) && normalizedVariation.length > 3) || 
+                 (normalizedVariation.includes(hName) && hName.length > 3) ||
+                 (hHeroName.includes(normalizedVariation) && normalizedVariation.length > 3) ||
+                 (normalizedVariation.includes(hHeroName) && hHeroName.length > 3) ||
+                 (hAlterEgo.includes(normalizedVariation) && normalizedVariation.length > 3) ||
+                 (normalizedVariation.includes(hAlterEgo) && hAlterEgo.length > 3)
+        }) || null
+        
+        if (foundHero) {
+          break
+        }
+      }
     }
     
     if (foundHero) {
@@ -293,8 +389,9 @@ export async function convertMarvelCDBDeck(
       }
       
       if (ourCard) {
-        // Usar el aspecto mapeado de MarvelCDB (faction_code), no el de nuestra BD
-        // Esto asegura que el aspecto sea correcto según MarvelCDB
+        // CRÍTICO: Usar SIEMPRE el aspecto mapeado de MarvelCDB (faction_code)
+        // NO usar el aspecto de nuestra BD porque puede ser incorrecto
+        // Si no tenemos aspecto de MarvelCDB, entonces usar el de nuestra BD como fallback
         const cardAspect = expectedAspect || ourCard.clase
         
         deckCards.push({
@@ -303,7 +400,7 @@ export async function convertMarvelCDBDeck(
           quantity: quantity,
           set: ourCard.set,
           type: ourCard.type,
-          clase: cardAspect // Aspecto mapeado desde MarvelCDB (faction_code)
+          clase: cardAspect // Aspecto mapeado desde MarvelCDB (faction_code) - CRÍTICO
         })
       } else {
         notFoundCards.push(marvelcdbCard.name)
