@@ -411,7 +411,7 @@ const MyDecksPage: React.FC = () => {
                                 console.error('Error guardando último mazo visto:', err)
                               }
                             }
-                            window.location.href = `/decks/${deck.id || 0}`
+                            navigate(`/decks/${deck.id || 0}`)
                           }}
                           className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
                         >

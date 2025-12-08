@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
@@ -6,6 +7,7 @@ import { useToast } from '../components/Toast'
 import { getClassColor } from '../utils/classColors'
 
 const DecksPage: React.FC = () => {
+  const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
   const [decks, setDecks] = useState<Deck[]>([])
@@ -417,7 +419,7 @@ const DecksPage: React.FC = () => {
                         console.error('Error guardando último mazo visto:', err)
                       }
                     }
-                    window.location.href = `/decks/${deck.id}`
+                    navigate(`/decks/${deck.id}`)
                   }}
                 >
                   {/* Header Section - Clean and Professional */}

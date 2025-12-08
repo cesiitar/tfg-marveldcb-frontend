@@ -31,11 +31,12 @@ const FavoritesPage: React.FC = () => {
         const favoritesWithCount = await Promise.all(
           favoritesData.map(async (deck) => {
             try {
-              // Obtener el mazo completo desde la API para tener el favorite_count actualizado
+              // Obtener el mazo completo desde la API para tener el favorite_count y creator_name actualizados
               const fullDeck = await apiService.getDeckById(deck.id!)
               return {
                 ...deck,
-                favorite_count: fullDeck.favorite_count ?? 0
+                favorite_count: fullDeck.favorite_count ?? 0,
+                creator_name: fullDeck.creator_name || deck.creator_name
               }
             } catch (err) {
               console.error(`Error obteniendo detalles del mazo ${deck.id}:`, err)
