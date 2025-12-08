@@ -27,10 +27,7 @@ const AIRecommendationPage: React.FC = () => {
   const [deckName, setDeckName] = useState<string>('')
   const [deckDescription, setDeckDescription] = useState<string>('')
   const [maxDecks, setMaxDecks] = useState<number>(3)
-  */
 
-  // Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables
-  /*
   // Cargar villanos al montar
   useEffect(() => {
     const loadVillains = async () => {
@@ -50,10 +47,7 @@ const AIRecommendationPage: React.FC = () => {
     loadVillains()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  */
 
-  // Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables
-  /*
   const handleGenerateDeck = async () => {
     if (!selectedVillainId) {
       showToast('Por favor, selecciona un villano', 'error')
@@ -132,9 +126,7 @@ const AIRecommendationPage: React.FC = () => {
       setDeckDescription('')
     }
   }
-  */
 
-  /*
   const handleUseDeck = async () => {
     if (!selectedDeck || !user?.sub) {
       showToast('Por favor, selecciona un mazo', 'error')
@@ -197,30 +189,37 @@ const AIRecommendationPage: React.FC = () => {
       navigate(`/decks/${selectedDeck.id}`)
     }
   }
-  */
 
-  // Mensaje temporal mientras se recopilan datos suficientes
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
+            <p className="text-gray-600 mb-6">Debes iniciar sesión para usar la recomendación de IA. Por favor, usa el botón de Login en el header para acceder.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="mb-6">
-            <svg className="w-16 h-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-lg shadow-lg mb-8 overflow-hidden">
+          <div className="absolute inset-0 bg-black opacity-30"></div>
+          <div className="relative z-10 px-6 py-8 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Recomendación de IA
+            </h1>
+            <p className="text-xl text-gray-200">
+              Selecciona un villano y genera un mazo optimizado con inteligencia artificial
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
-          <p className="text-gray-600 text-lg leading-relaxed">
-            Esta función se usará cuando veamos que hay datos suficientes para generar datos fiables.
-          </p>
         </div>
-        
-        {/* Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables */}
-        {/*
-        <div className={`grid gap-6 ${selectedDeck ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'}`}>
-          {/* Panel izquierdo: Selección */}
-          <div className={`space-y-6 ${selectedDeck ? 'lg:col-span-1' : ''}`}>
-            {/* Selección de Villano */}
+
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                 <svg className="w-6 h-6 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +252,6 @@ const AIRecommendationPage: React.FC = () => {
               )}
             </div>
 
-            {/* Dificultad */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                 <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,7 +293,6 @@ const AIRecommendationPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Número de mazos a generar */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                 <svg className="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -318,7 +315,6 @@ const AIRecommendationPage: React.FC = () => {
               </select>
             </div>
 
-            {/* Parches (Placeholder) */}
             <div className="bg-white rounded-lg shadow-lg p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
                 <svg className="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -336,7 +332,6 @@ const AIRecommendationPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Botón Generar */}
             <button
               onClick={handleGenerateDeck}
               disabled={!selectedVillainId || generatingDeck}
@@ -367,11 +362,9 @@ const AIRecommendationPage: React.FC = () => {
             )}
           </div>
 
-          {/* Panel derecho: Resultado */}
-          <div className={`space-y-6 ${selectedDeck ? 'lg:col-span-2' : ''}`}>
+          <div className="space-y-6">
             {generatedDecks.length > 0 ? (
               <>
-                {/* Mensaje informativo si hay menos mazos generados que solicitados */}
                 {totalGenerated < totalRequested && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div className="flex items-start">
@@ -393,7 +386,6 @@ const AIRecommendationPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Lista de mazos generados */}
                 <div className="space-y-4">
                   <h2 className="text-2xl font-bold text-gray-900 flex items-center">
                     <svg className="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -404,7 +396,6 @@ const AIRecommendationPage: React.FC = () => {
                   
                   {generatedDecks.map((deck, index) => {
                     const winProbability = deck.win_probability ?? null
-                    // Comparar mazos por hero_id, aspect y estructura de cartas
                     const isSelected = selectedDeck && 
                       selectedDeck.hero_id === deck.hero_id && 
                       selectedDeck.aspect === deck.aspect &&
@@ -420,7 +411,6 @@ const AIRecommendationPage: React.FC = () => {
                             : 'border-gray-200 hover:border-blue-300 hover:shadow-xl'
                         }`}
                       >
-                        {/* Header con ranking y probabilidad */}
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
@@ -449,7 +439,6 @@ const AIRecommendationPage: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Información del mazo */}
                         <div className="space-y-3">
                           <div className="flex items-center gap-2">
                             <span className="font-semibold text-gray-700">Héroe:</span>
@@ -471,7 +460,6 @@ const AIRecommendationPage: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Probabilidad destacada */}
                         {winProbability !== null && (
                           <div className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
                             <div className="flex items-center justify-between">
@@ -489,7 +477,6 @@ const AIRecommendationPage: React.FC = () => {
                   })}
                 </div>
 
-                {/* Panel de edición cuando hay un mazo seleccionado */}
                 {selectedDeck && (
                   <div className="bg-white rounded-lg shadow-xl p-8 border-t-4 border-blue-500 sticky top-4">
                     <div className="flex items-center justify-between mb-6">
@@ -514,7 +501,6 @@ const AIRecommendationPage: React.FC = () => {
                       </button>
                     </div>
                     
-                    {/* Información del mazo seleccionado destacada */}
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
@@ -575,7 +561,6 @@ const AIRecommendationPage: React.FC = () => {
                         </p>
                       </div>
                       
-                      {/* Vista previa del mazo */}
                       <div className="border-t border-gray-200 pt-6">
                         <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center justify-between">
                           <span>Lista de Cartas</span>
@@ -646,7 +631,6 @@ const AIRecommendationPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Botón para generar otros mazos */}
                 {!selectedDeck && (
                   <button
                     onClick={() => {
@@ -678,12 +662,30 @@ const AIRecommendationPage: React.FC = () => {
             )}
           </div>
         </div>
-        */}
       </div>
-      {/* <ToastContainer /> */}
+      <ToastContainer />
+    </div>
+  )
+  */
+  
+  // Mensaje temporal mientras se recopilan datos suficientes
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="mb-6">
+            <svg className="w-16 h-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            Esta función se usará cuando veamos que hay datos suficientes para generar datos fiables.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
 
 export default AIRecommendationPage
-
