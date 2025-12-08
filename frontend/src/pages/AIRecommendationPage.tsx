@@ -7,6 +7,8 @@ import { Deck } from '../types/card'
 import { getClassPillClasses } from '../utils/classColors'
 
 const AIRecommendationPage: React.FC = () => {
+  // Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables
+  /*
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth0()
   const { showToast, ToastContainer } = useToast()
@@ -25,7 +27,10 @@ const AIRecommendationPage: React.FC = () => {
   const [deckName, setDeckName] = useState<string>('')
   const [deckDescription, setDeckDescription] = useState<string>('')
   const [maxDecks, setMaxDecks] = useState<number>(3)
+  */
 
+  // Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables
+  /*
   // Cargar villanos al montar
   useEffect(() => {
     const loadVillains = async () => {
@@ -45,7 +50,10 @@ const AIRecommendationPage: React.FC = () => {
     loadVillains()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  */
 
+  // Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables
+  /*
   const handleGenerateDeck = async () => {
     if (!selectedVillainId) {
       showToast('Por favor, selecciona un villano', 'error')
@@ -124,7 +132,9 @@ const AIRecommendationPage: React.FC = () => {
       setDeckDescription('')
     }
   }
+  */
 
+  /*
   const handleUseDeck = async () => {
     if (!selectedDeck || !user?.sub) {
       showToast('Por favor, selecciona un mazo', 'error')
@@ -187,36 +197,26 @@ const AIRecommendationPage: React.FC = () => {
       navigate(`/decks/${selectedDeck.id}`)
     }
   }
+  */
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
-            <p className="text-gray-600 mb-6">Debes iniciar sesión para usar la recomendación de IA. Por favor, usa el botón de Login en el header para acceder.</p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
+  // Mensaje temporal mientras se recopilan datos suficientes
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-lg shadow-lg mb-8 overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-30"></div>
-          <div className="relative z-10 px-6 py-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Recomendación de IA
-            </h1>
-            <p className="text-xl text-gray-200">
-              Selecciona un villano y genera un mazo optimizado con inteligencia artificial
-            </p>
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="mb-6">
+            <svg className="w-16 h-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
           </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
+          <p className="text-gray-600 text-lg leading-relaxed">
+            Esta función se usará cuando veamos que hay datos suficientes para generar datos fiables.
+          </p>
         </div>
-
+        
+        {/* Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables */}
+        {/*
         <div className={`grid gap-6 ${selectedDeck ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'}`}>
           {/* Panel izquierdo: Selección */}
           <div className={`space-y-6 ${selectedDeck ? 'lg:col-span-1' : ''}`}>
@@ -678,8 +678,9 @@ const AIRecommendationPage: React.FC = () => {
             )}
           </div>
         </div>
+        */}
       </div>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </div>
   )
 }
