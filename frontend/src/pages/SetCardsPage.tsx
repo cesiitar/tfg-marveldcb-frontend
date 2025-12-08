@@ -137,13 +137,13 @@ const SetCardsPage: React.FC = () => {
     // Si es vista por aspecto, mostrar estadísticas detalladas de ese aspecto
     const classStats = [
       { value: stats.total, label: 'Total', color: 'text-blue-600' },
-      { value: stats.heroes, label: 'Héroes', color: 'text-red-600' },
-      { value: stats.allies, label: 'Aliados', color: 'text-blue-500' },
-      { value: stats.events, label: 'Eventos', color: 'text-purple-600' },
-      { value: stats.upgrades, label: 'Mejoras', color: 'text-green-600' },
-      { value: stats.supports, label: 'Apoyos', color: 'text-yellow-600' },
-      { value: stats.resources, label: 'Recursos', color: 'text-orange-600' },
-      { value: `${stats.minCost}-${stats.maxCost}`, label: 'Rango Coste', color: 'text-gray-600' }
+      { value: stats.heroes, label: 'Heroes', color: 'text-red-600' },
+      { value: stats.allies, label: 'Allies', color: 'text-blue-500' },
+      { value: stats.events, label: 'Events', color: 'text-purple-600' },
+      { value: stats.upgrades, label: 'Upgrades', color: 'text-green-600' },
+      { value: stats.supports, label: 'Supports', color: 'text-yellow-600' },
+      { value: stats.resources, label: 'Resources', color: 'text-orange-600' },
+      { value: `${stats.minCost}-${stats.maxCost}`, label: 'Cost Range', color: 'text-gray-600' }
     ]
     
     // Filtrar estadísticas que tengan valor 0 para mantener la UI limpia
@@ -162,8 +162,9 @@ const SetCardsPage: React.FC = () => {
   }
 
   const getStatsTitle = (viewType: string) => {
-    if (viewType === 'general') return 'Estadísticas del Set'
-    return `Estadísticas de ${viewType.charAt(0).toUpperCase() + viewType.slice(1)}`
+    if (viewType === 'general') return 'Set Statistics'
+    const aspectName = viewType.charAt(0).toUpperCase() + viewType.slice(1)
+    return `${aspectName} Statistics`
   }
 
   if (!set) {
