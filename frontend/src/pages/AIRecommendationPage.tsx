@@ -13,9 +13,8 @@ const AIRecommendationPage: React.FC = () => {
   
   const [villains, setVillains] = useState<{ id: number; name: string }[]>([])
   const [selectedVillainId, setSelectedVillainId] = useState<number | null>(null)
-  const [selectedVillainName, setSelectedVillainName] = useState<string>('')
   const [difficulty, setDifficulty] = useState<'normal' | 'expert'>('normal')
-  const [selectedPatches, setSelectedPatches] = useState<string[]>([]) // Placeholder para parches
+  const [selectedPatches] = useState<string[]>([]) // Placeholder para parches
   const [loadingVillains, setLoadingVillains] = useState(true)
   const [generatingDeck, setGeneratingDeck] = useState(false)
   const [generatedDecks, setGeneratedDecks] = useState<Deck[]>([])
@@ -241,8 +240,6 @@ const AIRecommendationPage: React.FC = () => {
                   onChange={(e) => {
                     const id = parseInt(e.target.value)
                     setSelectedVillainId(id || null)
-                    const villain = villains.find(v => v.id === id)
-                    setSelectedVillainName(villain?.name || '')
                   }}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
                 >

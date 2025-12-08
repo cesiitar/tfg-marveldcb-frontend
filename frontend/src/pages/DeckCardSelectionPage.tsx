@@ -24,7 +24,6 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   const [selectedCards, setSelectedCards] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
   const [basicSearchTerm, setBasicSearchTerm] = useState('')
   const [aspectSearchTerm, setAspectSearchTerm] = useState('')
   const [basicSetFilter, setBasicSetFilter] = useState<string>('')

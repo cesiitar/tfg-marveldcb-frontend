@@ -5,8 +5,8 @@ interface AuthContextType {
   user: User | undefined
   isAuthenticated: boolean
   isLoading: boolean
-  loginWithRedirect: () => void
-  logout: () => void
+  loginWithRedirect: (options?: any) => Promise<void>
+  logout: (options?: any) => void
   getAccessToken: () => Promise<string | undefined>
 }
 
@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Función para sincronizar usuario con el backend
   const syncUser = async (user: User) => {
     try {
-      const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api'
+      const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'https://marveldcb-backend.onrender.com/api'
       const response = await fetch(`${API_BASE_URL}/sync-user`, {
         method: 'POST',
         headers: {

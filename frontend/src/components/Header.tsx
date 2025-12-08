@@ -46,17 +46,17 @@ const Header: React.FC = () => {
   return (
     <header className="bg-slate-800 shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-3">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
+        <div className="flex items-center justify-between py-3">
+          {/* Logo - Izquierda del todo */}
+          <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
             <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
               <span className="text-white font-display font-bold text-2xl">A</span>
             </div>
             <span className="text-white font-display font-bold text-3xl">AI<span className="text-blue-400">Forge</span></span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          {/* Desktop Navigation - Centro (texto seguido) */}
+          <nav className="hidden md:flex space-x-8 flex-1 justify-center">
             <Link 
               to="/mydecks" 
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg"
@@ -95,8 +95,8 @@ const Header: React.FC = () => {
             </Link>
           </nav>
 
-          {/* Contacto y Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-6">
+          {/* Contacto y Auth Buttons - Derecha pegada a la esquina */}
+          <div className="hidden md:flex items-center space-x-6 flex-shrink-0">
             {/* Contacto */}
             <a
               href={`https://mail.google.com/mail/?view=cm&fs=1&to=aiforge.soporte@gmail.com&su=Reporte de Error - AIForge&body=Por favor, describe el error o sugerencia:`}

@@ -16,7 +16,7 @@ const CardsPage: React.FC = () => {
         setLoading(true)
         setError(null)
         const response = await apiService.getSets()
-        const setsData = response.sets || response
+        const setsData = Array.isArray(response) ? response : response.sets || []
         setSets(setsData)
         setFilteredSets(setsData)
       } catch (err) {
@@ -63,23 +63,6 @@ const CardsPage: React.FC = () => {
     return colors[index % colors.length]
   }
 
-  const getSetIcon = (index: number) => {
-    const icons = [
-      <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24" key={index}>
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-      </svg>,
-      <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24" key={index}>
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-      </svg>,
-      <svg className="w-8 h-8 text-yellow-600" fill="currentColor" viewBox="0 0 24 24" key={index}>
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-      </svg>,
-      <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24" key={index}>
-        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-      </svg>
-    ]
-    return icons[index % icons.length]
-  }
 
   if (loading) {
     return (

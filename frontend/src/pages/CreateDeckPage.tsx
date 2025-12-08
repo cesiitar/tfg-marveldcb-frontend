@@ -9,7 +9,7 @@ import { useToast } from '../components/Toast'
 const CreateDeckPage: React.FC = () => {
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
-  const { showToast, ToastContainer } = useToast()
+  const { ToastContainer } = useToast()
   const [heroes, setHeroes] = useState<Hero[]>([])
   const [selectedHero, setSelectedHero] = useState<number | null>(null)
   const [selectedHeroName, setSelectedHeroName] = useState<string>('')
@@ -18,7 +18,6 @@ const CreateDeckPage: React.FC = () => {
   const [deckName, setDeckName] = useState<string>('')
   const [deckDescription, setDeckDescription] = useState<string>('')
   const [creationMode, setCreationMode] = useState<'manual' | 'ai' | null>(null) // null = no elegido, 'manual' = crear manualmente, 'ai' = usar IA
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentStep, setCurrentStep] = useState<'setup' | 'cards'>('setup')
 
@@ -327,10 +326,10 @@ const CreateDeckPage: React.FC = () => {
           {/* Botón continuar */}
           <button
             onClick={handleContinueToCards}
-            disabled={loading || !selectedHero || !selectedAspect || !deckName.trim()}
+            disabled={!selectedHero || !selectedAspect || !deckName.trim()}
             className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
           >
-            {loading ? 'Cargando...' : 'Continuar a Selección de Cartas'}
+            Continuar a Selección de Cartas
           </button>
         </div>
       </div>

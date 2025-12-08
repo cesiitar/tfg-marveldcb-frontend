@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { marvelcdbService } from '../services/marvelcdbService'
-import { convertMarvelCDBDeck, mapAspect } from '../utils/marvelcdbConverter'
+import { convertMarvelCDBDeck } from '../utils/marvelcdbConverter'
 import { apiService } from '../services/api'
 import { useToast } from './Toast'
 import { Deck } from '../types/card'
@@ -157,7 +157,7 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
             if (importResult.failed > 0) {
               const failedCards = importResult.errors?.map(e => e.code).join(', ') || ''
               console.warn(`${importResult.failed} carta(s) no se pudieron importar:`, failedCards)
-              showToast(`Algunas cartas no se pudieron importar: ${failedCards}`, 'warning')
+              showToast(`Algunas cartas no se pudieron importar: ${failedCards}`, 'info')
             }
           }
         } catch (importError: any) {
@@ -179,17 +179,13 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
           const card = await apiService.getCardByMarvelCDBCode(cardCode)
           
           if (card) {
-            const marvelcdbCard = marvelcdbCardsMap.get(cardCode)
-            const expectedAspect = marvelcdbCard ? mapAspect(marvelcdbCard.faction_code) : undefined
-            const cardAspect = expectedAspect || card.clase
-            
             finalDeckCards.push({
               card_id: card.id,
               card_name: card.name,
               quantity: quantity,
               set: card.set,
               type: card.type,
-              clase: cardAspect
+              clase: card.clase
             })
           } else {
             console.warn(`No se pudo encontrar la carta ${cardCode} después de importarla`)
