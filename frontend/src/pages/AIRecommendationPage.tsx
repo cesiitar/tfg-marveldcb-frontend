@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+// Imports comentados temporalmente - se usarán cuando haya datos suficientes para generar datos fiables
+/*
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { useToast } from '../components/Toast'
 import { Deck } from '../types/card'
 import { getClassPillClasses } from '../utils/classColors'
+*/
 
 const AIRecommendationPage: React.FC = () => {
   // Código comentado temporalmente - se usará cuando haya datos suficientes para generar datos fiables
