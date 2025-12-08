@@ -15,8 +15,7 @@ const CardsPage: React.FC = () => {
       try {
         setLoading(true)
         setError(null)
-        const response = await apiService.getSets()
-        const setsData = Array.isArray(response) ? response : response.sets || []
+        const setsData = await apiService.getSets()
         setSets(setsData)
         setFilteredSets(setsData)
       } catch (err) {
