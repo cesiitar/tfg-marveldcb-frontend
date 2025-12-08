@@ -679,8 +679,11 @@ const AIRecommendationPage: React.FC = () => {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
-          <p className="text-gray-600 text-lg leading-relaxed">
+          <p className="text-gray-600 text-lg leading-relaxed mb-4">
             Esta función se usará cuando veamos que hay datos suficientes para generar datos fiables.
+          </p>
+          <p className="text-gray-500 text-base">
+            Estamos recopilando información de partidas para entrenar nuestro modelo de inteligencia artificial y poder ofrecerte recomendaciones precisas.
           </p>
         </div>
       </div>
