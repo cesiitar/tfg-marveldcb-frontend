@@ -372,7 +372,7 @@ const DeckDetailPage: React.FC = () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Columna izquierda - Descripción y estadísticas */}
+          {/* Columna izquierda - Descripción */}
           <div className="lg:col-span-1 space-y-6">
             {/* Descripción del mazo */}
             <div className="bg-white rounded-lg shadow-lg p-6">
@@ -385,93 +385,6 @@ const DeckDetailPage: React.FC = () => {
               <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                 {formatDescription(deck.description)}
               </p>
-            </div>
-
-            {/* Estadísticas de cartas */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Distribución por Aspecto
-              </h3>
-              {(() => {
-                const stats = deck.cards.reduce((acc: any, card: any) => {
-                  const clase = card.clase || 'basic'
-                  acc[clase] = (acc[clase] || 0) + card.quantity
-                  return acc
-                }, {})
-
-                const aspectStats = Object.entries(stats).map(([clase, count]) => ({
-                  clase,
-                  count: count as number,
-                  percentage: Math.round(((count as number) / totalCards) * 100)
-                })).sort((a, b) => b.count - a.count)
-
-                return (
-                  <div className="space-y-4">
-                    {aspectStats.map(({ clase, count, percentage }) => (
-                      <div key={clase} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-4 h-4 rounded-full ${getClassColor(clase)}`}></div>
-                          <span className="text-sm font-medium capitalize">{clase}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${getClassColor(clase)}`}
-                              style={{ width: `${percentage}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-gray-600 w-8 text-right">{count}</span>
-                          <span className="text-xs text-gray-500 w-8 text-right">{percentage}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              })()}
-            </div>
-
-            {/* Gráfico de tipos de cartas */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-                Tipos de Cartas
-              </h3>
-              {(() => {
-                const typeStats = deck.cards.reduce((acc: any, card: any) => {
-                  const type = card.type || 'unknown'
-                  acc[type] = (acc[type] || 0) + card.quantity
-                  return acc
-                }, {})
-
-                const sortedTypes = Object.entries(typeStats)
-                  .map(([type, count]) => ({ type, count: count as number }))
-                  .sort((a, b) => b.count - a.count)
-                  .slice(0, 6) // Mostrar solo los 6 tipos más comunes
-
-                return (
-                  <div className="space-y-3">
-                    {sortedTypes.map(({ type, count }) => (
-                      <div key={type} className="flex items-center justify-between text-sm">
-                        <span className="capitalize font-medium">{type.replace('_', ' ')}</span>
-                        <div className="flex items-center gap-3">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-gradient-to-r from-gray-400 to-gray-500 h-2 rounded-full"
-                              style={{ width: `${(count / totalCards) * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-gray-600 w-6 text-right">{count}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-              })()}
             </div>
           </div>
 
@@ -576,7 +489,97 @@ const DeckDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Comentarios debajo del mazo para evitar que los tape la descripción */}
+        {/* Estadísticas debajo del mazo */}
+        <div className="mt-8 grid lg:grid-cols-2 gap-6">
+          {/* Distribución por Aspecto */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Distribución por Aspecto
+            </h3>
+            {(() => {
+              const stats = deck.cards.reduce((acc: any, card: any) => {
+                const clase = card.clase || 'basic'
+                acc[clase] = (acc[clase] || 0) + card.quantity
+                return acc
+              }, {})
+
+              const aspectStats = Object.entries(stats).map(([clase, count]) => ({
+                clase,
+                count: count as number,
+                percentage: Math.round(((count as number) / totalCards) * 100)
+              })).sort((a, b) => b.count - a.count)
+
+              return (
+                <div className="space-y-4">
+                  {aspectStats.map(({ clase, count, percentage }) => (
+                    <div key={clase} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-4 h-4 rounded-full ${getClassColor(clase)}`}></div>
+                        <span className="text-sm font-medium capitalize">{clase}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-24 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full ${getClassColor(clase)}`}
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-gray-600 w-8 text-right">{count}</span>
+                        <span className="text-xs text-gray-500 w-8 text-right">{percentage}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+          </div>
+
+          {/* Tipos de cartas */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              Tipos de Cartas
+            </h3>
+            {(() => {
+              const typeStats = deck.cards.reduce((acc: any, card: any) => {
+                const type = card.type || 'unknown'
+                acc[type] = (acc[type] || 0) + card.quantity
+                return acc
+              }, {})
+
+              const sortedTypes = Object.entries(typeStats)
+                .map(([type, count]) => ({ type, count: count as number }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 6) // Mostrar solo los 6 tipos más comunes
+
+              return (
+                <div className="space-y-3">
+                  {sortedTypes.map(({ type, count }) => (
+                    <div key={type} className="flex items-center justify-between text-sm">
+                      <span className="capitalize font-medium">{type.replace('_', ' ')}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-gray-400 to-gray-500 h-2 rounded-full"
+                            style={{ width: `${(count / totalCards) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-gray-600 w-6 text-right">{count}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+          </div>
+        </div>
+
+        {/* Comentarios debajo de estadísticas */}
         <div className="mt-8">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
