@@ -99,9 +99,7 @@ const Header: React.FC = () => {
           <div className="hidden md:flex items-center space-x-6 flex-shrink-0">
             {/* Contacto */}
             <a
-              href={`https://mail.google.com/mail/?view=cm&fs=1&to=aiforge.soporte@gmail.com&su=Reporte de Error - AIForge&body=Por favor, describe el error o sugerencia:`}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="mailto:aiforge.soporte@gmail.com?subject=Reporte de Error - AIForge&body=Por favor, describe el error o sugerencia:"
               className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-lg flex items-center gap-1"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,9 +226,7 @@ const Header: React.FC = () => {
                 Preguntas Frecuentes
               </Link>
               <a
-                href={`https://mail.google.com/mail/?view=cm&fs=1&to=aiforge.soporte@gmail.com&su=Reporte de Error - AIForge&body=Por favor, describe el error o sugerencia:`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="mailto:aiforge.soporte@gmail.com?subject=Reporte de Error - AIForge&body=Por favor, describe el error o sugerencia:"
                 className="text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 flex items-center gap-2"
                 onClick={() => setIsMenuOpen(false)}
               >
