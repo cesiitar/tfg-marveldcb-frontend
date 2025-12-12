@@ -317,7 +317,7 @@ const HomePage: React.FC = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
               ¿Cómo funciona?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                   1
@@ -342,16 +342,6 @@ const HomePage: React.FC = () => {
                 <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                   3
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Obtén Recomendaciones</h3>
-                <p className="text-gray-600 text-sm">
-                  Usa la IA para recibir sugerencias de villanos y estrategias
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                  4
-                </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Juega y Aprende</h3>
                 <p className="text-gray-600 text-sm">
                   Registra tus partidas y mejora con cada juego
@@ -366,7 +356,7 @@ const HomePage: React.FC = () => {
               ¿Listo para crear tu primer mazo?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Únete a la comunidad y comienza a construir mazos increíbles con la ayuda de la inteligencia artificial
+              Únete a la comunidad y comienza a construir mazos increíbles
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
