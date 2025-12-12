@@ -375,32 +375,41 @@ const DeckDetailPage: React.FC = () => {
           {/* Columna izquierda - Descripción */}
           <div className="lg:col-span-1 space-y-6">
             {/* Descripción del mazo */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
                 Descripción
               </h3>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {formatDescription(deck.description)}
-              </p>
+              <div className="prose prose-sm max-w-none">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {formatDescription(deck.description)}
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Columna derecha - Lista de cartas */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+              <div className="bg-gradient-to-r from-slate-50 via-blue-50 to-slate-50 px-6 py-5 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                Lista de Cartas ({totalCards})
+                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                  </div>
+                  <span>Lista de Cartas</span>
+                  <span className="ml-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold">
+                    {totalCards}
+                  </span>
                 </h2>
               </div>
               
-              <div className="p-4 max-h-[600px] overflow-y-auto">
+              <div className="p-6 max-h-[600px] overflow-y-auto">
                 {(() => {
                   // Agrupar cartas por tipo
                   const cardsByType = deck.cards.reduce((acc: any, c: any) => {
@@ -429,49 +438,49 @@ const DeckDetailPage: React.FC = () => {
                       const typeLabel = translateCardType(type)
                       
                       return (
-                        <div key={type} className="mb-3 last:mb-0">
-                          <h3 className="text-sm font-semibold text-gray-800 mb-1 flex items-center">
-                            <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full mr-2">
+                        <div key={type} className="mb-4 last:mb-0">
+                          <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                            <span className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 text-xs font-bold px-3 py-1 rounded-full mr-2 shadow-sm">
                               {cards.length}
                             </span>
-                            {typeLabel} ({cards.length})
+                            <span className="text-base">{typeLabel}</span>
                           </h3>
                           
-                          <div className="space-y-0.5">
+                          <div className="space-y-1.5">
                             {cards.map((card: any, idx: number) => {
                               const isHeroCard = card.clase === 'hero' || card.type === 'hero'
                               const isBasic = card.clase === 'basic'
                               return (
-                                <div key={`${card.name}-${idx}`} className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 transition-colors rounded text-sm group relative">
-                                  <div className="flex items-center space-x-2 flex-1 min-w-0">
-                                    <span className="text-xs font-medium text-gray-600 min-w-[1.2rem]">
+                                <div key={`${card.name}-${idx}`} className="flex items-center justify-between py-2 px-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 rounded-lg text-sm group border border-transparent hover:border-blue-100">
+                                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                    <span className="text-xs font-bold text-gray-700 min-w-[1.5rem] bg-gray-100 px-1.5 py-0.5 rounded">
                                       {card.quantity}x
                                     </span>
                                     
                                     {/* Indicador de carta automática del héroe */}
                                     {isHeroCard && (
-                                      <div className="w-1.5 h-1.5 bg-purple-600 rounded-full flex-shrink-0" title="Carta automática del héroe"></div>
+                                      <div className="w-2 h-2 bg-purple-600 rounded-full flex-shrink-0 shadow-sm" title="Carta automática del héroe"></div>
                                     )}
                                     
                                     {/* Punto de color según clase */}
-                                    <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${getClassColor(card.clase)}`}></div>
+                                    <div className={`w-2 h-2 rounded-full flex-shrink-0 shadow-sm ${getClassColor(card.clase)}`}></div>
                                     
                                     <span 
-                                      className="text-gray-800 font-medium truncate cursor-help" 
+                                      className="text-gray-800 font-medium truncate cursor-help group-hover:text-blue-700 transition-colors" 
                                       title={`Set: ${card.set}`}
                                     >
                                       {card.name}
                                     </span>
                                   </div>
                                   
-                                  <div className="flex items-center space-x-1 flex-shrink-0">
+                                  <div className="flex items-center space-x-1.5 flex-shrink-0">
                                     {isBasic && (
-                                      <span className="text-xs px-1 py-0.5 rounded bg-gray-100 text-gray-600">
+                                      <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 font-medium border border-gray-200">
                                         basic
                                       </span>
                                     )}
                                     {card.clase && card.clase !== 'basic' && (
-                                      <span className={`text-xs px-1 py-0.5 rounded-full ${getClassPillClasses(card.clase)}`}>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium shadow-sm ${getClassPillClasses(card.clase)}`}>
                                         {card.clase}
                                       </span>
                                     )}
@@ -492,11 +501,13 @@ const DeckDetailPage: React.FC = () => {
         {/* Estadísticas debajo del mazo */}
         <div className="mt-8 grid lg:grid-cols-2 gap-6">
           {/* Distribución por Aspecto */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
               Distribución por Aspecto
             </h3>
             {(() => {
@@ -513,36 +524,56 @@ const DeckDetailPage: React.FC = () => {
               })).sort((a, b) => b.count - a.count)
 
               return (
-                <div className="space-y-4">
-                  {aspectStats.map(({ clase, count, percentage }) => (
-                    <div key={clase} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded-full ${getClassColor(clase)}`}></div>
-                        <span className="text-sm font-medium capitalize">{clase}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="w-24 bg-gray-200 rounded-full h-2">
+                <div className="space-y-5">
+                  {aspectStats.map(({ clase, count, percentage }) => {
+                    const getGradientClass = (cls: string) => {
+                      switch (cls.toLowerCase()) {
+                        case 'aggression': return 'from-red-500 to-red-600'
+                        case 'justice': return 'from-amber-500 to-amber-600'
+                        case 'leadership': return 'from-blue-500 to-blue-600'
+                        case 'protection': return 'from-green-500 to-green-600'
+                        case 'hero': return 'from-purple-500 to-purple-600'
+                        case 'pool': return 'from-teal-500 to-teal-600'
+                        default: return 'from-gray-400 to-gray-500'
+                      }
+                    }
+                    
+                    return (
+                      <div key={clase} className="group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full bg-gradient-to-br ${getGradientClass(clase)} shadow-md`}></div>
+                            <span className="text-sm font-semibold capitalize text-gray-800">{clase}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-gray-900">{count}</span>
+                            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                              {percentage}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
                           <div 
-                            className={`h-2 rounded-full ${getClassColor(clase)}`}
+                            className={`h-3 rounded-full bg-gradient-to-r ${getGradientClass(clase)} shadow-sm transition-all duration-500 ease-out`}
                             style={{ width: `${percentage}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm text-gray-600 w-8 text-right">{count}</span>
-                        <span className="text-xs text-gray-500 w-8 text-right">{percentage}%</span>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )
             })()}
           </div>
 
           {/* Tipos de cartas */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
               Tipos de Cartas
             </h3>
             {(() => {
@@ -558,21 +589,29 @@ const DeckDetailPage: React.FC = () => {
                 .slice(0, 6) // Mostrar solo los 6 tipos más comunes
 
               return (
-                <div className="space-y-3">
-                  {sortedTypes.map(({ type, count }) => (
-                    <div key={type} className="flex items-center justify-between text-sm">
-                      <span className="capitalize font-medium">{type.replace('_', ' ')}</span>
-                      <div className="flex items-center gap-3">
-                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                <div className="space-y-4">
+                  {sortedTypes.map(({ type, count }) => {
+                    const percentage = Math.round((count / totalCards) * 100)
+                    return (
+                      <div key={type} className="group hover:bg-gray-50 p-3 rounded-lg transition-colors duration-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="capitalize font-semibold text-gray-800 text-sm">{type.replace('_', ' ')}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-gray-900">{count}</span>
+                            <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                              {percentage}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
                           <div 
-                            className="bg-gradient-to-r from-gray-400 to-gray-500 h-2 rounded-full"
-                            style={{ width: `${(count / totalCards) * 100}%` }}
+                            className="bg-gradient-to-r from-indigo-400 via-indigo-500 to-indigo-600 h-3 rounded-full shadow-sm transition-all duration-500 ease-out"
+                            style={{ width: `${percentage}%` }}
                           ></div>
                         </div>
-                        <span className="text-gray-600 w-6 text-right">{count}</span>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )
             })()}
@@ -581,12 +620,17 @@ const DeckDetailPage: React.FC = () => {
 
         {/* Comentarios debajo de estadísticas */}
         <div className="mt-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              Comentarios ({comments.length})
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <span>Comentarios</span>
+              <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">
+                {comments.length}
+              </span>
             </h3>
 
             {/* Formulario para añadir comentario (solo si está autenticado) */}
@@ -653,21 +697,21 @@ const DeckDetailPage: React.FC = () => {
                   const isDeleting = deletingCommentId === comment.id
 
                   return (
-                    <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2 flex-1">
-                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div key={comment.id} className="border border-gray-200 rounded-lg p-4 mb-4 last:mb-0 hover:border-blue-300 hover:shadow-md transition-all duration-200 bg-gradient-to-br from-white to-gray-50">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-gray-900 text-sm">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-semibold text-gray-900 text-base">
                                 {comment.author_name || 'Usuario anónimo'}
                               </p>
                               {isOwn && (
-                                <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full">
+                                <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium border border-blue-200">
                                   Tú
                                 </span>
                               )}
@@ -752,7 +796,7 @@ const DeckDetailPage: React.FC = () => {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-gray-700 text-sm leading-relaxed ml-10">
+                        <p className="text-gray-700 text-sm leading-relaxed ml-13 bg-white p-3 rounded-lg border border-gray-100">
                           {comment.comment_text}
                         </p>
                       )}
