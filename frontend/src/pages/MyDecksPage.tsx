@@ -264,7 +264,7 @@ const MyDecksPage: React.FC = () => {
                   Crear Nuevo Mazo
                 </Link>
                     <button
-                  onClick={() => logout()}
+                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                   className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center gap-2"
                     >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
