@@ -338,12 +338,12 @@ const DecksPage: React.FC = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre de mazo"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              />
+                  />
                   <select
                 value={heroFilter}
                 onChange={(e) => setHeroFilter(e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              >
+                  >
                 <option value="">Todos los héroes</option>
                 {availableHeroes.map(h => (
                   <option key={h} value={h}>{h}</option>

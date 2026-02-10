@@ -108,7 +108,7 @@ const Header: React.FC = () => {
               Contacto
             </a>
 
-            {/* Auth Buttons */}
+          {/* Auth Buttons */}
             {isAuthenticated ? (
               <div className="relative" ref={userMenuRef}>
                 <button
@@ -157,13 +157,13 @@ const Header: React.FC = () => {
                   className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200"
                 >
                   Iniciar Sesión
-                </button>
+            </button>
                 <button 
                   onClick={handleSignupClick}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
                 >
                   Registrarse
-                </button>
+            </button>
               </>
             )}
           </div>
@@ -269,13 +269,13 @@ const Header: React.FC = () => {
                       className="px-4 py-2 text-gray-300 hover:text-blue-400 font-medium transition-colors duration-200 text-left"
                     >
                       Iniciar Sesión
-                    </button>
+                </button>
                     <button 
                       onClick={handleSignupClick}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-left"
                     >
                       Registrarse
-                    </button>
+                </button>
                   </>
                 )}
               </div>

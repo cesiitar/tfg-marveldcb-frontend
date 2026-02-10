@@ -21,10 +21,10 @@ import AIRecommendationPage from './pages/AIRecommendationPage'
 function App() {
   return (
     <AuthProvider>
-      <Layout>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/decks" element={<DecksPage />} />
+    <Layout>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/decks" element={<DecksPage />} />
               <Route path="/decks/:id" element={<DeckDetailPage />} />
               <Route
                 path="/decks/:id/edit"
@@ -75,10 +75,10 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/cards" element={<CardsPage />} />
-              <Route path="/cards/set/:setId" element={<SetCardsPage />} />
-              <Route path="/cards/search" element={<CardSearchPage />} />
-              <Route path="/faq" element={<FAQPage />} />
+        <Route path="/cards" element={<CardsPage />} />
+        <Route path="/cards/set/:setId" element={<SetCardsPage />} />
+        <Route path="/cards/search" element={<CardSearchPage />} />
+        <Route path="/faq" element={<FAQPage />} />
               <Route
                 path="/profile"
                 element={
@@ -87,8 +87,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-            </Routes>
-      </Layout>
+      </Routes>
+    </Layout>
     </AuthProvider>
   )
 }

@@ -26,10 +26,10 @@ const CardSearchPage: React.FC = () => {
     } catch (err) {
       console.error('Error cargando filtros desde localStorage:', err)
       return {
-        name: '',
-        aspect: '',
-        type: '',
-        cost: '',
+    name: '',
+    aspect: '',
+    type: '',
+    cost: '',
         set_name: '',
         hasSearched: false
       }
