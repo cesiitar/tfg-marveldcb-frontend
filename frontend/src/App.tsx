@@ -17,6 +17,7 @@ import ConfigureGamePage from './pages/ConfigureGamePage'
 import FavoritesPage from './pages/FavoritesPage'
 import GamesHistoryPage from './pages/GamesHistoryPage'
 import AIRecommendationPage from './pages/AIRecommendationPage'
+import AddGamePage from './pages/AddGamePage'
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+        <Route path="/add-game" element={<AddGamePage />} />
               <Route
                 path="/favorites"
                 element={

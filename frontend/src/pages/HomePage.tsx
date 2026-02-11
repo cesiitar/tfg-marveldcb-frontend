@@ -118,18 +118,24 @@ const HomePage: React.FC = () => {
             <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
               Forja mazos, aprende de tus partidas y obtén recomendaciones basadas en IA para dominar cada partida
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to="/create-deck" 
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
+              <Link
+                to="/create-deck"
                 className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 Crear Mazo
               </Link>
-              <Link 
-                to="/decks" 
+              <Link
+                to="/decks"
                 className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors duration-200 font-semibold text-lg border-2 border-white/30"
               >
                 Explorar Mazos
+              </Link>
+              <Link
+                to="/add-game"
+                className="px-8 py-4 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                Añadir Partida
               </Link>
             </div>
           </div>
