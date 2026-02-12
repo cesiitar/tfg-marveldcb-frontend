@@ -309,16 +309,14 @@ const GamesHistoryPage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Filtro
                 </label>
-                <button
-                  onClick={() => setFilterMyGames(!filterMyGames)}
-                  className={`w-full px-3 py-2 border rounded-lg transition-colors duration-200 ${
-                    filterMyGames
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
+                <select
+                  value={filterMyGames ? 'my' : 'all'}
+                  onChange={(e) => setFilterMyGames(e.target.value === 'my')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  {filterMyGames ? '✓ Mis Partidas' : 'Todas las Partidas'}
-                </button>
+                  <option value="all">Todas las Partidas</option>
+                  <option value="my">Mis Partidas</option>
+                </select>
               </div>
             )}
           </div>
