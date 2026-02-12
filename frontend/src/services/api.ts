@@ -394,6 +394,25 @@ class ApiService {
     }
   }
 
+  // Eliminar una partida del historial (solo propias)
+  async deleteGameConfiguration(gameId: number, auth0Id: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/game-configurations/${gameId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-Auth0-ID': auth0Id,
+      },
+    })
+    if (response.status === 404) {
+      throw new Error('Partida no encontrada o no puedes eliminarla')
+    }
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(errorText || 'Error al eliminar la partida')
+    }
+    const data = await response.json()
+    return data
+  }
+
   // Obtener favoritos del usuario
   async getUserFavorites(auth0Id: string): Promise<Deck[]> {
     try {

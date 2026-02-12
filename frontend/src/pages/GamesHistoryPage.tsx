@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { useToast } from '../components/Toast'
 import { getClassBadgeStyle } from '../utils/classColors'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 interface GameHistory {
   id: number
@@ -76,6 +77,28 @@ const GamesHistoryPage: React.FC = () => {
   // Paginación
   const [currentPage, setCurrentPage] = useState(1)
   const [gamesPerPage] = useState(15)
+
+  // Eliminar partida
+  const [gameToDelete, setGameToDelete] = useState<number | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
+  const canDeleteGames = Boolean(isAuthenticated && user?.sub && filterMyGames)
+
+  const handleConfirmDeleteGame = async () => {
+    if (!gameToDelete || !user?.sub) return
+    setDeleting(true)
+    try {
+      await apiService.deleteGameConfiguration(gameToDelete, user.sub)
+      setGames(prev => prev.filter(g => g.id !== gameToDelete))
+      showToast('Partida eliminada correctamente', 'success')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al eliminar la partida'
+      showToast(message, 'error')
+    } finally {
+      setDeleting(false)
+      setGameToDelete(null)
+    }
+  }
   
   // Obtener lista única de villanos
   const availableVillains = Array.from(new Set(games.map(game => game.villain_name))).sort()
@@ -461,8 +484,8 @@ const GamesHistoryPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Botón ver mazo */}
-                    <div className="ml-6">
+                    {/* Botones: Ver mazo y Eliminar (solo en "Mis Partidas") */}
+                    <div className="ml-6 flex items-center gap-2">
                       <Link
                         to={`/decks/${game.deck_id}`}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -473,6 +496,22 @@ const GamesHistoryPage: React.FC = () => {
                         </svg>
                         Ver Mazo
                       </Link>
+                      {canDeleteGames && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setGameToDelete(game.id)
+                          }}
+                          disabled={deleting}
+                          className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                        >
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Eliminar
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -540,6 +579,18 @@ const GamesHistoryPage: React.FC = () => {
         </div>
       </div>
       
+      {/* Confirmación eliminar partida */}
+      <ConfirmDialog
+        isOpen={gameToDelete !== null}
+        title="Eliminar partida"
+        message="¿Estás seguro de que quieres eliminar esta partida del historial? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        onConfirm={handleConfirmDeleteGame}
+        onCancel={() => setGameToDelete(null)}
+      />
+
       {/* Toast Container */}
       <ToastContainer />
     </div>
