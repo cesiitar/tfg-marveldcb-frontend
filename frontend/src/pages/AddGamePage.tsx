@@ -288,8 +288,8 @@ const AddGamePage: React.FC = () => {
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onImportSuccess={() => {
-          loadDecks()
           setShowImportModal(false)
+          navigate('/mydecks')
         }}
       />
 
