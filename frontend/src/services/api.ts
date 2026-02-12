@@ -175,14 +175,17 @@ class ApiService {
     }
   }
 
-  async createDeck(deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'>, auth0Id: string): Promise<Deck> {
+  async createDeck(deck: Omit<Deck, 'id' | 'created_at' | 'updated_at'>, auth0Id?: string): Promise<Deck> {
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      if (auth0Id) {
+        headers['X-Auth0-ID'] = auth0Id
+      }
       const response = await fetch(`${API_BASE_URL}/decks`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Auth0-ID': auth0Id,
-        },
+        headers,
         body: JSON.stringify(deck),
       })
       if (!response.ok) {

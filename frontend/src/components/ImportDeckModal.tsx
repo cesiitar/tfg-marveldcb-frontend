@@ -89,8 +89,8 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
   }
 
   const handleImport = async () => {
-    if (!previewDeck || !user?.sub) {
-      setError('No hay mazo para importar o no estás autenticado')
+    if (!previewDeck) {
+      setError('No hay mazo para importar')
       return
     }
 
@@ -148,7 +148,7 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
               }>
             
             // Pasar los datos completos de las cartas que NO existen
-            const importResult = await apiService.importMissingCards(undefined, cardsToImport, user.sub)
+            const importResult = await apiService.importMissingCards(undefined, cardsToImport, user?.sub)
             
             if (importResult.imported > 0) {
               showToast(`${importResult.imported} carta(s) importada(s) exitosamente`, 'success')
@@ -201,7 +201,7 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
         cards: finalDeckCards
       }
       
-      const createdDeck = await apiService.createDeck(deckToCreate, user.sub)
+      const createdDeck = await apiService.createDeck(deckToCreate, user?.sub)
       
       showToast(`Mazo "${createdDeck.name}" importado exitosamente`, 'success')
       handleClose()
