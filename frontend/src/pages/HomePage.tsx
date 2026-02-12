@@ -133,7 +133,7 @@ const HomePage: React.FC = () => {
               </Link>
               <Link
                 to="/add-game"
-                className="px-8 py-4 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 Añadir Partida
               </Link>

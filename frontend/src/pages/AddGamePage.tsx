@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
@@ -16,6 +16,7 @@ const AddGamePage: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [search, setSearch] = useState('')
   const [showImportModal, setShowImportModal] = useState(false)
+  const [showDbDecks, setShowDbDecks] = useState(false)
 
   const loadDecks = async () => {
     setLoading(true)
@@ -31,10 +32,16 @@ const AddGamePage: React.FC = () => {
     }
   }
 
-  useEffect(() => {
+  const handleShowDbDecks = () => {
+    setShowDbDecks(true)
     loadDecks()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    setTimeout(() => {
+      const element = document.getElementById('db-decks-section')
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 100)
+  }
 
   const filteredDecks = decks.filter(deck =>
     !search || deck.name.toLowerCase().includes(search.toLowerCase())
@@ -74,12 +81,7 @@ const AddGamePage: React.FC = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => {
-                  const element = document.getElementById('db-decks-section')
-                  if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' })
-                  }
-                }}
+                onClick={handleShowDbDecks}
                 className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Elegir mazo de la base de datos
@@ -105,7 +107,8 @@ const AddGamePage: React.FC = () => {
       {/* Main content */}
       <div className="relative -mt-8 z-20 px-4 pb-12">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Sección: Mazos de la base de datos */}
+          {/* Sección: Mazos de la base de datos (solo visible al pulsar "Elegir mazo de la base de datos") */}
+          {showDbDecks && (
           <section
             id="db-decks-section"
             className="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-200"
@@ -276,6 +279,7 @@ const AddGamePage: React.FC = () => {
               </div>
             )}
           </section>
+          )}
         </div>
       </div>
 
