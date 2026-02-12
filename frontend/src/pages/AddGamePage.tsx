@@ -289,7 +289,7 @@ const AddGamePage: React.FC = () => {
         onClose={() => setShowImportModal(false)}
         onImportSuccess={() => {
           setShowImportModal(false)
-          navigate('/mydecks')
+          navigate(isAuthenticated ? '/mydecks' : '/decks')
         }}
       />
 
