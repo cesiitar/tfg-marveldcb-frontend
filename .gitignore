@@ -86,3 +86,7 @@ jspm_packages/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Memoria TFG (no subir a GitHub)
+*.tex
+PROMPTS_GEMINI_FIGURAS.txt
