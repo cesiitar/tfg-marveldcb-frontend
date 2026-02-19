@@ -47,6 +47,7 @@ export interface Deck {
   updated_at?: string
   favorite_count?: number  // Número de usuarios que han marcado este mazo como favorito
   win_probability?: number  // Probabilidad de victoria (0-1) para mazos generados por IA
+  hero_unresolved?: boolean  // true si el héroe no pudo resolverse contra la BD (no participa en recomendaciones IA)
 }
 
 export interface DeckComment {

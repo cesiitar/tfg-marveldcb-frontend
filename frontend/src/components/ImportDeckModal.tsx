@@ -204,6 +204,9 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
       const createdDeck = await apiService.createDeck(deckToCreate, user?.sub)
       
       showToast(`Mazo "${createdDeck.name}" importado exitosamente`, 'success')
+      if (createdDeck.hero_unresolved === true) {
+        showToast('No obstante, el héroe no está vinculado a la base de datos, por lo que este mazo no participará en las recomendaciones de IA.', 'info')
+      }
       handleClose()
       onImportSuccess()
     } catch (err: any) {
