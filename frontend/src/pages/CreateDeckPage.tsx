@@ -99,8 +99,6 @@ const CreateDeckPage: React.FC = () => {
   }
 
   const handleCompleteDeck = (selectedCards: DeckCard[]) => {
-    console.log('🎯 handleCompleteDeck llamado con:', selectedCards)
-    
     if (!isAuthenticated || !user?.sub) {
       setError('Debes estar autenticado para crear un mazo')
       return
@@ -116,8 +114,6 @@ const CreateDeckPage: React.FC = () => {
       cards: selectedCards
     }
 
-    console.log('📤 Navegando a configure-game con datos del mazo:', deckData)
-    
     // Navegar a la página de configuración de partida con los datos del mazo
     // El mazo se creará cuando se guarde la configuración de la partida
     navigate('/configure-game', { 

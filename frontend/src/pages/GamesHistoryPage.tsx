@@ -124,7 +124,6 @@ const GamesHistoryPage: React.FC = () => {
       }
       
       setGames(historyData.games || [])
-      console.log('🎮 Historial de partidas cargado:', historyData.games)
     } catch (err) {
       console.error('Error cargando historial:', err)
       showToast('Error al cargar el historial de partidas', 'error')

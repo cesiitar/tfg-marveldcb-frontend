@@ -30,9 +30,7 @@ const ConfigureGamePage: React.FC = () => {
       try {
         setLoadingVillains(true)
         const villainsData = await apiService.getVillainsWithIds()
-        // El backend devuelve un array de objetos { id, name }
         setVillains(villainsData)
-        console.log('🎭 Villanos con IDs cargados:', villainsData)
       } catch (error) {
         console.error('Error cargando villanos:', error)
         showToast('Error al cargar la lista de villanos', 'error')
@@ -42,7 +40,7 @@ const ConfigureGamePage: React.FC = () => {
     }
 
     loadVillains()
-  }, []) // ← Quitar showToast de las dependencias para evitar bucle infinito
+  }, [])
 
   const handleSave = async () => {
     if (!deckData) {
@@ -65,11 +63,6 @@ const ConfigureGamePage: React.FC = () => {
       return
     }
 
-    if (!user?.sub) {
-      showToast('Error: No se encontró el ID de usuario', 'error')
-      return
-    }
-
     try {
       setSaving(true)
       
@@ -83,9 +76,7 @@ const ConfigureGamePage: React.FC = () => {
         if (!deckData) {
           throw new Error('No se encontraron los datos del mazo')
         }
-        console.log('📤 Creando mazo con datos:', deckData)
         const createdDeck = await apiService.createDeck(deckData, user.sub)
-        console.log('✅ Mazo creado exitosamente:', createdDeck)
         
         // Verificar que el mazo tiene un ID
         if (!createdDeck.id) {
@@ -107,7 +98,6 @@ const ConfigureGamePage: React.FC = () => {
         played_at: new Date().toISOString()
       }
       
-      console.log('📤 Enviando configuración de partida:', gameConfig)
       await apiService.saveGameConfiguration(gameConfig, user.sub)
       
       showToast('Partida guardada correctamente', 'success')
@@ -152,9 +142,7 @@ const ConfigureGamePage: React.FC = () => {
     try {
       setSaving(true)
       
-      console.log('📤 Creando mazo sin configuración de partida:', deckData)
-      const createdDeck = await apiService.createDeck(deckData, user.sub)
-      console.log('✅ Mazo creado exitosamente:', createdDeck)
+      await apiService.createDeck(deckData, user.sub)
       
       showToast(`Mazo "${deckData.name}" creado exitosamente`, 'success')
       navigate('/mydecks')

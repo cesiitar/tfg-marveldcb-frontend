@@ -65,22 +65,11 @@ const EditDeckPage: React.FC = () => {
         setAspectCards(aspectCardsData)
         setFilteredAspectCards(aspectCardsData)
         
-        // Cargar cartas del héroe
-        console.log('🔍 Mazo completo recibido:', deckData)
-        console.log('🔍 Hero_id:', (deckData as any).hero_id)
-        
         const heroes = await apiService.getHeroes()
-        
-        // Buscar el héroe por ID
         const hero = heroes.find(h => h.id === (deckData as any).hero_id)
-        console.log('🔍 Héroe encontrado por ID:', hero)
-        
         if (hero) {
           const heroCardsData = await apiService.getHeroCards(hero.id)
-          console.log('🔍 Cartas del héroe cargadas:', heroCardsData)
           setHeroCards(heroCardsData)
-        } else {
-          console.log('❌ No se encontró el héroe con ID:', (deckData as any).hero_id)
         }
         
         // Inicializar estados de edición
@@ -164,21 +153,9 @@ const EditDeckPage: React.FC = () => {
 
   // Calcular total de cartas seleccionadas
   const totalSelectedCards = Array.from(selectedCards.values()).reduce((sum, quantity) => sum + quantity, 0)
-  const heroCardsCount = heroCards.reduce((sum, card) => {
-    const quantity = card.quantity || 1
-    console.log('🔍 Carta del héroe:', card.name, 'quantity:', quantity)
-    return sum + quantity
-  }, 0)
+  const heroCardsCount = heroCards.reduce((sum, card) => sum + (card.quantity || 1), 0)
   const totalCards = heroCardsCount + totalSelectedCards
   const remainingCards = 50 - totalCards
-  
-  console.log('🔍 Estado de cartas:', { 
-    heroCards: heroCards.length, 
-    heroCardsCount, 
-    totalSelectedCards, 
-    totalCards,
-    heroCardsData: heroCards 
-  })
 
   // Añadir carta al mazo
   const addCard = (card: Card) => {
@@ -285,9 +262,6 @@ const EditDeckPage: React.FC = () => {
         
         // Combinar cartas editables + cartas del héroe
         cardsArray = [...editableCardsArray, ...heroCards]
-      } else {
-        console.log('❌ No hay hero_id en el mazo')
-        // Usar solo cartas editables (fallback)
       }
       
       const updatedDeck = {

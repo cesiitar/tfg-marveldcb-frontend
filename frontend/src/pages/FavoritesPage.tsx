@@ -46,7 +46,6 @@ const FavoritesPage: React.FC = () => {
           })
         )
         setFavorites(favoritesWithCount)
-        console.log('❤️ Favoritos cargados con contadores reales:', favoritesWithCount)
       } catch (err) {
         console.error('Error loading favorites:', err)
         setError('Error al cargar los favoritos')

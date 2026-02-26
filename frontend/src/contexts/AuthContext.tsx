@@ -43,9 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       });
 
-      if (response.ok) {
-        console.log('Usuario sincronizado correctamente');
-      } else {
+      if (!response.ok) {
         console.error('Error sincronizando usuario:', response.statusText);
       }
     } catch (error) {

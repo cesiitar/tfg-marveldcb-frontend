@@ -41,8 +41,6 @@ const DeckDetailPage: React.FC = () => {
         setLoading(true)
         setError(null)
         const d = await apiService.getDeckById(Number(id))
-        console.log('🔍 Deck recibido del backend:', d)
-        console.log('🔍 Descripción:', d.description)
         setDeck(d)
         
         // Guardar el ID del mazo visto para restaurar la vista al volver
