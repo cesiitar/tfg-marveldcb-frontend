@@ -136,7 +136,10 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
                   type_code: marvelcdbCard.type_code,
                   faction_code: marvelcdbCard.faction_code,
                   pack_code: marvelcdbCard.pack_code,
-                  // Añadir más campos si están disponibles en MarvelCDBCard
+                  // Nombre del set / pack. El backend lo usará para el campo `set`.
+                  card_set_name: marvelcdbCard.card_set_name || marvelcdbCard.pack_name || marvelcdbCard.pack_code,
+                  // Opcionalmente también enviamos el nombre del pack por separado
+                  pack_name: marvelcdbCard.pack_name,
                 }
               })
               .filter(card => card !== null) as Array<{
@@ -145,6 +148,8 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
                 type_code: string
                 faction_code: string
                 pack_code: string
+                card_set_name: string
+                pack_name?: string
               }>
             
             // Pasar los datos completos de las cartas que NO existen

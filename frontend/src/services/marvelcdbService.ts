@@ -9,6 +9,10 @@ export interface MarvelCDBCard {
   type_code: string
   faction_code: string
   pack_code: string
+  // Nombre legible del pack / set (si la API lo devuelve)
+  pack_name?: string
+  // Nombre del set que usaremos en nuestra BD (alias al pack)
+  card_set_name?: string
   quantity?: number
 }
 
