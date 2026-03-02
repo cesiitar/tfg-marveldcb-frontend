@@ -327,6 +327,9 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
                     <span className="ml-2 text-gray-900">
                       {previewDeck.cards.reduce((sum, card) => sum + card.quantity, 0)} cartas
                     </span>
+                    <p className="mt-1 text-xs text-gray-500">
+                      El número puede variar ligeramente respecto al mazo original, pero se importarán todas las cartas.
+                    </p>
                   </div>
                   
                   <div>
