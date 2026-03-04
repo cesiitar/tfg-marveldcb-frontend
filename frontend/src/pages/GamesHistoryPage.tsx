@@ -82,8 +82,6 @@ const GamesHistoryPage: React.FC = () => {
   const [gameToDelete, setGameToDelete] = useState<number | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const canDeleteGames = Boolean(isAuthenticated && user?.sub && filterMyGames)
-
   const handleConfirmDeleteGame = async () => {
     if (!gameToDelete || !user?.sub) return
     setDeleting(true)
@@ -493,7 +491,7 @@ const GamesHistoryPage: React.FC = () => {
                         </svg>
                         Ver Mazo
                       </Link>
-                      {canDeleteGames && (
+                      {isAuthenticated && user?.sub && user?.name && game.creator_name === user.name && (
                         <button
                           type="button"
                           onClick={(e) => {
