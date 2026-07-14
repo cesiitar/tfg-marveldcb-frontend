@@ -90,3 +90,9 @@ jspm_packages/
 # Memoria TFG (no subir a GitHub)
 *.tex
 PROMPTS_GEMINI_FIGURAS.txt
+
+# Defensa y material de trabajo local (no subir a GitHub)
+DEFENSA_TFG_*.pptx
+DEFENSA_TFG_*.zip
+~$*
+scripts/
