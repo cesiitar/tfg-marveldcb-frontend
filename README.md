@@ -2,7 +2,7 @@
 
 Frontend de **AIForge**, mi Trabajo de Fin de Grado: una plataforma web para crear, compartir y optimizar mazos de Marvel Champions (el juego de cartas cooperativo) usando machine learning. Este repo es la interfaz; la API y el modelo de IA viven en [tfg-marveldcb-backend](https://github.com/cesiitar/tfg-marveldcb-backend).
 
-En producción: https://frontend-sigma-dusky-21.vercel.app
+En producción: https://aiforge-decks.vercel.app
 
 ## Qué se puede hacer
 
