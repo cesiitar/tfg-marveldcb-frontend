@@ -17,9 +17,20 @@ El login es con Auth0 (cuenta de Google o email), y las zonas personales (mis ma
 ## Stack
 
 - **React 18 + TypeScript** con **Vite**
-- **Tailwind CSS** para los estilos
+- **Tailwind CSS** para los estilos, con un sistema de diseño propio definido en `tailwind.config.cjs`
+- **Motion** para las animaciones de la home y las tarjetas, y **Phosphor** para los iconos
 - **Auth0** (`@auth0/auth0-react`) para la autenticación
 - **React Router** como SPA, desplegada en **Vercel** (los rewrites están en `frontend/vercel.json`; hay también configuración alternativa para Render estático en `render.yaml`)
+
+## Diseño
+
+La interfaz sigue un estilo "tinta y papel": neutros cálidos, un único color de acento carmesí y tipografías Archivo (títulos), Geist (texto) y Geist Mono (etiquetas y cifras). Los colores de aspecto del juego (Aggression, Justice, Leadership, Protection, Pool) se respetan en toda la web.
+
+- Todas las páginas comparten la misma cabecera (`components/ui/page-header.tsx`), y las tarjetas de mazo la misma clase (`.deck-card`).
+- Las cartas se muestran con forma de carta física (`components/ui/game-card.tsx`): marco del color del aspecto, coste e icono según el tipo.
+- La home tiene animaciones al hacer scroll. Las ligadas al scroll usan CSS scroll-driven animations y las de entrada, Motion. Solo se anima posición y opacidad, y todo respeta la opción de "reducir movimiento" del sistema.
+
+En `.claude/skills` están las skills de Claude Code que se usaron para el rediseño (especificación de componentes, rendimiento de animaciones, UI/UX y tokens de diseño).
 
 ## Ejecutarlo en local
 
@@ -29,7 +40,7 @@ npm install
 npm run dev
 ```
 
-Por defecto el frontend apunta al backend desplegado en producción, así que funciona sin configurar nada. Si quieres apuntar a un backend local, crea un `.env` en `frontend/` con:
+Se abre en `http://localhost:3000`. Por defecto el frontend apunta al backend desplegado en producción, así que funciona sin configurar nada. Si quieres apuntar a un backend local, crea un `.env.local` en `frontend/` con:
 
 ```
 VITE_API_BASE_URL=http://localhost:8000/api
