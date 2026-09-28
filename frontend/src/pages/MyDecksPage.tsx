@@ -8,6 +8,16 @@ import { useToast } from '../components/Toast'
 import { getClassColor } from '../utils/classColors'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ImportDeckModal from '../components/ImportDeckModal'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { CalendarBlankIcon, CardsIcon, ClipboardTextIcon, EyeIcon, HeartIcon, PencilSimpleIcon, PlusIcon, SignOutIcon, StarIcon, TrashIcon, UploadSimpleIcon, WarningIcon } from '@phosphor-icons/react'
 
 const MyDecksPage: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
@@ -129,7 +139,7 @@ const MyDecksPage: React.FC = () => {
     try {
       // Verificar que tenemos el Auth0 SUB del usuario
       if (!user?.sub) {
-        showToast('❌ No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
+        showToast('No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
       return
     }
       
@@ -173,12 +183,10 @@ const MyDecksPage: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+            <WarningIcon className="w-8 h-8 text-red-600" weight="duotone" aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h2>
           <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tus mazos. Por favor, usa el botón de Login en el header para acceder.</p>
@@ -189,7 +197,7 @@ const MyDecksPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando tus mazos...</p>
@@ -199,41 +207,34 @@ const MyDecksPage: React.FC = () => {
   }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      <div className="min-h-[60vh]">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-          <div className="absolute inset-0 bg-black opacity-30"></div>
-          
-          <div className="relative z-10 text-center py-12 px-4">
-            <div className="max-w-3xl mx-auto">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Mis Mazos
-              </h1>
-              <p className="text-lg text-gray-300 mb-6">
+        <PageHeader>
+          <PageHeaderContent>
+            <PageHeaderEyebrow>Tu colección</PageHeaderEyebrow>
+            <PageHeaderTitle>Mis Mazos</PageHeaderTitle>
+            <PageHeaderDescription>
               Gestiona tus mazos personales y obtén recomendaciones de IA
-            </p>
-            {isAuthenticated && (
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={() => navigate('/favorites')}
-                  className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                >
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                  </svg>
-                  Mis Favoritos
-                </button>
-              </div>
-            )}
-            </div>
-          </div>
-        </div>
+            </PageHeaderDescription>
+          </PageHeaderContent>
+          {isAuthenticated && (
+            <PageHeaderActions>
+              <button
+                onClick={() => navigate('/favorites')}
+                className={pageHeaderButton.secondary}
+              >
+                <HeartIcon className="w-5 h-5 text-brand-400" weight="fill" aria-hidden="true" />
+                Mis Favoritos
+              </button>
+            </PageHeaderActions>
+          )}
+        </PageHeader>
 
         {/* Main Content */}
         <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Search and Actions */}
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-ink-900/[0.06] mb-6">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               <div className="flex-1 max-w-md">
                     <input
@@ -247,29 +248,23 @@ const MyDecksPage: React.FC = () => {
                   <div className="flex gap-3">
                 <button
                   onClick={() => setShowImportModal(true)}
-                  className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 font-medium flex items-center gap-2"
+                  className="px-6 py-3 bg-ink-900 text-white rounded-lg hover:bg-ink-700 transition-colors duration-200 font-medium flex items-center gap-2"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
+                  <UploadSimpleIcon className="w-5 h-5" weight="bold" aria-hidden="true" />
                   Importar desde MarvelCDB
                 </button>
                 <Link
                   to="/create-deck"
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium flex items-center gap-2"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
+                  <PlusIcon className="w-5 h-5" weight="bold" aria-hidden="true" />
                   Crear Nuevo Mazo
                 </Link>
                     <button
                   onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                   className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center gap-2"
                     >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  <SignOutIcon className="w-5 h-5" weight="bold" aria-hidden="true" />
                   Cerrar Sesión
                     </button>
                   </div>
@@ -279,10 +274,8 @@ const MyDecksPage: React.FC = () => {
           {/* Decks Grid */}
           {filteredDecks.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+              <div className="w-24 h-24 bg-ink-100 ring-1 ring-ink-900/5 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <CardsIcon className="w-12 h-12 text-gray-400" weight="duotone" aria-hidden="true" />
                   </div>
               <h3 className="text-2xl font-bold text-gray-700 mb-4">
                 {search ? 'No hay mazos que coincidan' : 'Aún no tienes mazos'}
@@ -304,12 +297,12 @@ const MyDecksPage: React.FC = () => {
               {filteredDecks.map((deck) => (
                 <div 
                   key={deck.id}
-                  className="group bg-white border border-gray-200 hover:border-blue-300 transition-all duration-200 overflow-hidden hover:shadow-lg"
+                  className="group deck-card"
                 >
                   {/* Header Section */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
+                  <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
                         {deck.name}
                       </h3>
                       <div className="flex items-center gap-2">
@@ -328,9 +321,7 @@ const MyDecksPage: React.FC = () => {
                             }`}
                             title={favorites.has(deck.id!) ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
                           >
-                            <svg className="w-5 h-5" fill={favorites.has(deck.id!) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
+                            <HeartIcon className="w-5 h-5" weight={favorites.has(deck.id!) ? 'fill' : 'regular'} aria-hidden="true" />
                             <span className="text-sm font-semibold">
                               {deck.favorite_count !== undefined ? deck.favorite_count : 0}
                             </span>
@@ -339,9 +330,7 @@ const MyDecksPage: React.FC = () => {
                           /* Contador de favoritos - solo si no está autenticado */
                           deck.favorite_count !== undefined && (
                             <div className="flex items-center gap-1 text-red-500">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                              </svg>
+                              <HeartIcon className="w-4 h-4" weight="fill" aria-hidden="true" />
                               <span className="text-sm font-semibold">{deck.favorite_count}</span>
                             </div>
                           )
@@ -356,10 +345,8 @@ const MyDecksPage: React.FC = () => {
                     <div className="mb-4">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
+                          <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
+                            <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                 </div>
                           <span className="text-lg font-bold text-gray-900">
                             {getDeckHeroName(deck) || '—'}
@@ -380,18 +367,14 @@ const MyDecksPage: React.FC = () => {
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 bg-gradient-to-br from-gray-400 to-gray-500 rounded-md flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                          </svg>
+                          <CardsIcon className="w-3 h-3 text-white" weight="duotone" aria-hidden="true" />
                         </div>
                         <span className="font-semibold text-blue-600">
                           {deck.cards.length} cartas
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-500">
-                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
-                        </svg>
+                        <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
                         <span>
                           {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                         </span>
@@ -415,37 +398,28 @@ const MyDecksPage: React.FC = () => {
                           }}
                           className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
+                          <EyeIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                           Ver
                     </button>
                   <button
                           onClick={() => handleEditDeck(deck.id || 0)}
                           className="flex-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
                   >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
+                          <PencilSimpleIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                           Editar
                   </button>
                   <button
                           onClick={() => handleDeleteDeck(deck.id || 0)}
                           className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
                   >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          <TrashIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                   </button>
                 </div>
             <button 
                         onClick={() => handleConfigureGame(deck)}
-                        className="w-full px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
+                        className="w-full px-3 py-2 bg-ink-900 text-white rounded-lg hover:bg-ink-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
             >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
+                        <ClipboardTextIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                         Registrar Partida
             </button>
           </div>

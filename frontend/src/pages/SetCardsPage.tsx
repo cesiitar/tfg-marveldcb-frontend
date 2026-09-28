@@ -4,6 +4,17 @@ import { apiService } from '../services/api'
 import { Card, CardSet } from '../types/card'
 import { translateCardType } from '../utils/typeTranslations'
 import { getClassBadgeStyle, getClassGradientClasses } from '../utils/classColors'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { AnimatedNumber } from '../components/ui/animated-number'
+import { CardsIcon, CaretDownIcon, CaretLeftIcon, CaretRightIcon, ChartBarIcon, FunnelIcon, MagnifyingGlassIcon, SmileySadIcon } from '@phosphor-icons/react'
 
 const SetCardsPage: React.FC = () => {
   const { setId } = useParams<{ setId: string }>()
@@ -122,13 +133,13 @@ const SetCardsPage: React.FC = () => {
     if (viewType === 'general') {
       const classDistribution = getAvailableClasses(cards)
       return [
-        { value: stats.total, label: 'Total Cartas', color: 'text-blue-600' },
-        { value: classDistribution.find(c => c.value === 'hero')?.count || 0, label: 'Aspecto Hero', color: 'text-orange-600' },
+        { value: stats.total, label: 'Total Cartas', color: 'text-ink-900' },
+        { value: classDistribution.find(c => c.value === 'hero')?.count || 0, label: 'Aspecto Hero', color: 'text-purple-600' },
         { value: classDistribution.find(c => c.value === 'basic')?.count || 0, label: 'Aspecto Basic', color: 'text-gray-600' },
         { value: classDistribution.find(c => c.value === 'aggression')?.count || 0, label: 'Aspecto Aggression', color: 'text-red-600' },
-        { value: classDistribution.find(c => c.value === 'justice')?.count || 0, label: 'Aspecto Justice', color: 'text-blue-500' },
-        { value: classDistribution.find(c => c.value === 'leadership')?.count || 0, label: 'Aspecto Leadership', color: 'text-yellow-600' },
-        { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Aspecto Protection', color: 'text-emerald-600' },
+        { value: classDistribution.find(c => c.value === 'justice')?.count || 0, label: 'Aspecto Justice', color: 'text-amber-600' },
+        { value: classDistribution.find(c => c.value === 'leadership')?.count || 0, label: 'Aspecto Leadership', color: 'text-sky-600' },
+        { value: classDistribution.find(c => c.value === 'protection')?.count || 0, label: 'Aspecto Protection', color: 'text-green-600' },
         { value: classDistribution.find(c => c.value === 'encounter')?.count || 0, label: 'Aspecto Encounter', color: 'text-red-900' },
         { value: classDistribution.find(c => c.value === 'campaign')?.count || 0, label: 'Aspecto Campaign', color: 'text-indigo-600' }
       ].filter(stat => stat.value > 0) // Solo mostrar clases que existen
@@ -136,14 +147,14 @@ const SetCardsPage: React.FC = () => {
     
     // Si es vista por aspecto, mostrar estadísticas detalladas de ese aspecto
     const classStats = [
-      { value: stats.total, label: 'Total', color: 'text-blue-600' },
-      { value: stats.heroes, label: 'Heroes', color: 'text-red-600' },
-      { value: stats.allies, label: 'Allies', color: 'text-blue-500' },
-      { value: stats.events, label: 'Events', color: 'text-purple-600' },
-      { value: stats.upgrades, label: 'Upgrades', color: 'text-green-600' },
-      { value: stats.supports, label: 'Supports', color: 'text-yellow-600' },
-      { value: stats.resources, label: 'Resources', color: 'text-orange-600' },
-      { value: `${stats.minCost}-${stats.maxCost}`, label: 'Cost Range', color: 'text-gray-600' }
+      { value: stats.total, label: 'Total', color: 'text-ink-900' },
+      { value: stats.heroes, label: 'Heroes', color: 'text-ink-800' },
+      { value: stats.allies, label: 'Allies', color: 'text-ink-800' },
+      { value: stats.events, label: 'Events', color: 'text-ink-800' },
+      { value: stats.upgrades, label: 'Upgrades', color: 'text-ink-800' },
+      { value: stats.supports, label: 'Supports', color: 'text-ink-800' },
+      { value: stats.resources, label: 'Resources', color: 'text-ink-800' },
+      { value: `${stats.minCost}-${stats.maxCost}`, label: 'Cost Range', color: 'text-ink-800' }
     ]
     
     // Filtrar estadísticas que tengan valor 0 para mantener la UI limpia
@@ -184,49 +195,30 @@ const SetCardsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 py-8">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+    <div className="min-h-[60vh]">
+      <div>
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-start mb-6">
-            <div></div>
-          <button
-            onClick={() => navigate('/cards')}
-              className="text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Volver a cartas
-          </button>
-          </div>
-          
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold mb-2">{set.name}</h1>
-                <p className="text-blue-100 text-lg">
-                  {set.cardCount} cartas disponibles
-                </p>
-              </div>
-              <div className="hidden md:block">
-                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PageHeader className="mb-8">
+          <PageHeaderContent>
+            <PageHeaderEyebrow>Set de cartas</PageHeaderEyebrow>
+            <PageHeaderTitle>{set.name}</PageHeaderTitle>
+            <PageHeaderDescription>
+              <AnimatedNumber value={set.cardCount} className="font-semibold text-white" /> cartas disponibles
+            </PageHeaderDescription>
+          </PageHeaderContent>
+          <PageHeaderActions>
+            <button onClick={() => navigate('/cards')} className={pageHeaderButton.secondary}>
+              <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+              Volver a cartas
+            </button>
+          </PageHeaderActions>
+        </PageHeader>
 
         {/* Estadísticas del Set */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-              <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
+              <ChartBarIcon className="w-6 h-6 mr-2 text-blue-600" weight="duotone" aria-hidden="true" />
               {getStatsTitle(statsView)}
             </h2>
             
@@ -244,16 +236,18 @@ const SetCardsPage: React.FC = () => {
                   </option>
                 ))}
               </select>
-              <svg className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <CaretDownIcon className="absolute right-2 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" weight="bold" aria-hidden="true" />
             </div>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
             {generateSetStats(cards, statsView).map((stat, index) => (
-              <div key={index} className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+              <div key={index} className="text-center p-4 bg-white rounded-xl ring-1 ring-ink-900/[0.06] border-0">
+                {typeof stat.value === 'number' ? (
+                  <AnimatedNumber value={stat.value} className={`block font-display text-2xl font-extrabold ${stat.color}`} />
+                ) : (
+                  <div className={`font-display text-2xl font-extrabold tabular-nums ${stat.color}`}>{stat.value}</div>
+                )}
                 <div className="text-sm text-gray-600">{stat.label}</div>
               </div>
             ))}
@@ -263,9 +257,7 @@ const SetCardsPage: React.FC = () => {
         {/* Filtros */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
           <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
-            </svg>
+            <FunnelIcon className="w-6 h-6 mr-2 text-blue-600" weight="duotone" aria-hidden="true" />
             Filtros y Ordenamiento
           </h2>
           
@@ -273,7 +265,7 @@ const SetCardsPage: React.FC = () => {
             {/* Buscador */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700">
-                🔍 Buscar por nombre
+                Buscar por nombre
               </label>
               <div className="relative">
                 <input
@@ -283,16 +275,14 @@ const SetCardsPage: React.FC = () => {
                   placeholder="Escribe el nombre de la carta..."
                   className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
-                <svg className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <MagnifyingGlassIcon className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" weight="bold" aria-hidden="true" />
               </div>
             </div>
 
             {/* Ordenamiento */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700">
-                📊 Ordenar por
+                Ordenar por
               </label>
               <div className="relative">
                 <select
@@ -305,9 +295,7 @@ const SetCardsPage: React.FC = () => {
                   <option value="nombre">Nombre</option>
                   <option value="fuerza">Fuerza (coste)</option>
                 </select>
-                <svg className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <CaretDownIcon className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" weight="bold" aria-hidden="true" />
               </div>
             </div>
           </div>
@@ -317,9 +305,7 @@ const SetCardsPage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-              <svg className="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+              <CardsIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
               Cartas del Set
             </h2>
             {!isLoading && cards.length > 0 && (
@@ -344,9 +330,7 @@ const SetCardsPage: React.FC = () => {
           ) : cards.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.343A7.962 7.962 0 0112 4c-2.34 0-4.29 1.009-5.824 2.57" />
-                </svg>
+                <SmileySadIcon className="w-8 h-8 text-gray-400" weight="duotone" aria-hidden="true" />
               </div>
               <p className="text-lg">No se encontraron cartas</p>
             </div>
@@ -387,9 +371,7 @@ const SetCardsPage: React.FC = () => {
                       disabled={currentPage === 1}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
+                      <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
                     
                     {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
@@ -423,9 +405,7 @@ const SetCardsPage: React.FC = () => {
                       disabled={currentPage === getTotalPages()}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
                   </div>
                   

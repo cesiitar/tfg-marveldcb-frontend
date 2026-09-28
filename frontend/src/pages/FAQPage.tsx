@@ -1,4 +1,12 @@
 import React from 'react'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+} from '../components/ui/page-header'
+import { EnvelopeSimpleIcon } from '@phosphor-icons/react'
 
 // Correo de contacto para reportar errores
 const CONTACT_EMAIL = 'aiforge.soporte@gmail.com' // Cambiar por tu correo de Gmail
@@ -49,30 +57,23 @@ const FAQPage: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 py-12 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Preguntas Frecuentes
-              </h1>
-              <p className="text-lg text-gray-300">
-                Encuentra respuestas a las preguntas más comunes sobre AIForge
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Ayuda</PageHeaderEyebrow>
+          <PageHeaderTitle>Preguntas Frecuentes</PageHeaderTitle>
+          <PageHeaderDescription>
+            Encuentra respuestas a las preguntas más comunes sobre AIForge
+          </PageHeaderDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-4xl mx-auto">
           {/* FAQs */}
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] overflow-hidden mb-6">
             <div className="p-6 space-y-4">
               {faqs.map((faq, index) => (
                 <div key={index} className="border-b border-gray-200 last:border-b-0 pb-4 last:pb-0">
@@ -89,7 +90,7 @@ const FAQPage: React.FC = () => {
           </div>
 
           {/* Contact Section */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
               ¿No encuentras tu pregunta?
             </h2>
@@ -127,9 +128,7 @@ const FAQPage: React.FC = () => {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+                  <EnvelopeSimpleIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
                   Enviar Correo (Gmail)
                 </a>
                 <button

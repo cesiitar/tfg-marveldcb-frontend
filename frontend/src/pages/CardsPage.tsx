@@ -2,6 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CardSet } from '../types/card'
 import { apiService } from '../services/api'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { CaretRightIcon, MagnifyingGlassIcon, SmileySadIcon, WarningIcon } from '@phosphor-icons/react'
 
 const CardsPage: React.FC = () => {
   const [sets, setSets] = useState<CardSet[]>([])
@@ -42,22 +52,15 @@ const CardsPage: React.FC = () => {
 
   const getSetColor = (index: number) => {
     const colors = [
-      'from-blue-500 to-blue-600',
-      'from-slate-500 to-slate-600', 
-      'from-indigo-500 to-indigo-600',
-      'from-emerald-500 to-emerald-600',
-      'from-purple-500 to-purple-600',
-      'from-rose-500 to-rose-600',
-      'from-teal-500 to-teal-600',
-      'from-violet-500 to-violet-600',
-      'from-cyan-500 to-cyan-600',
-      'from-orange-500 to-orange-600',
-      'from-green-500 to-green-600',
-      'from-pink-500 to-pink-600',
-      'from-amber-500 to-amber-600',
+      // Paleta de la web: marca, tinta y colores de aspecto del juego
+      'from-brand-500 to-brand-700',
+      'from-ink-700 to-ink-900',
       'from-red-500 to-red-600',
-      'from-lime-500 to-lime-600',
-      'from-sky-500 to-sky-600'
+      'from-amber-500 to-amber-600',
+      'from-sky-500 to-sky-600',
+      'from-green-500 to-green-600',
+      'from-teal-500 to-teal-600',
+      'from-ink-400 to-ink-500'
     ]
     return colors[index % colors.length]
   }
@@ -78,9 +81,7 @@ const CardsPage: React.FC = () => {
     return (
       <div className="text-center py-16">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
+          <WarningIcon className="w-8 h-8 text-red-600" weight="duotone" aria-hidden="true" />
         </div>
         <h2 className="text-2xl font-semibold text-secondary-800 mb-4">Error</h2>
         <p className="text-secondary-600 mb-6">{error}</p>
@@ -95,31 +96,22 @@ const CardsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 text-center py-12 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              AI<span className="text-blue-400">Forge</span>
-            </h1>
-            <p className="text-lg text-gray-300 mb-6">
-              Explora y construye mazos con inteligencia artificial
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <Link 
-                to="/cards/search" 
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-              >
-                Buscar Cartas
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Catálogo</PageHeaderEyebrow>
+          <PageHeaderTitle>Cartas</PageHeaderTitle>
+          <PageHeaderDescription>
+            Explora y construye mazos con inteligencia artificial
+          </PageHeaderDescription>
+        </PageHeaderContent>
+        <PageHeaderActions>
+          <Link to="/cards/search" className={pageHeaderButton.primary}>
+            Buscar Cartas
+          </Link>
+        </PageHeaderActions>
+      </PageHeader>
 
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
@@ -141,9 +133,7 @@ const CardsPage: React.FC = () => {
                   placeholder="Buscar por nombre del set..."
                   className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                 />
-                <svg className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <MagnifyingGlassIcon className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" weight="bold" aria-hidden="true" />
               </div>
               
               {searchTerm && (
@@ -159,10 +149,8 @@ const CardsPage: React.FC = () => {
           {/* Sets Grid */}
           {filteredSets.length === 0 && searchTerm ? (
             <div className="text-center py-20">
-              <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.343A7.962 7.962 0 0112 4c-2.34 0-4.29 1.009-5.824 2.57" />
-                </svg>
+              <div className="w-24 h-24 bg-ink-100 ring-1 ring-ink-900/5 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <SmileySadIcon className="w-12 h-12 text-gray-400" weight="duotone" aria-hidden="true" />
               </div>
               <h3 className="text-2xl font-bold text-gray-700 mb-4">
                 No se encontraron sets
@@ -172,7 +160,7 @@ const CardsPage: React.FC = () => {
               </p>
               <button 
                 onClick={() => setSearchTerm('')}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-500 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 Limpiar búsqueda
               </button>
@@ -183,7 +171,7 @@ const CardsPage: React.FC = () => {
                 <Link 
                   key={set.id}
                   to={`/cards/set/${set.id}`}
-                  className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300 overflow-hidden"
+                  className="group deck-card"
                 >
                   {/* Header with subtle gradient */}
                   <div className={`h-2 bg-gradient-to-r ${getSetColor(index)}`}></div>
@@ -211,9 +199,7 @@ const CardsPage: React.FC = () => {
                       <span className="text-sm text-gray-500">
                         Ver cartas
                       </span>
-                      <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <CaretRightIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" weight="bold" aria-hidden="true" />
                     </div>
                   </div>
                 </Link>

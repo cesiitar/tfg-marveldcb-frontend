@@ -8,9 +8,15 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-[100dvh] flex flex-col bg-paper overflow-x-clip">
+      <a
+        href="#contenido"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[70] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-white focus:text-ink-900 focus:shadow-lg"
+      >
+        Saltar al contenido
+      </a>
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main id="contenido" className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-10">
         {children}
       </main>
       <Footer />

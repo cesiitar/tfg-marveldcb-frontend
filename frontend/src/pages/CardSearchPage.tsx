@@ -3,6 +3,14 @@ import { apiService } from '../services/api'
 import { Card, CardSet } from '../types/card'
 import { getClassGradientClasses, getClassBadgeStyle } from '../utils/classColors'
 import { translateCardType } from '../utils/typeTranslations'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+} from '../components/ui/page-header'
+import { ArrowsClockwiseIcon, CardsIcon, CaretDownIcon, CheckCircleIcon, MagnifyingGlassIcon, SmileySadIcon, TagIcon, TrashIcon } from '@phosphor-icons/react'
 
 const CardSearchPage: React.FC = () => {
   // Cargar filtros desde localStorage al inicializar
@@ -138,20 +146,21 @@ const CardSearchPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="text-center py-8">
-        <h1 className="text-4xl font-display font-bold text-primary-800 mb-4">Búsqueda de Cartas</h1>
-        <p className="text-xl text-secondary-600 mb-8">
-          Encuentra las cartas perfectas para tu mazo
-        </p>
-      </div>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Catálogo</PageHeaderEyebrow>
+          <PageHeaderTitle>Búsqueda de Cartas</PageHeaderTitle>
+          <PageHeaderDescription>
+            Encuentra las cartas perfectas para tu mazo
+          </PageHeaderDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Main Search Form */}
       <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-              <svg className="w-7 h-7 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <MagnifyingGlassIcon className="w-7 h-7 mr-3 text-blue-600" weight="bold" aria-hidden="true" />
               Filtros de Búsqueda
             </h2>
             <p className="text-gray-600 mt-2">Encuentra las cartas perfectas para tu mazo</p>
@@ -161,9 +170,7 @@ const CardSearchPage: React.FC = () => {
             {/* Name */}
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
+                <TagIcon className="w-5 h-5 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Nombre de la Carta
               </h3>
               <div className="relative">
@@ -175,18 +182,14 @@ const CardSearchPage: React.FC = () => {
                   className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   placeholder="Escribe el nombre de la carta..."
                 />
-                <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <MagnifyingGlassIcon className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" weight="bold" aria-hidden="true" />
               </div>
             </div>
 
             {/* Aspect */}
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
+                <TagIcon className="w-5 h-5 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Aspecto de la Carta
               </h3>
               <div className="flex flex-wrap gap-3">
@@ -210,9 +213,7 @@ const CardSearchPage: React.FC = () => {
             {/* Type and Cost */}
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+                <CardsIcon className="w-5 h-5 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Tipo y Coste
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -246,9 +247,7 @@ const CardSearchPage: React.FC = () => {
                       <option value="player_side_scheme">Player Side Scheme</option>
                       <option value="alter_ego">Alter Ego</option>
                     </select>
-                    <svg className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
+                    <CaretDownIcon className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" weight="bold" aria-hidden="true" />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -272,9 +271,7 @@ const CardSearchPage: React.FC = () => {
             {/* Set */}
             <div className="space-y-3">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+                <CardsIcon className="w-5 h-5 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Set de Cartas
               </h3>
               <div className="space-y-2">
@@ -295,9 +292,7 @@ const CardSearchPage: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <svg className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  <CaretDownIcon className="absolute right-3 top-3.5 w-4 h-4 text-gray-400 pointer-events-none" weight="bold" aria-hidden="true" />
                 </div>
               </div>
             </div>
@@ -309,15 +304,13 @@ const CardSearchPage: React.FC = () => {
                 onClick={clearSearch}
                 className="px-8 py-3 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 font-semibold flex items-center"
               >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
+                <TrashIcon className="w-5 h-5 mr-2" weight="duotone" aria-hidden="true" />
                 Limpiar Filtros
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-10 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
+                className="px-10 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-500 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
               >
                 {isLoading ? (
                   <>
@@ -329,9 +322,7 @@ const CardSearchPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <MagnifyingGlassIcon className="w-5 h-5 mr-2" weight="bold" aria-hidden="true" />
                     Buscar Cartas
                   </>
                 )}
@@ -344,9 +335,7 @@ const CardSearchPage: React.FC = () => {
       <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-gray-800 flex items-center">
-            <svg className="w-7 h-7 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <CheckCircleIcon className="w-7 h-7 mr-3 text-brand-600" weight="duotone" aria-hidden="true" />
             Resultados de la Búsqueda
           </h3>
           {hasSearched && (
@@ -359,9 +348,7 @@ const CardSearchPage: React.FC = () => {
         {isLoading ? (
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <ArrowsClockwiseIcon className="w-8 h-8 text-gray-400 animate-spin" weight="bold" aria-hidden="true" />
             </div>
             <h4 className="text-lg font-semibold text-secondary-600 mb-2">
               Buscando cartas...
@@ -373,9 +360,7 @@ const CardSearchPage: React.FC = () => {
         ) : !hasSearched ? (
           <div className="text-center py-16 text-secondary-500">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z" />
-              </svg>
+              <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" weight="bold" aria-hidden="true" />
             </div>
             <h4 className="text-lg font-semibold text-secondary-600 mb-2">
               No hay resultados aún
@@ -387,9 +372,7 @@ const CardSearchPage: React.FC = () => {
         ) : searchResults.length === 0 ? (
           <div className="text-center py-16 text-secondary-500">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.343A7.962 7.962 0 0112 4c-2.34 0-4.29 1.009-5.824 2.57" />
-              </svg>
+              <SmileySadIcon className="w-8 h-8 text-gray-400" weight="duotone" aria-hidden="true" />
             </div>
             <h4 className="text-lg font-semibold text-secondary-600 mb-2">
               No se encontraron cartas
@@ -423,7 +406,7 @@ const CardSearchPage: React.FC = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 text-sm">Set:</span>
-                    <span className="font-medium text-sm text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                    <span className="font-medium text-sm text-ink-700 bg-ink-100 px-2 py-1 rounded-full">
                       {card.set}
                     </span>
                   </div>

@@ -5,6 +5,15 @@ import { apiService } from '../services/api'
 import { useToast } from '../components/Toast'
 import { getClassBadgeStyle } from '../utils/classColors'
 import ConfirmDialog from '../components/ConfirmDialog'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+} from '../components/ui/page-header'
+import { AnimatedNumber } from '../components/ui/animated-number'
+import { CaretLeftIcon, CaretRightIcon, ChartBarIcon, CheckIcon, ClipboardTextIcon, EyeIcon, MagnifyingGlassIcon, PlusIcon, TrashIcon, XIcon } from '@phosphor-icons/react'
 
 interface GameHistory {
   id: number
@@ -195,7 +204,7 @@ const GamesHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando historial de partidas...</p>
@@ -205,32 +214,23 @@ const GamesHistoryPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 py-12 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="relative">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-white mb-4">
-                  Historial de Partidas
-                </h1>
-                <p className="text-lg text-gray-300">
-                  {isAuthenticated && filterMyGames ? 'Tus partidas jugadas' : 'Registro de todas las partidas jugadas'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Partidas</PageHeaderEyebrow>
+          <PageHeaderTitle>Historial de Partidas</PageHeaderTitle>
+          <PageHeaderDescription>
+            {isAuthenticated && filterMyGames ? 'Tus partidas jugadas' : 'Registro de todas las partidas jugadas'}
+          </PageHeaderDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {/* Búsqueda */}
             <div>
@@ -245,9 +245,7 @@ const GamesHistoryPage: React.FC = () => {
                   placeholder="Mazo, héroe o villano..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
-                <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" weight="bold" aria-hidden="true" />
               </div>
             </div>
 
@@ -321,73 +319,69 @@ const GamesHistoryPage: React.FC = () => {
 
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
+                <ClipboardTextIcon className="w-6 h-6 text-blue-600" weight="duotone" aria-hidden="true" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Partidas</p>
-                <p className="text-2xl font-bold text-gray-900">{games.length}</p>
+                <AnimatedNumber value={games.length} className="block font-display text-3xl font-extrabold text-gray-900" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                <CheckIcon className="w-6 h-6 text-green-600" weight="bold" aria-hidden="true" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Victorias</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {games.filter(g => g.result === 'win').length}
-                </p>
+                <AnimatedNumber
+                  value={games.filter(g => g.result === 'win').length}
+                  className="block font-display text-3xl font-extrabold text-gray-900"
+                />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
             <div className="flex items-center">
               <div className="p-2 bg-red-100 rounded-lg">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XIcon className="w-6 h-6 text-red-600" weight="bold" aria-hidden="true" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Derrotas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {games.filter(g => g.result === 'loss').length}
-                </p>
+                <AnimatedNumber
+                  value={games.filter(g => g.result === 'loss').length}
+                  className="block font-display text-3xl font-extrabold text-gray-900"
+                />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <ChartBarIcon className="w-6 h-6 text-blue-600" weight="duotone" aria-hidden="true" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">% Victorias</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {games.length > 0 
+                <AnimatedNumber
+                  value={games.length > 0
                     ? Math.round((games.filter(g => g.result === 'win').length / games.length) * 100)
-                    : 0}%
-                </p>
+                    : 0}
+                  format={(n) => `${n}%`}
+                  className="block font-display text-3xl font-extrabold text-gray-900"
+                />
               </div>
             </div>
           </div>
         </div>
 
         {/* Lista de partidas */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">
               Partidas Jugadas ({filteredGames.length})
@@ -396,9 +390,7 @@ const GamesHistoryPage: React.FC = () => {
 
           {filteredGames.length === 0 ? (
             <div className="text-center py-12">
-              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-              </svg>
+              <ClipboardTextIcon className="mx-auto h-12 w-12 text-gray-400" weight="duotone" aria-hidden="true" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No hay partidas</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {games.length === 0 
@@ -412,9 +404,7 @@ const GamesHistoryPage: React.FC = () => {
                     to="/create-deck"
                     className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
+                    <PlusIcon className="w-4 h-4 mr-2" weight="bold" aria-hidden="true" />
                     Crear Primer Mazo
                   </Link>
                 </div>
@@ -434,13 +424,11 @@ const GamesHistoryPage: React.FC = () => {
                             ? 'bg-green-100 text-green-800' 
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            {game.result === 'win' ? (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            ) : (
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            )}
-                          </svg>
+                          {game.result === 'win' ? (
+                            <CheckIcon className="w-3 h-3 mr-1" weight="bold" aria-hidden="true" />
+                          ) : (
+                            <XIcon className="w-3 h-3 mr-1" weight="bold" aria-hidden="true" />
+                          )}
                           {game.result === 'win' ? 'Victoria' : 'Derrota'}
                         </div>
 
@@ -485,10 +473,7 @@ const GamesHistoryPage: React.FC = () => {
                         to={`/decks/${game.deck_id}`}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
+                        <EyeIcon className="w-4 h-4 mr-2" weight="duotone" aria-hidden="true" />
                         Ver Mazo
                       </Link>
                       {isAuthenticated && user?.sub && user?.name && game.creator_name === user.name && (
@@ -501,9 +486,7 @@ const GamesHistoryPage: React.FC = () => {
                           disabled={deleting}
                           className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
                         >
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          <TrashIcon className="w-4 h-4 mr-2" weight="duotone" aria-hidden="true" />
                           Eliminar
                         </button>
                       )}
@@ -521,9 +504,7 @@ const GamesHistoryPage: React.FC = () => {
                       disabled={currentPage === 1}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
+                      <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
                     
                     {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
@@ -557,9 +538,7 @@ const GamesHistoryPage: React.FC = () => {
                       disabled={currentPage === getTotalPages()}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
                   </div>
                   

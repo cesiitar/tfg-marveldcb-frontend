@@ -2,6 +2,226 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-paper text-ink-900 font-sans;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  /* Grano sutil sobre toda la web para romper la planitud digital */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3 {
+    @apply font-display;
+    font-stretch: 88%;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-weight: 800;
+    line-height: 1.02;
+  }
+
+  h2 {
+    font-weight: 750;
+    line-height: 1.1;
+  }
+
+  h3 {
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-ink-900;
+  }
+
+  /* Anillo de foco visible y consistente para navegación con teclado */
+  :focus-visible {
+    outline: 2px solid theme('colors.brand.500');
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline-offset: 0;
+  }
+
+  /* Feedback táctil al pulsar cualquier botón */
+  button,
+  a[class*='bg-'] {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  button:not(:disabled):active,
+  a[class*='bg-']:active {
+    transform: scale(0.98);
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Inputs con un acabado más cuidado */
+  input[type='text'],
+  input[type='search'],
+  input[type='email'],
+  input[type='number'],
+  input[type='date'],
+  select,
+  textarea {
+    @apply bg-white;
+    transition: border-color 200ms, box-shadow 200ms;
+  }
+
+  input[type='text']:focus,
+  input[type='search']:focus,
+  input[type='email']:focus,
+  input[type='number']:focus,
+  input[type='date']:focus,
+  select:focus,
+  textarea:focus {
+    @apply border-brand-500;
+    box-shadow: 0 0 0 3px theme('colors.brand.100');
+  }
+
+  /* Cifras alineadas en estadísticas y contadores */
+  .tabular-nums,
+  [class*='text-3xl'],
+  [class*='text-4xl'] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-brand-600;
+  }
+
+  /* Tarjeta de mazo/set común a todas las páginas */
+  .deck-card {
+    @apply bg-white rounded-xl border border-ink-900/[0.08] overflow-hidden shadow-sm;
+    @apply transition-[transform,box-shadow,border-color] duration-300 ease-out;
+    @apply hover:-translate-y-0.5 hover:shadow-lg hover:border-ink-300;
+  }
+
+  .halftone {
+    background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1.2px);
+    background-size: 14px 14px;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Animaciones ligadas al scroll (CSS scroll-driven animations).
+   Corren en el compositor, fuera del hilo principal, y solo tocan
+   transform/opacity. Sin soporte o con "reducir movimiento" no se aplican.
+   ------------------------------------------------------------------ */
+.scroll-progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-progress {
+      display: block;
+      transform-origin: 0 50%;
+      animation: sd-grow linear both;
+      animation-timeline: scroll(root);
+    }
+
+    .sd-hero-exit {
+      animation: sd-hero-exit linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+
+    .sd-drift-left {
+      animation: sd-drift-left linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    .sd-drift-right {
+      animation: sd-drift-right linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    .sd-draw {
+      transform-origin: 0 50%;
+      animation: sd-grow linear both;
+      animation-timeline: view();
+      animation-range: entry 40% cover 55%;
+    }
+
+    .sd-parallax {
+      animation: sd-parallax linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes sd-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes sd-hero-exit {
+  to { transform: translateY(-4%) scale(0.95); opacity: 0.25; }
+}
+
+@keyframes sd-drift-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-28%); }
+}
+
+@keyframes sd-drift-right {
+  from { transform: translateX(-28%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes sd-parallax {
+  from { transform: translateY(48px); }
+  to { transform: translateY(-48px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Animaciones para Toast */
 @keyframes slide-in {
   from {
@@ -25,10 +245,25 @@
   }
 }
 
+@keyframes rise-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
 
 .animate-slide-out {
   animation: slide-out 0.3s ease-in;
+}
+
+.animate-rise-in {
+  animation: rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

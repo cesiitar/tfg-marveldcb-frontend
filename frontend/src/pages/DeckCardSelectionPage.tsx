@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { apiService } from '../services/api'
 import { Card, DeckCard } from '../types/card'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { MagnifyingGlassIcon, XIcon } from '@phosphor-icons/react'
 
 interface DeckCardSelectionPageProps {
   heroName: string
@@ -178,7 +187,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   if (!isAuthenticated) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8 text-center">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">Selección de Cartas</h1>
           <p className="text-gray-600">Debes iniciar sesión para crear un mazo.</p>
         </div>
@@ -187,17 +196,20 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Seleccionar Cartas</h1>
-          <button
-            onClick={onBack}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
-          >
+    <div className="space-y-8">
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Constructor · Paso 2</PageHeaderEyebrow>
+          <PageHeaderTitle>Seleccionar Cartas</PageHeaderTitle>
+        </PageHeaderContent>
+        <PageHeaderActions>
+          <button onClick={onBack} className={pageHeaderButton.secondary}>
             Volver
           </button>
-        </div>
+        </PageHeaderActions>
+      </PageHeader>
+
+      <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8">
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -251,18 +263,14 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                       className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-sm"
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+                      <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" weight="bold" aria-hidden="true" />
                     </div>
                     {basicSearchTerm && (
                       <button
                         onClick={() => setBasicSearchTerm('')}
                         className="absolute inset-y-0 right-0 pr-2 flex items-center"
                       >
-                        <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <XIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" weight="bold" aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -344,18 +352,14 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                       className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 text-sm"
                     />
                     <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                      <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+                      <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" weight="bold" aria-hidden="true" />
                     </div>
                     {aspectSearchTerm && (
                       <button
                         onClick={() => setAspectSearchTerm('')}
                         className="absolute inset-y-0 right-0 pr-2 flex items-center"
                       >
-                        <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <XIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" weight="bold" aria-hidden="true" />
                       </button>
                     )}
                   </div>

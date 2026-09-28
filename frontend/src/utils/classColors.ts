@@ -8,7 +8,7 @@ export function getClassColor(cls?: string): string {
     case 'justice':
       return 'bg-amber-500'
     case 'leadership':
-      return 'bg-blue-500'
+      return 'bg-sky-500'
     case 'protection':
       return 'bg-green-600'
     case 'hero':
@@ -33,7 +33,7 @@ export function getClassPillClasses(cls?: string): string {
     case 'justice':
       return 'bg-amber-50 text-amber-800 border border-amber-200'
     case 'leadership':
-      return 'bg-blue-50 text-blue-700 border border-blue-200'
+      return 'bg-sky-50 text-sky-700 border border-sky-200'
     case 'protection':
       return 'bg-green-50 text-green-700 border border-green-200'
     case 'hero':
@@ -58,7 +58,7 @@ export function getClassGradientClasses(cls?: string): string {
     case 'justice':
       return 'from-amber-100 to-amber-200 border-amber-300'
     case 'leadership':
-      return 'from-blue-100 to-blue-200 border-blue-300'
+      return 'from-sky-100 to-sky-200 border-sky-300'
     case 'protection':
       return 'from-green-100 to-green-200 border-green-300'
     case 'hero':
@@ -83,7 +83,7 @@ export function getClassBadgeStyle(cls?: string): string {
     case 'justice':
       return 'text-amber-800 bg-amber-200'
     case 'leadership':
-      return 'text-blue-800 bg-blue-200'
+      return 'text-sky-800 bg-sky-200'
     case 'protection':
       return 'text-green-800 bg-green-200'
     case 'hero':
@@ -108,7 +108,7 @@ export function getAspectHeaderGradient(aspect?: string): string {
     case 'justice':
       return 'from-amber-600 to-amber-700'
     case 'leadership':
-      return 'from-blue-600 to-blue-700'
+      return 'from-sky-600 to-sky-700'
     case 'protection':
       return 'from-green-600 to-green-700'
     case 'pool':

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { CheckIcon, InfoIcon, XIcon } from '@phosphor-icons/react'
 
 interface ToastProps {
   message: string
@@ -16,13 +17,13 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 4000 }
   const getToastStyles = () => {
     switch (type) {
       case 'success':
-        return 'bg-gradient-to-r from-green-700 to-emerald-800 text-white'
+        return 'bg-green-800 text-white'
       case 'error':
-        return 'bg-gradient-to-r from-red-500 to-rose-600 text-white'
+        return 'bg-red-700 text-white'
       case 'info':
-        return 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
+        return 'bg-ink-900 text-white'
       default:
-        return 'bg-gradient-to-r from-gray-500 to-slate-600 text-white'
+        return 'bg-ink-700 text-white'
     }
   }
 
@@ -30,27 +31,21 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 4000 }
     switch (type) {
       case 'success':
         return (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+          <CheckIcon className="w-6 h-6" weight="bold" aria-hidden="true" />
         )
       case 'error':
         return (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <XIcon className="w-6 h-6" weight="bold" aria-hidden="true" />
         )
       case 'info':
         return (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <InfoIcon className="w-6 h-6" weight="duotone" aria-hidden="true" />
         )
     }
   }
 
   return (
-    <div className={`fixed top-4 right-4 z-50 ${getToastStyles()} rounded-xl shadow-2xl p-4 min-w-80 max-w-96 transform transition-all duration-300 ease-in-out animate-slide-in`}>
+    <div className={`fixed top-4 right-4 z-50 ${getToastStyles()} rounded-xl shadow-2xl ring-1 ring-white/10 p-4 min-w-80 max-w-96 animate-slide-in`}>
       <div className="flex items-center gap-3">
         <div className="flex-shrink-0">
           {getIcon()}
@@ -62,9 +57,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 4000 }
           onClick={onClose}
           className="flex-shrink-0 p-1 hover:bg-white/20 rounded-lg transition-colors duration-200"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <XIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
         </button>
       </div>
     </div>

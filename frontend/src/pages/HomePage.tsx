@@ -1,7 +1,69 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+import { LazyMotion, domAnimation, m, useInView } from 'motion/react'
+import {
+  ArrowRightIcon,
+  ArrowUpRightIcon,
+  CardsIcon,
+  ChartLineUpIcon,
+  ClipboardTextIcon,
+  HeartIcon,
+  SparkleIcon,
+  TrophyIcon,
+  UsersThreeIcon,
+  type Icon,
+} from '@phosphor-icons/react'
 import { apiService } from '../services/api'
+import { AnimatedNumber } from '../components/ui/animated-number'
+import { Reveal, RevealGroup, RevealItem, easeOut } from '../components/motion/reveal'
+import { SplitWords } from '../components/motion/split-words'
+import { TiltCard } from '../components/motion/tilt-card'
+import { Magnetic } from '../components/motion/magnetic'
+import { CardFan } from '../components/home/card-fan'
+import { ScrollMarquee } from '../components/home/scroll-marquee'
+
+/** Cifra global grande; cuenta desde 0 cuando entra en pantalla. */
+const BandStat: React.FC<{ label: string; value: number; loading: boolean; Icon: Icon }> = ({ label, value, loading, Icon }) => {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '0px 0px -15% 0px' })
+  return (
+    <RevealItem className="px-6 py-8 md:px-10 md:py-10">
+      <div ref={ref} className="flex items-center gap-2 text-ink-500">
+        <Icon className="w-5 h-5 text-brand-600" weight="duotone" aria-hidden="true" />
+        <span className="font-mono text-[11px] uppercase tracking-[0.18em]">{label}</span>
+      </div>
+      {loading ? (
+        <div className="mt-4 h-14 w-24 bg-ink-100 rounded-lg animate-pulse" />
+      ) : (
+        <AnimatedNumber
+          value={inView ? value : 0}
+          stiffness={40}
+          damping={14}
+          className="mt-3 block font-display text-6xl md:text-7xl font-extrabold text-ink-900 leading-none"
+        />
+      )}
+    </RevealItem>
+  )
+}
+
+const UserStat: React.FC<{ label: string; value: number; loading: boolean; Icon: Icon; tone?: 'brand' | 'ink' }> = ({ label, value, loading, Icon, tone = 'ink' }) => (
+  <RevealItem>
+    <TiltCard maxTilt={5} className="group bg-white rounded-xl p-5 ring-1 ring-ink-900/[0.06] shadow-sm hover:shadow-lg transition-shadow duration-300">
+      <div className="relative flex items-start justify-between">
+        <span className="text-sm font-medium text-ink-500">{label}</span>
+        <span className={`w-9 h-9 rounded-lg flex items-center justify-center transition-transform duration-300 ease-out group-hover:-rotate-6 group-hover:scale-110 ${tone === 'brand' ? 'bg-brand-50 text-brand-600' : 'bg-ink-100 text-ink-700'}`}>
+          <Icon className="w-5 h-5" weight="duotone" aria-hidden="true" />
+        </span>
+      </div>
+      {loading ? (
+        <div className="relative mt-3 h-9 w-14 bg-ink-100 rounded-md animate-pulse" />
+      ) : (
+        <AnimatedNumber value={value} className="relative mt-2 block font-display text-4xl font-extrabold text-ink-900" />
+      )}
+    </TiltCard>
+  </RevealItem>
+)
 
 const HomePage: React.FC = () => {
   const { isAuthenticated, user } = useAuth0()
@@ -22,14 +84,14 @@ const HomePage: React.FC = () => {
     const loadStats = async () => {
       try {
         setLoading(true)
-        
+
         // Siempre cargar estadísticas globales
         try {
           const decks = await apiService.getDecks()
           const gameHistory = await apiService.getGameHistory(null, false)
           const games = gameHistory.games || []
           const wins = games.filter(g => g.result === 'win').length
-          
+
           if (isAuthenticated && user?.sub) {
             // Si está logueado, cargar también estadísticas del usuario
             try {
@@ -38,7 +100,7 @@ const HomePage: React.FC = () => {
               const userGames = userGameHistory.games || []
               const userWins = userGames.filter(g => g.result === 'win').length
               const favorites = await apiService.getUserFavorites(user.sub)
-              
+
               setStats({
                 totalDecks: decks.length,
                 totalGames: games.length,
@@ -102,286 +164,242 @@ const HomePage: React.FC = () => {
   }, [isAuthenticated, user?.sub])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 text-center py-20 px-4">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Bienvenido a <span className="text-white">AI</span><span className="text-blue-400">Forge</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-200 mb-8">
-              La plataforma definitiva para crear mazos con inteligencia artificial
-            </p>
-            <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
-              Forja mazos, aprende de tus partidas y obtén recomendaciones basadas en IA para dominar cada partida
-            </p>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
-              <Link
-                to="/create-deck"
-                className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+    <LazyMotion features={domAnimation} strict>
+      {/* Progreso de lectura de la página */}
+      <div className="scroll-progress fixed left-0 right-0 top-16 z-40 h-[3px] bg-brand-500" aria-hidden="true" />
+
+      <div className="space-y-20 md:space-y-28">
+        {/* Hero */}
+        <section className="sd-hero-exit relative overflow-hidden rounded-2xl bg-ink-900 text-white shadow-2xl">
+          <div className="absolute inset-0 halftone pointer-events-none" aria-hidden="true" />
+          <div
+            className="absolute -top-40 -right-32 w-[620px] h-[620px] rounded-full opacity-60 blur-3xl pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgb(184 38 61 / 0.6), transparent 65%)' }}
+            aria-hidden="true"
+          />
+          <div className="relative grid lg:grid-cols-12 gap-6 lg:gap-8 px-6 sm:px-10 lg:px-14 pt-12 pb-10 lg:py-20">
+            <div className="lg:col-span-7 flex flex-col justify-center">
+              <m.span
+                className="eyebrow !text-brand-300 mb-5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, ease: easeOut }}
               >
-                Crear Mazo
-              </Link>
-              <Link
-                to="/decks"
-                className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors duration-200 font-semibold text-lg border-2 border-white/30"
-              >
-                Explorar Mazos
-              </Link>
-              <Link
-                to="/add-game"
-                className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-              >
-                Añadir Partida
-              </Link>
+                Constructor de mazos · Marvel Champions
+              </m.span>
+              <SplitWords
+                className="text-5xl sm:text-6xl lg:text-7xl text-white"
+                segments={[
+                  { text: 'Forja mazos que' },
+                  { text: 'ganan', className: 'text-brand-400' },
+                  { text: 'partidas.' },
+                ]}
+              />
+              <Reveal delay={0.55} y={16}>
+                <p className="mt-6 text-lg text-ink-300 max-w-xl leading-relaxed">
+                  Construye tus mazos, registra cada partida y deja que la inteligencia artificial
+                  te proponga combinaciones pensadas para cada villano.
+                </p>
+              </Reveal>
+              <Reveal delay={0.7} y={16} className="mt-9 flex flex-col sm:flex-row flex-wrap gap-3">
+                <Link
+                  to="/create-deck"
+                  className="group inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-brand-600 text-white rounded-lg hover:bg-brand-500 font-semibold shadow-brand"
+                >
+                  Crear Mazo
+                  <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" aria-hidden="true" />
+                </Link>
+                <Link
+                  to="/add-game"
+                  className="inline-flex items-center justify-center px-6 py-3.5 bg-white text-ink-900 rounded-lg hover:bg-ink-100 font-semibold"
+                >
+                  Añadir Partida
+                </Link>
+                <Link
+                  to="/decks"
+                  className="inline-flex items-center justify-center px-4 py-3.5 text-ink-200 hover:text-white font-semibold underline decoration-ink-600 underline-offset-[6px] hover:decoration-brand-400 transition-colors"
+                >
+                  Explorar mazos
+                </Link>
+              </Reveal>
+            </div>
+
+            <div className="lg:col-span-5 flex items-center justify-center">
+              <CardFan className="scale-[0.78] sm:scale-100 -my-6 sm:my-0" />
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* Estadísticas globales */}
+        <section aria-label="Estadísticas globales">
+          <RevealGroup className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-ink-200 bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm">
+            <BandStat label="Mazos totales" value={stats.totalDecks} loading={loading} Icon={CardsIcon} />
+            <BandStat label="Partidas totales" value={stats.totalGames} loading={loading} Icon={ClipboardTextIcon} />
+            <BandStat label="Victorias totales" value={stats.totalWins} loading={loading} Icon={TrophyIcon} />
+          </RevealGroup>
+        </section>
+
+        {/* Estadísticas del usuario (solo si está logueado) */}
+        {isAuthenticated && (
+          <section>
+            <Reveal className="flex items-end justify-between mb-5">
+              <h2 className="text-2xl md:text-3xl text-ink-900">Tu actividad</h2>
+              <Link to="/profile" className="group inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:text-brand-700">
+                Ver perfil
+                <ArrowUpRightIcon className="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" weight="bold" aria-hidden="true" />
+              </Link>
+            </Reveal>
+            <RevealGroup className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <UserStat label="Mis mazos" value={stats.myDecks} loading={loading} Icon={CardsIcon} />
+              <UserStat label="Mis partidas" value={stats.myGames} loading={loading} Icon={ClipboardTextIcon} />
+              <UserStat label="Mis victorias" value={stats.myWins} loading={loading} Icon={TrophyIcon} />
+              <UserStat label="Mis favoritos" value={stats.myFavorites} loading={loading} Icon={HeartIcon} tone="brand" />
+            </RevealGroup>
+          </section>
+        )}
+
+        {/* Franjas tipográficas con el scroll */}
+        <ScrollMarquee />
+
+        {/* Características */}
+        <section>
+          <Reveal className="max-w-2xl mb-10">
+            <span className="eyebrow">Por qué AIForge</span>
+            <h2 className="mt-3 text-3xl md:text-5xl text-ink-900">
+              Todo lo que necesitas entre partida y partida.
+            </h2>
+          </Reveal>
+          <RevealGroup className="grid grid-cols-1 md:grid-cols-6 gap-4" stagger={0.1}>
+            <RevealItem className="md:col-span-4 md:row-span-2">
+              <TiltCard
+                maxTilt={4}
+                spotlight="light"
+                className="group h-full rounded-2xl bg-brand-700 text-white p-8 md:p-10 flex flex-col justify-between min-h-[340px] shadow-lg"
+              >
+                <div className="absolute inset-0 halftone pointer-events-none" aria-hidden="true" />
+                <div
+                  className="sd-parallax absolute -bottom-24 -right-24 w-80 h-80 rounded-full blur-2xl opacity-60 pointer-events-none"
+                  style={{ background: 'radial-gradient(circle, rgb(238 154 166 / 0.55), transparent 70%)' }}
+                  aria-hidden="true"
+                />
+                <SparkleIcon
+                  className="absolute right-8 top-8 w-28 h-28 md:w-36 md:h-36 text-white/15 transition-transform duration-700 ease-out group-hover:rotate-12 group-hover:scale-110"
+                  weight="fill"
+                  aria-hidden="true"
+                />
+                <span className="relative w-12 h-12 rounded-xl bg-white/10 ring-1 ring-inset ring-white/20 flex items-center justify-center">
+                  <SparkleIcon className="w-6 h-6" weight="duotone" aria-hidden="true" />
+                </span>
+                <div className="relative mt-10">
+                  <h3 className="text-3xl md:text-4xl text-white">Inteligencia artificial</h3>
+                  <p className="mt-3 text-brand-100 max-w-md leading-relaxed">
+                    Genera mazos optimizados para enfrentarte a villanos concretos. La IA aprende de tus
+                    partidas para proponer mejores combinaciones de cartas.
+                  </p>
+                  <Link
+                    to="/ai-recommendation"
+                    className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-white"
+                  >
+                    Probar la recomendación IA
+                    <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 group-hover/link:translate-x-1" weight="bold" aria-hidden="true" />
+                  </Link>
+                </div>
+              </TiltCard>
+            </RevealItem>
+
+            <RevealItem className="md:col-span-2">
+              <TiltCard className="group h-full rounded-2xl bg-white p-7 ring-1 ring-ink-900/[0.06] shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <span className="relative w-11 h-11 rounded-lg bg-ink-100 text-ink-800 flex items-center justify-center transition-transform duration-300 ease-out group-hover:-rotate-6 group-hover:scale-110">
+                  <ChartLineUpIcon className="w-6 h-6" weight="duotone" aria-hidden="true" />
+                </span>
+                <h3 className="relative mt-5 text-xl text-ink-900">Análisis de partidas</h3>
+                <p className="relative mt-2 text-ink-600 leading-relaxed">
+                  Registra tus partidas y consulta victorias, derrotas y tendencias para ajustar tu estrategia.
+                </p>
+              </TiltCard>
+            </RevealItem>
+
+            <RevealItem className="md:col-span-2">
+              <TiltCard className="group h-full rounded-2xl bg-white p-7 ring-1 ring-ink-900/[0.06] shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <span className="relative w-11 h-11 rounded-lg bg-ink-100 text-ink-800 flex items-center justify-center transition-transform duration-300 ease-out group-hover:-rotate-6 group-hover:scale-110">
+                  <UsersThreeIcon className="w-6 h-6" weight="duotone" aria-hidden="true" />
+                </span>
+                <h3 className="relative mt-5 text-xl text-ink-900">Comunidad</h3>
+                <p className="relative mt-2 text-ink-600 leading-relaxed">
+                  Comparte tus mazos, comenta los de otros jugadores y guarda tus favoritos.
+                </p>
+              </TiltCard>
+            </RevealItem>
+          </RevealGroup>
+        </section>
+
+        {/* Cómo funciona */}
+        <section className="grid lg:grid-cols-12 gap-10">
+          <Reveal className="lg:col-span-4">
+            <span className="eyebrow">Cómo funciona</span>
+            <h2 className="mt-3 text-3xl md:text-4xl text-ink-900">Tres pasos hasta tu próxima partida.</h2>
+          </Reveal>
+          <div className="lg:col-span-8">
+            <div className="h-[3px] bg-ink-200 rounded-full overflow-hidden mb-4" aria-hidden="true">
+              <div className="sd-draw h-full bg-brand-600" />
+            </div>
+            <RevealGroup className="grid sm:grid-cols-3 gap-4" stagger={0.12}>
+              {[
+                { n: '01', title: 'Elige tu héroe', text: 'Selecciona el héroe con el que quieres construir tu mazo.' },
+                { n: '02', title: 'Construye tu mazo', text: 'Añade las cartas que mejor encajan con tu estrategia.' },
+                { n: '03', title: 'Juega y aprende', text: 'Registra tus partidas y mejora con cada una.' },
+              ].map((step) => (
+                <RevealItem key={step.n}>
+                  <TiltCard maxTilt={3} className="h-full rounded-2xl bg-white p-6 md:p-7 ring-1 ring-ink-900/[0.06] shadow-sm">
+                    <span className="relative font-display text-5xl font-extrabold text-brand-600/90 leading-none">{step.n}</span>
+                    <h3 className="relative mt-6 text-lg text-ink-900">{step.title}</h3>
+                    <p className="relative mt-2 text-sm text-ink-600 leading-relaxed">{step.text}</p>
+                  </TiltCard>
+                </RevealItem>
+              ))}
+            </RevealGroup>
+          </div>
+        </section>
+
+        {/* Llamada a la acción final */}
+        <Reveal y={40}>
+          <section className="relative overflow-hidden rounded-2xl bg-ink-900 px-6 sm:px-10 lg:px-14 py-14 md:py-20 shadow-xl">
+            <div className="absolute inset-0 halftone pointer-events-none" aria-hidden="true" />
+            <div
+              className="sd-parallax absolute -left-24 -bottom-32 w-[480px] h-[480px] rounded-full opacity-50 blur-3xl pointer-events-none"
+              style={{ background: 'radial-gradient(circle, rgb(184 38 61 / 0.55), transparent 65%)' }}
+              aria-hidden="true"
+            />
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-brand-600" aria-hidden="true" />
+            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+              <div className="max-w-xl">
+                <h2 className="text-3xl md:text-5xl text-white">¿Listo para crear tu primer mazo?</h2>
+                <p className="mt-3 text-ink-300 text-lg">
+                  Únete a la comunidad y empieza a construir mazos para tu próxima partida.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
+                <Magnetic>
+                  <Link
+                    to="/create-deck"
+                    className="group inline-flex w-full items-center justify-center gap-2 px-7 py-4 bg-brand-600 text-white rounded-lg hover:bg-brand-500 font-semibold shadow-brand"
+                  >
+                    Crear Mazo Ahora
+                    <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" aria-hidden="true" />
+                  </Link>
+                </Magnetic>
+                <Link
+                  to="/decks"
+                  className="inline-flex items-center justify-center px-7 py-4 text-white rounded-lg ring-1 ring-inset ring-white/20 hover:bg-white/5 font-semibold"
+                >
+                  Ver mazos de la comunidad
+                </Link>
+              </div>
+            </div>
+          </section>
+        </Reveal>
       </div>
-
-      {/* Main Content */}
-      <div className="relative -mt-8 z-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Estadísticas Generales */}
-          <div className="space-y-6 mb-12">
-            {/* Estadísticas Globales */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-4">Estadísticas Globales</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  {loading ? (
-                    <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-                  ) : (
-                    <>
-                      <div className="text-3xl font-bold text-gray-900">{stats.totalDecks}</div>
-                      <div className="text-sm text-gray-600 mt-1">Mazos Totales</div>
-                    </>
-                  )}
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                  </div>
-                  {loading ? (
-                    <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-                  ) : (
-                    <>
-                      <div className="text-3xl font-bold text-gray-900">{stats.totalGames}</div>
-                      <div className="text-sm text-gray-600 mt-1">Partidas Totales</div>
-                    </>
-                  )}
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  {loading ? (
-                    <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-                  ) : (
-                    <>
-                      <div className="text-3xl font-bold text-gray-900">{stats.totalWins}</div>
-                      <div className="text-sm text-gray-600 mt-1">Victorias Totales</div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Estadísticas del Usuario (solo si está logueado) */}
-            {isAuthenticated && (
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">Mis Estadísticas</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                      </svg>
-                    </div>
-                    {loading ? (
-                      <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold text-gray-900">{stats.myDecks}</div>
-                        <div className="text-sm text-gray-600 mt-1">Mis Mazos</div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                      </svg>
-                    </div>
-                    {loading ? (
-                      <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold text-gray-900">{stats.myGames}</div>
-                        <div className="text-sm text-gray-600 mt-1">Mis Partidas</div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    {loading ? (
-                      <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold text-gray-900">{stats.myWins}</div>
-                        <div className="text-sm text-gray-600 mt-1">Mis Victorias</div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-200">
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </div>
-                    {loading ? (
-                      <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold text-gray-900">{stats.myFavorites}</div>
-                        <div className="text-sm text-gray-600 mt-1">Mis Favoritos</div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Características Destacadas */}
-          <div className="bg-white rounded-lg shadow-lg p-8 md:p-12 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
-              ¿Por qué elegir <span className="text-gray-900">AI</span><span className="text-blue-400">Forge</span>?
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Inteligencia Artificial</h3>
-                <p className="text-gray-600">
-                  Genera mazos optimizados con IA para enfrentar villanos específicos. La IA aprende de tus partidas para crear las mejores combinaciones de cartas.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Análisis de Partidas</h3>
-                <p className="text-gray-600">
-                  Registra tus partidas y analiza tu rendimiento. Visualiza estadísticas, victorias y derrotas para mejorar tus estrategias.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Comunidad Activa</h3>
-                <p className="text-gray-600">
-                  Comparte tus mazos, comenta y marca como favoritos los mejores. Únete a una comunidad de jugadores apasionados.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Cómo Funciona */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-lg p-8 md:p-12 mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
-              ¿Cómo funciona?
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                  1
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Elige tu Héroe</h3>
-                <p className="text-gray-600 text-sm">
-                  Selecciona el héroe con el que quieres construir tu mazo
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                  2
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Construye tu Mazo</h3>
-                <p className="text-gray-600 text-sm">
-                  Añade las cartas que mejor se adapten a tu estrategia
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                  3
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Juega y Aprende</h3>
-                <p className="text-gray-600 text-sm">
-                  Registra tus partidas y mejora con cada juego
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Call to Action Final */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-xl p-8 md:p-12 text-center text-white mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              ¿Listo para crear tu primer mazo?
-            </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Únete a la comunidad y comienza a construir mazos increíbles
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                to="/create-deck" 
-                className="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors duration-200 font-semibold text-lg shadow-lg"
-              >
-                Crear Mazo Ahora
-              </Link>
-              <Link 
-                to="/decks" 
-                className="px-8 py-4 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors duration-200 font-semibold text-lg border-2 border-white/50"
-              >
-                Ver Mazos de la Comunidad
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </LazyMotion>
   )
 }
 

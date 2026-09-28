@@ -5,6 +5,7 @@ import { convertMarvelCDBDeck } from '../utils/marvelcdbConverter'
 import { apiService } from '../services/api'
 import { useToast } from './Toast'
 import { Deck } from '../types/card'
+import { UploadSimpleIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
 
 interface ImportDeckModalProps {
   isOpen: boolean
@@ -231,21 +232,17 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-t-lg">
+          <div className="sticky top-0 bg-ink-900 text-white p-6 rounded-t-lg">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold flex items-center gap-2">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
+                <UploadSimpleIcon className="w-6 h-6" weight="bold" aria-hidden="true" />
                 Importar Mazo desde MarvelCDB
               </h2>
               <button
                 onClick={handleClose}
                 className="text-white hover:text-gray-200 transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <XIcon className="w-6 h-6" weight="bold" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -356,9 +353,7 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
                   {previewDeck.description && previewDeck.description.includes('no se encontraron') && (
                     <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                       <div className="flex items-start">
-                        <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                        </svg>
+                        <WarningIcon className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" weight="duotone" aria-hidden="true" />
                         <div className="text-sm text-yellow-800">
                           <p className="font-semibold mb-1">Advertencia: Algunas cartas no se encontraron</p>
                           <p className="text-xs">El mazo se importará pero puede estar incompleto. Revisa la descripción para más detalles.</p>

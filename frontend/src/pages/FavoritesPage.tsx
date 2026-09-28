@@ -5,6 +5,17 @@ import { useToast } from '../components/Toast'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { getClassColor } from '../utils/classColors'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { AnimatedNumber } from '../components/ui/animated-number'
+import { ArrowLeftIcon, CalendarBlankIcon, HeartIcon, LockIcon, StarIcon, UserIcon, WarningCircleIcon } from '@phosphor-icons/react'
 
 const FavoritesPage: React.FC = () => {
   const navigate = useNavigate()
@@ -49,7 +60,7 @@ const FavoritesPage: React.FC = () => {
       } catch (err) {
         console.error('Error loading favorites:', err)
         setError('Error al cargar los favoritos')
-        showToast('❌ Error al cargar los favoritos', 'error')
+        showToast('Error al cargar los favoritos', 'error')
       } finally {
         setLoading(false)
       }
@@ -77,11 +88,11 @@ const FavoritesPage: React.FC = () => {
             return deck
           }).filter(deck => deck.id !== deckId)
         )
-        showToast('❤️ Favorito eliminado', 'success')
+        showToast('Favorito eliminado', 'success')
       }
     } catch (err) {
       console.error('Error removing favorite:', err)
-      showToast('❌ Error al eliminar favorito', 'error')
+      showToast('Error al eliminar favorito', 'error')
     }
   }
 
@@ -93,11 +104,9 @@ const FavoritesPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8">
             <div className="mb-6">
-              <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+              <LockIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" weight="duotone" aria-hidden="true" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
               <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tus favoritos</p>
             </div>
@@ -131,11 +140,9 @@ const FavoritesPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center">
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8">
             <div className="mb-6">
-              <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <WarningCircleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" weight="duotone" aria-hidden="true" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
               <p className="text-gray-600 mb-6">{error}</p>
             </div>
@@ -152,43 +159,32 @@ const FavoritesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 mb-8">
-          <div className="absolute inset-0 bg-black opacity-30"></div>
-          
-          <div className="relative z-10 py-12 px-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="relative">
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold text-white mb-4">
-                    Mis Favoritos
-                  </h1>
-                  <p className="text-lg text-gray-300">
-                    {favorites.length} mazos guardados
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate('/mydecks')}
-                  className="absolute top-0 right-0 inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                  Volver a Mis Mazos
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PageHeader className="mb-8">
+          <PageHeaderContent>
+            <PageHeaderEyebrow>Tu colección</PageHeaderEyebrow>
+            <PageHeaderTitle>Mis Favoritos</PageHeaderTitle>
+            <PageHeaderDescription>
+              <AnimatedNumber value={favorites.length} className="font-semibold text-white" /> mazos guardados
+            </PageHeaderDescription>
+          </PageHeaderContent>
+          <PageHeaderActions>
+            <button
+              onClick={() => navigate('/mydecks')}
+              className={pageHeaderButton.secondary}
+            >
+              <ArrowLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+              Volver a Mis Mazos
+            </button>
+          </PageHeaderActions>
+        </PageHeader>
 
         {/* Lista de favoritos */}
         {favorites.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-12 text-center">
+            <HeartIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" weight="duotone" aria-hidden="true" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No tienes favoritos aún</h3>
             <p className="text-gray-600 mb-6">Explora los mazos y marca como favoritos los que más te gusten</p>
             <button
@@ -203,13 +199,13 @@ const FavoritesPage: React.FC = () => {
             {favorites.map((deck) => (
               <div 
                 key={deck.id}
-                className="group bg-white border border-gray-200 hover:border-blue-300 transition-all duration-200 overflow-hidden hover:shadow-lg cursor-pointer"
+                className="group deck-card cursor-pointer"
                 onClick={() => handleViewDeck(deck.id!)}
               >
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
+                <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
                       {deck.name}
                     </h3>
                     <div className="flex items-center gap-2">
@@ -224,9 +220,7 @@ const FavoritesPage: React.FC = () => {
                           className="flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors text-red-500 hover:text-red-700 hover:bg-red-50"
                           title="Eliminar de favoritos"
                         >
-                          <svg className="w-5 h-5" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
+                          <HeartIcon className="w-5 h-5" weight="fill" aria-hidden="true" />
                           <span className="text-sm font-semibold">
                             {deck.favorite_count !== undefined ? deck.favorite_count : 0}
                           </span>
@@ -242,10 +236,8 @@ const FavoritesPage: React.FC = () => {
                   <div className="mb-4">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
-                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
+                        <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
+                          <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                         </div>
                         <span className="text-lg font-bold text-gray-900">
                           {deck.hero_name || '—'}
@@ -266,9 +258,7 @@ const FavoritesPage: React.FC = () => {
                   <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 bg-gradient-to-br from-gray-400 to-gray-500 rounded-md flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.343-3 3m6 0a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+                        <UserIcon className="w-3 h-3 text-white" weight="duotone" aria-hidden="true" />
                       </div>
                       <span className="font-medium text-gray-600">
                         by {deck.creator_name || 'Anónimo'}
@@ -279,9 +269,7 @@ const FavoritesPage: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex items-center gap-1 text-gray-500">
-                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
-                      </svg>
+                      <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
                       <span>
                         {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                       </span>
