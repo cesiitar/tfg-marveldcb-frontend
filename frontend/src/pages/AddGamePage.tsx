@@ -6,6 +6,16 @@ import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
 import { getClassColor } from '../utils/classColors'
 import ImportDeckModal from '../components/ImportDeckModal'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { CardsIcon, ClipboardTextIcon, HeartIcon, StarIcon } from '@phosphor-icons/react'
 
 const AddGamePage: React.FC = () => {
   const navigate = useNavigate()
@@ -65,44 +75,33 @@ const AddGamePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30" />
-
-        <div className="relative z-10 text-center py-12 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Añadir Partida
-            </h1>
-            <p className="text-lg text-gray-300 mb-6">
-              Registra una nueva partida eligiendo un mazo existente o importando uno
-              desde MarvelCDB.
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Partidas</PageHeaderEyebrow>
+          <PageHeaderTitle>Añadir Partida</PageHeaderTitle>
+          <PageHeaderDescription>
+            Registra una nueva partida eligiendo un mazo existente o importando uno
+            desde MarvelCDB.
+          </PageHeaderDescription>
+          <PageHeaderActions className="mt-7">
+            <button onClick={handleShowDbDecks} className={pageHeaderButton.primary}>
+              Elegir mazo de la base de datos
+            </button>
+            <button onClick={() => setShowImportModal(true)} className={pageHeaderButton.secondary}>
+              Importar mazo desde MarvelCDB
+            </button>
+          </PageHeaderActions>
+          {!isAuthenticated && (
+            <p className="mt-4 text-sm text-ink-400 max-w-xl">
+              Puedes explorar e importar mazos sin registrarte, pero{' '}
+              <span className="font-semibold text-ink-200">necesitarás iniciar sesión</span> para
+              registrar partidas asociadas a un mazo de la base de datos.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={handleShowDbDecks}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                Elegir mazo de la base de datos
-              </button>
-              <button
-                onClick={() => setShowImportModal(true)}
-                className="px-8 py-3 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors duration-200 font-semibold text-base border-2 border-white/30"
-              >
-                Importar mazo desde MarvelCDB
-              </button>
-            </div>
-            {!isAuthenticated && (
-              <p className="mt-4 text-sm text-gray-200 max-w-xl mx-auto">
-                Puedes explorar e importar mazos sin registrarte, pero{' '}
-                <span className="font-semibold">necesitarás iniciar sesión</span> para
-                registrar partidas asociadas a un mazo de la base de datos.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+          )}
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Main content */}
       <div className="relative -mt-8 z-20 px-4 pb-12">
@@ -111,7 +110,7 @@ const AddGamePage: React.FC = () => {
           {showDbDecks && (
           <section
             id="db-decks-section"
-            className="bg-white rounded-lg shadow-lg p-6 md:p-8 border border-gray-200"
+            className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6 md:p-8 border border-gray-200"
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <div>
@@ -140,20 +139,8 @@ const AddGamePage: React.FC = () => {
               </div>
             ) : filteredDecks.length === 0 ? (
               <div className="py-12 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-                  <svg
-                    className="w-10 h-10 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                    />
-                  </svg>
+                <div className="w-20 h-20 bg-ink-100 ring-1 ring-ink-900/5 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
+                  <CardsIcon className="w-10 h-10 text-gray-400" weight="duotone" aria-hidden="true" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   No se han encontrado mazos
@@ -168,12 +155,12 @@ const AddGamePage: React.FC = () => {
                 {filteredDecks.map(deck => (
                   <div
                     key={deck.id}
-                    className="group bg-white border border-gray-200 hover:border-blue-400 transition-all duration-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg cursor-pointer flex flex-col"
+                    className="group deck-card cursor-pointer flex flex-col"
                     onClick={() => handleSelectDeck(deck)}
                   >
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-100">
-                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 line-clamp-2">
+                    <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 line-clamp-2">
                         {deck.name}
                       </h3>
                     </div>
@@ -181,20 +168,8 @@ const AddGamePage: React.FC = () => {
                     {/* Content */}
                     <div className="p-4 flex-1 flex flex-col">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-9 h-9 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                            />
-                          </svg>
+                        <div className="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
+                          <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-900">
@@ -222,32 +197,14 @@ const AddGamePage: React.FC = () => {
 
                       <div className="flex items-center justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-100">
                         <span className="flex items-center gap-1">
-                          <svg
-                            className="w-3 h-3 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                            />
-                          </svg>
+                          <CardsIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
                           <span className="font-semibold text-blue-600">
                             {deck.cards.length} cartas
                           </span>
                         </span>
                         {deck.favorite_count !== undefined && (
                           <span className="flex items-center gap-1">
-                            <svg
-                              className="w-3 h-3 text-red-500"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
+                            <HeartIcon className="w-3 h-3 text-red-500" weight="fill" aria-hidden="true" />
                             <span>{deck.favorite_count}</span>
                           </span>
                         )}
@@ -257,21 +214,9 @@ const AddGamePage: React.FC = () => {
                     {/* Footer button */}
                     <button
                       type="button"
-                      className="w-full px-3 py-2 bg-purple-600 text-white text-sm font-medium flex items-center justify-center gap-1 hover:bg-purple-700 transition-colors duration-200 border-t border-purple-500"
+                      className="w-full px-3 py-2 bg-ink-900 text-white text-sm font-medium flex items-center justify-center gap-1 hover:bg-ink-700 transition-colors duration-200 border-t border-ink-700"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                      </svg>
+                      <ClipboardTextIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                       Registrar partida con este mazo
                     </button>
                   </div>

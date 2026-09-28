@@ -5,6 +5,14 @@ import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
 import { getClassColor } from '../utils/classColors'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+} from '../components/ui/page-header'
+import { CalendarBlankIcon, CardsIcon, CaretLeftIcon, CaretRightIcon, HeartIcon, StarIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
 
 const DecksPage: React.FC = () => {
   const navigate = useNavigate()
@@ -277,7 +285,7 @@ const DecksPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando mazos...</p>
@@ -288,12 +296,10 @@ const DecksPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+            <WarningIcon className="w-8 h-8 text-red-600" weight="duotone" aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Error</h2>
           <p className="text-gray-600 mb-6">{error}</p>
@@ -309,28 +315,23 @@ const DecksPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 text-center py-12 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Decklists Públicos
-            </h1>
-            <p className="text-lg text-gray-300 mb-6">
-              Explora los mazos públicos creados por la comunidad
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Comunidad</PageHeaderEyebrow>
+          <PageHeaderTitle>Decklists Públicos</PageHeaderTitle>
+          <PageHeaderDescription>
+            Explora los mazos públicos creados por la comunidad
+          </PageHeaderDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Filters */}
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 mb-6">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-ink-900/[0.06] mb-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   <input
                     type="text"
@@ -375,10 +376,8 @@ const DecksPage: React.FC = () => {
           {/* Decks Grid */}
           {filteredDecks.length === 0 ? (
             <div className="text-center py-20">
-              <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+              <div className="w-24 h-24 bg-ink-100 ring-1 ring-ink-900/5 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <CardsIcon className="w-12 h-12 text-gray-400" weight="duotone" aria-hidden="true" />
               </div>
               <h3 className="text-2xl font-bold text-gray-700 mb-4">
                 No hay mazos que coincidan
@@ -405,10 +404,10 @@ const DecksPage: React.FC = () => {
                 <div 
                   key={deck.id}
                   id={isLastViewed ? `deck-${deck.id}` : undefined}
-                  className={`group bg-white border transition-all duration-200 overflow-hidden hover:shadow-lg cursor-pointer ${
+                  className={`group deck-card cursor-pointer ${
                     isLastViewed 
                       ? 'border-blue-500 border-2 shadow-lg ring-2 ring-blue-200' 
-                      : 'border-gray-200 hover:border-blue-300'
+                      : 'border-ink-900/[0.08] hover:border-ink-300'
                   }`}
                   onClick={() => {
                     // Guardar el ID antes de navegar
@@ -423,9 +422,9 @@ const DecksPage: React.FC = () => {
                   }}
                 >
                   {/* Header Section - Clean and Professional */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
+                  <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors duration-200 leading-tight">
+                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
                         {deck.name}
                       </h3>
                       <div className="flex items-center gap-2">
@@ -444,9 +443,7 @@ const DecksPage: React.FC = () => {
                             }`}
                             title={favorites.has(deck.id!) ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
                           >
-                            <svg className="w-5 h-5" fill={favorites.has(deck.id!) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
+                            <HeartIcon className="w-5 h-5" weight={favorites.has(deck.id!) ? 'fill' : 'regular'} aria-hidden="true" />
                             <span className="text-sm font-semibold">
                               {deck.favorite_count !== undefined ? deck.favorite_count : 0}
                             </span>
@@ -455,9 +452,7 @@ const DecksPage: React.FC = () => {
                           /* Contador de favoritos - solo si no está autenticado */
                           deck.favorite_count !== undefined && (
                             <div className="flex items-center gap-1 text-red-500">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                              </svg>
+                              <HeartIcon className="w-4 h-4" weight="fill" aria-hidden="true" />
                               <span className="text-sm font-semibold">{deck.favorite_count}</span>
                             </div>
                           )
@@ -472,10 +467,8 @@ const DecksPage: React.FC = () => {
                     <div className="mb-4">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
-                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
+                          <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
+                            <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                           </div>
                           <span className="text-lg font-bold text-gray-900">
                             {getDeckHeroName(deck) || '—'}
@@ -496,9 +489,7 @@ const DecksPage: React.FC = () => {
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
                       <div className="flex items-center gap-2">
                         <div className="w-5 h-5 bg-gradient-to-br from-gray-400 to-gray-500 rounded-md flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 1.343-3 3m6 0a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
+                          <UserIcon className="w-3 h-3 text-white" weight="duotone" aria-hidden="true" />
                         </div>
                         <span className="font-medium text-gray-600">
                           by {deck.creator_name || 'Anónimo'}
@@ -509,9 +500,7 @@ const DecksPage: React.FC = () => {
                       </span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-500">
-                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7a2 2 0 002 2z" />
-                      </svg>
+                        <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
                         <span>
                           {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                         </span>
@@ -531,9 +520,7 @@ const DecksPage: React.FC = () => {
                       disabled={currentPage === 1}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
+                      <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
                     
                     {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
@@ -567,9 +554,7 @@ const DecksPage: React.FC = () => {
                       disabled={currentPage === getTotalPages()}
                       className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
                     </div>
                   

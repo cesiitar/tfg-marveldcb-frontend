@@ -7,6 +7,15 @@ import { apiService } from '../services/api'
 import { useToast } from '../components/Toast'
 import { Deck } from '../types/card'
 import { getClassPillClasses } from '../utils/classColors'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+} from '../components/ui/page-header'
+import { AnimatedNumber } from '../components/ui/animated-number'
+import { ChartBarIcon, CheckCircleIcon, ClipboardTextIcon, InfoIcon, LightbulbIcon, PencilSimpleIcon, TagIcon, XIcon } from '@phosphor-icons/react'
 
 
 const AIRecommendationPage: React.FC = () => {
@@ -193,9 +202,9 @@ const AIRecommendationPage: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      <div className="min-h-[60vh]">
         <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8 text-center">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
             <p className="text-gray-600 mb-6">Debes iniciar sesión para usar la recomendación de IA. Por favor, usa el botón de Login en el header para acceder.</p>
           </div>
@@ -205,27 +214,23 @@ const AIRecommendationPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-lg shadow-lg mb-8 overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-30"></div>
-          <div className="relative z-10 px-6 py-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Recomendación de IA
-            </h1>
-            <p className="text-xl text-gray-200">
+    <div className="min-h-[60vh]">
+      <div>
+        <PageHeader className="mb-8">
+          <PageHeaderContent>
+            <PageHeaderEyebrow>Inteligencia artificial</PageHeaderEyebrow>
+            <PageHeaderTitle>Recomendación de IA</PageHeaderTitle>
+            <PageHeaderDescription>
               Selecciona un villano y genera un mazo optimizado con inteligencia artificial
-            </p>
-          </div>
-        </div>
+            </PageHeaderDescription>
+          </PageHeaderContent>
+        </PageHeader>
 
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-6 h-6 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <CheckCircleIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Selecciona un Villano
               </h2>
               
@@ -253,11 +258,9 @@ const AIRecommendationPage: React.FC = () => {
               )}
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <ChartBarIcon className="w-6 h-6 mr-2 text-blue-600" weight="duotone" aria-hidden="true" />
                 Dificultad
               </h2>
               
@@ -294,11 +297,9 @@ const AIRecommendationPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+                <ClipboardTextIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Número de Mazos
               </h2>
               <p className="text-gray-600 mb-4">
@@ -316,11 +317,9 @@ const AIRecommendationPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-6 h-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
+                <TagIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Parches Disponibles
               </h2>
               <p className="text-gray-600 mb-4">
@@ -369,9 +368,7 @@ const AIRecommendationPage: React.FC = () => {
                 {totalGenerated < totalRequested && (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div className="flex items-start">
-                      <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <InfoIcon className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" weight="duotone" aria-hidden="true" />
                       <div>
                         <p className="text-sm font-semibold text-yellow-800">
                           Se generaron {totalGenerated} de {totalRequested} mazos solicitados
@@ -389,9 +386,7 @@ const AIRecommendationPage: React.FC = () => {
 
                 <div className="space-y-4">
                   <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                    <svg className="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <CheckCircleIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                     Mazos Generados ({generatedDecks.length})
                   </h2>
                   
@@ -406,7 +401,7 @@ const AIRecommendationPage: React.FC = () => {
                       <div
                         key={index}
                         onClick={() => handleSelectDeck(deck)}
-                        className={`bg-white rounded-lg shadow-lg p-6 border-2 cursor-pointer transition-all ${
+                        className={`bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6 border-2 cursor-pointer transition-all ${
                           isSelected 
                             ? 'border-blue-500 bg-blue-50' 
                             : 'border-gray-200 hover:border-blue-300 hover:shadow-xl'
@@ -462,14 +457,16 @@ const AIRecommendationPage: React.FC = () => {
                         </div>
 
                         {winProbability !== null && (
-                          <div className="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
+                          <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-semibold text-green-800">
                                 Probabilidad de Victoria
                               </span>
-                              <span className="text-2xl font-bold text-green-700">
-                                {Math.round(winProbability * 100)}%
-                              </span>
+                              <AnimatedNumber
+                                value={Math.round(winProbability * 100)}
+                                format={(n) => `${n}%`}
+                                className="font-display text-2xl font-extrabold text-green-700"
+                              />
                             </div>
                           </div>
                         )}
@@ -479,12 +476,10 @@ const AIRecommendationPage: React.FC = () => {
                 </div>
 
                 {selectedDeck && (
-                  <div className="bg-white rounded-lg shadow-xl p-8 border-t-4 border-blue-500 sticky top-4">
+                  <div className="bg-white rounded-2xl shadow-xl ring-1 ring-ink-900/[0.04] p-8 border-t-4 border-brand-600 sticky top-20">
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-                        <svg className="w-8 h-8 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
+                        <PencilSimpleIcon className="w-8 h-8 mr-3 text-blue-600" weight="duotone" aria-hidden="true" />
                         Personalizar Mazo Seleccionado
                       </h2>
                       <button
@@ -496,21 +491,19 @@ const AIRecommendationPage: React.FC = () => {
                         className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                         title="Cerrar"
                       >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <XIcon className="w-6 h-6" weight="bold" aria-hidden="true" />
                       </button>
                     </div>
                     
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="bg-ink-50 border border-ink-200 rounded-xl p-4 mb-6">
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
-                          <p className="text-sm font-semibold text-blue-800 mb-1">Héroe</p>
-                          <p className="text-lg font-bold text-blue-900">{selectedDeck.hero_name}</p>
+                          <p className="text-sm font-semibold text-ink-500 mb-1">Héroe</p>
+                          <p className="text-lg font-bold text-ink-900">{selectedDeck.hero_name}</p>
                         </div>
                         {selectedDeck.aspect && (
                           <div>
-                            <p className="text-sm font-semibold text-blue-800 mb-1">Aspecto</p>
+                            <p className="text-sm font-semibold text-ink-500 mb-1">Aspecto</p>
                             <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getClassPillClasses(selectedDeck.aspect)}`}>
                               {selectedDeck.aspect}
                             </span>
@@ -518,10 +511,12 @@ const AIRecommendationPage: React.FC = () => {
                         )}
                         {selectedDeck.win_probability !== null && selectedDeck.win_probability !== undefined && (
                           <div className="text-right">
-                            <p className="text-sm font-semibold text-blue-800 mb-1">Probabilidad</p>
-                            <p className="text-2xl font-bold text-green-700">
-                              {Math.round(selectedDeck.win_probability * 100)}%
-                            </p>
+                            <p className="text-sm font-semibold text-ink-500 mb-1">Probabilidad</p>
+                            <AnimatedNumber
+                              value={Math.round(selectedDeck.win_probability * 100)}
+                              format={(n) => `${n}%`}
+                              className="block font-display text-2xl font-extrabold text-green-700"
+                            />
                           </div>
                         )}
                       </div>
@@ -649,11 +644,9 @@ const AIRecommendationPage: React.FC = () => {
                 )}
               </>
             ) : (
-              <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
                 <div className="text-center py-12">
-                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
+                  <LightbulbIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" weight="duotone" aria-hidden="true" />
                   <h3 className="text-xl font-semibold text-gray-700 mb-2">Mazos Generados</h3>
                   <p className="text-gray-500">
                     Selecciona un villano y genera mazos optimizados con IA

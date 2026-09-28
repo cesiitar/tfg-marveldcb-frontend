@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CardSet } from '../types/card'
 import { apiService } from '../services/api'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { ArrowRightIcon, CardsThreeIcon, MagnifyingGlassIcon, SmileySadIcon, WarningIcon } from '@phosphor-icons/react'
+import { AnimatedNumber } from '../components/ui/animated-number'
+import { Reveal } from '../components/motion/reveal'
+import { TiltCard } from '../components/motion/tilt-card'
 
 const CardsPage: React.FC = () => {
   const [sets, setSets] = useState<CardSet[]>([])
@@ -40,24 +53,21 @@ const CardsPage: React.FC = () => {
     }
   }, [searchTerm, sets])
 
+  // Datos derivados solo para la presentación (barra de tamaño y cifras de la cabecera)
+  const maxCards = Math.max(1, ...sets.map((s) => s.cardCount || 0))
+  const totalCards = sets.reduce((sum, s) => sum + (s.cardCount || 0), 0)
+
   const getSetColor = (index: number) => {
     const colors = [
-      'from-blue-500 to-blue-600',
-      'from-slate-500 to-slate-600', 
-      'from-indigo-500 to-indigo-600',
-      'from-emerald-500 to-emerald-600',
-      'from-purple-500 to-purple-600',
-      'from-rose-500 to-rose-600',
-      'from-teal-500 to-teal-600',
-      'from-violet-500 to-violet-600',
-      'from-cyan-500 to-cyan-600',
-      'from-orange-500 to-orange-600',
-      'from-green-500 to-green-600',
-      'from-pink-500 to-pink-600',
-      'from-amber-500 to-amber-600',
+      // Paleta de la web: marca, tinta y colores de aspecto del juego
+      'from-brand-500 to-brand-700',
+      'from-ink-700 to-ink-900',
       'from-red-500 to-red-600',
-      'from-lime-500 to-lime-600',
-      'from-sky-500 to-sky-600'
+      'from-amber-500 to-amber-600',
+      'from-sky-500 to-sky-600',
+      'from-green-500 to-green-600',
+      'from-teal-500 to-teal-600',
+      'from-ink-400 to-ink-500'
     ]
     return colors[index % colors.length]
   }
@@ -78,9 +88,7 @@ const CardsPage: React.FC = () => {
     return (
       <div className="text-center py-16">
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
+          <WarningIcon className="w-8 h-8 text-red-600" weight="duotone" aria-hidden="true" />
         </div>
         <h2 className="text-2xl font-semibold text-secondary-800 mb-4">Error</h2>
         <p className="text-secondary-600 mb-6">{error}</p>
@@ -95,63 +103,61 @@ const CardsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 text-center py-12 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              AI<span className="text-blue-400">Forge</span>
-            </h1>
-            <p className="text-lg text-gray-300 mb-6">
-              Explora y construye mazos con inteligencia artificial
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <Link 
-                to="/cards/search" 
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-              >
-                Buscar Cartas
-              </Link>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Catálogo</PageHeaderEyebrow>
+          <PageHeaderTitle>Cartas</PageHeaderTitle>
+          <PageHeaderDescription>
+            Explora y construye mazos con inteligencia artificial
+          </PageHeaderDescription>
+          <div className="mt-6 flex items-center gap-6">
+            <div>
+              <AnimatedNumber value={sets.length} className="block font-display text-3xl font-extrabold text-white leading-none" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">Sets</span>
+            </div>
+            <span className="h-9 w-px bg-white/15" aria-hidden="true" />
+            <div>
+              <AnimatedNumber value={totalCards} className="block font-display text-3xl font-extrabold text-white leading-none" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">Cartas</span>
             </div>
           </div>
-        </div>
-      </div>
+        </PageHeaderContent>
+        <PageHeaderActions>
+          <Link to="/cards/search" className={pageHeaderButton.primary}>
+            Buscar Cartas
+          </Link>
+        </PageHeaderActions>
+      </PageHeader>
 
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Buscador de Sets */}
-          <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200 mb-8">
-            <div className="max-w-lg mx-auto">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-1">
-                  Buscar Sets
-                </h2>
-              </div>
-              
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar por nombre del set..."
-                  className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                />
-                <svg className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              
+          {/* Barra de búsqueda de sets */}
+          <div className="bg-white rounded-2xl p-2.5 shadow-lg ring-1 ring-ink-900/[0.06] mb-10 flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <label className="relative flex-1">
+              <span className="sr-only">Buscar sets por nombre</span>
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-400" weight="bold" aria-hidden="true" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar set por nombre: Core Set, Hulk, Mutant Genesis…"
+                className="w-full pl-12 pr-4 py-3.5 rounded-xl !bg-ink-50 border border-transparent text-ink-900 placeholder:text-ink-400"
+              />
+            </label>
+            <div className="flex items-center justify-between sm:justify-end gap-3 px-2 sm:px-3">
+              <span className="font-mono text-xs uppercase tracking-[0.14em] text-ink-500 tabular-nums">
+                {filteredSets.length} de {sets.length} sets
+              </span>
               {searchTerm && (
-                <div className="mt-3 text-center">
-                  <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                    {filteredSets.length} set{filteredSets.length !== 1 ? 's' : ''} encontrado{filteredSets.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+                >
+                  Limpiar
+                </button>
               )}
             </div>
           </div>
@@ -159,10 +165,8 @@ const CardsPage: React.FC = () => {
           {/* Sets Grid */}
           {filteredSets.length === 0 && searchTerm ? (
             <div className="text-center py-20">
-              <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.57M15 6.343A7.962 7.962 0 0112 4c-2.34 0-4.29 1.009-5.824 2.57" />
-                </svg>
+              <div className="w-24 h-24 bg-ink-100 ring-1 ring-ink-900/5 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <SmileySadIcon className="w-12 h-12 text-gray-400" weight="duotone" aria-hidden="true" />
               </div>
               <h3 className="text-2xl font-bold text-gray-700 mb-4">
                 No se encontraron sets
@@ -170,53 +174,66 @@ const CardsPage: React.FC = () => {
               <p className="text-gray-500 mb-8 text-lg">
                 No hay sets que coincidan con "{searchTerm}"
               </p>
-              <button 
+              <button
                 onClick={() => setSearchTerm('')}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-500 font-semibold shadow-brand"
               >
                 Limpiar búsqueda
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {filteredSets.map((set, index) => (
-                <Link 
-                  key={set.id}
-                  to={`/cards/set/${set.id}`}
-                  className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300 overflow-hidden"
-                >
-                  {/* Header with subtle gradient */}
-                  <div className={`h-2 bg-gradient-to-r ${getSetColor(index)}`}></div>
-                  
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <span className="text-sm font-bold text-gray-700">
-                            {set.id}
-                          </span>
+                <Reveal key={set.id} delay={(index % 4) * 0.06} y={28}>
+                  <Link to={`/cards/set/${set.id}`} className="group block h-full rounded-2xl">
+                    <TiltCard
+                      maxTilt={5}
+                      spotlight="light"
+                      className="h-full rounded-2xl bg-white ring-1 ring-ink-900/[0.07] shadow-sm hover:shadow-xl transition-shadow duration-300"
+                    >
+                      {/* Portada del set */}
+                      <div className={`relative h-32 overflow-hidden bg-gradient-to-br ${getSetColor(index)}`}>
+                        <div className="absolute inset-0 halftone opacity-80" aria-hidden="true" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" aria-hidden="true" />
+                        <span className="absolute left-4 top-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/85">
+                          Set · {set.cardCount} cartas
+                        </span>
+                        <CardsThreeIcon
+                          className="absolute left-4 bottom-4 w-8 h-8 text-white transition-transform duration-500 ease-out group-hover:-rotate-12 group-hover:scale-110"
+                          weight="duotone"
+                          aria-hidden="true"
+                        />
+                        <span
+                          className="absolute -right-1 -bottom-7 font-display text-[7.5rem] leading-none font-extrabold text-transparent tabular-nums transition-transform duration-500 ease-out group-hover:-translate-x-2 group-hover:-translate-y-1"
+                          style={{ WebkitTextStroke: '1.5px rgb(255 255 255 / 0.6)', fontStretch: '80%' }}
+                          aria-hidden="true"
+                        >
+                          {String(set.id).padStart(2, '0')}
+                        </span>
+                      </div>
+
+                      {/* Información */}
+                      <div className="relative p-5">
+                        <h3 className="text-lg leading-tight text-ink-900 group-hover:text-brand-700 transition-colors duration-200">
+                          {set.name}
+                        </h3>
+                        <div className="mt-4 flex items-center gap-3">
+                          <div className="flex-1 h-1.5 rounded-full bg-ink-100 overflow-hidden" aria-hidden="true">
+                            <div
+                              className="h-full rounded-full bg-ink-800 group-hover:bg-brand-600 transition-colors duration-300"
+                              style={{ width: `${Math.max(6, Math.round((set.cardCount / maxCards) * 100))}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-xs text-ink-500 tabular-nums">{set.cardCount}</span>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors duration-200">
-                            {set.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {set.cardCount} cartas
-                          </p>
+                        <div className="mt-5 flex items-center justify-between text-sm font-semibold text-ink-500 group-hover:text-brand-600 transition-colors duration-200">
+                          <span>Ver cartas</span>
+                          <ArrowRightIcon className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" weight="bold" aria-hidden="true" />
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
-                        Ver cartas
-                      </span>
-                      <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
+                    </TiltCard>
+                  </Link>
+                </Reveal>
               ))}
             </div>
           )}

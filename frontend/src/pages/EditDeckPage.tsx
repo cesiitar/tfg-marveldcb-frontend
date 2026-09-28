@@ -6,6 +6,7 @@ import { Deck, Card } from '../types/card'
 import { useToast } from '../components/Toast'
 import { translateCardType } from '../utils/typeTranslations'
 import { getAspectHeaderGradient } from '../utils/classColors'
+import { ArrowLeftIcon, CardsThreeIcon, TagIcon, UserIcon } from '@phosphor-icons/react'
 
 const EditDeckPage: React.FC = () => {
   const { id } = useParams()
@@ -94,7 +95,7 @@ const EditDeckPage: React.FC = () => {
       } catch (err) {
         console.error('Error loading deck:', err)
         setError('Error al cargar el mazo')
-        showToast('❌ Error al cargar el mazo', 'error')
+        showToast('Error al cargar el mazo', 'error')
       } finally {
         setLoading(false)
       }
@@ -160,7 +161,7 @@ const EditDeckPage: React.FC = () => {
   // Añadir carta al mazo
   const addCard = (card: Card) => {
     if (remainingCards <= 0) {
-      showToast('❌ Ya tienes 50 cartas en el mazo', 'error')
+      showToast('Ya tienes 50 cartas en el mazo', 'error')
       return
     }
     
@@ -169,7 +170,7 @@ const EditDeckPage: React.FC = () => {
     const maxQuantity = card.max_quantity || 3
     
     if (currentQuantity >= maxQuantity) {
-      showToast(`❌ No puedes añadir más de ${maxQuantity} copias de esta carta`, 'error')
+      showToast(`No puedes añadir más de ${maxQuantity} copias de esta carta`, 'error')
       return
     }
     
@@ -196,18 +197,18 @@ const EditDeckPage: React.FC = () => {
     if (!deck) return
     
     if (!deckName.trim()) {
-      showToast('❌ El nombre del mazo es obligatorio', 'error')
+      showToast('El nombre del mazo es obligatorio', 'error')
       return
     }
     
     if (totalCards < 40 || totalCards > 50) {
-      showToast('❌ El mazo debe tener entre 40 y 50 cartas', 'error')
+      showToast('El mazo debe tener entre 40 y 50 cartas', 'error')
       return
     }
     
     // Verificar que tenemos el Auth0 SUB del usuario
     if (!user?.sub) {
-      showToast('❌ No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
+      showToast('No hay Auth0 ID. Inicia sesión nuevamente.', 'error')
       return
     }
     
@@ -220,7 +221,7 @@ const EditDeckPage: React.FC = () => {
       )
       
       if (duplicateDeck) {
-        showToast(`❌ Ya existe un mazo con el nombre "${deckName}". Por favor, elige otro nombre.`, 'error')
+        showToast(`Ya existe un mazo con el nombre "${deckName}". Por favor, elige otro nombre.`, 'error')
         return
       }
     } catch (err) {
@@ -284,7 +285,7 @@ const EditDeckPage: React.FC = () => {
       
     } catch (err: any) {
       console.error('Error updating deck:', err)
-      showToast(`❌ Error al actualizar el mazo: ${err.message}`, 'error')
+      showToast(`Error al actualizar el mazo: ${err.message}`, 'error')
     } finally {
       setSaving(false)
     }
@@ -292,7 +293,7 @@ const EditDeckPage: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h2>
           <p className="text-gray-600 mb-6">Necesitas iniciar sesión para editar mazos</p>
@@ -303,7 +304,7 @@ const EditDeckPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando mazo...</p>
@@ -314,7 +315,7 @@ const EditDeckPage: React.FC = () => {
 
   if (error || !deck) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Error</h2>
           <p className="text-gray-600 mb-6">{error || 'Mazo no encontrado'}</p>
@@ -333,28 +334,22 @@ const EditDeckPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header mejorado */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] overflow-hidden mb-8">
           <div className={`bg-gradient-to-r ${getAspectHeaderGradient(deck.aspect)} px-6 py-8`}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Editar Mazo</h1>
                 <div className="flex flex-wrap items-center gap-3 text-blue-100">
                   <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+                    <UserIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
                     <span className="font-medium">{deck.hero_name}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
+                    <TagIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
                     <span className="font-medium capitalize">{deck.aspect}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 0V6a2 2 0 012-2h2a2 2 0 012 2v1m-6 0h6m-6 0l-3 3m3-3l3 3m-3-3v10a2 2 0 002 2h2a2 2 0 002-2V7" />
-                    </svg>
+                    <CardsThreeIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
                     <span className="font-medium">{totalCards} cartas</span>
                   </div>
                 </div>
@@ -363,9 +358,7 @@ const EditDeckPage: React.FC = () => {
                 onClick={() => navigate('/mydecks')}
                 className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+                <ArrowLeftIcon className="w-4 h-4 mr-2" weight="bold" aria-hidden="true" />
                 Volver a Mis Mazos
               </button>
             </div>
@@ -400,7 +393,7 @@ const EditDeckPage: React.FC = () => {
             
             {/* Columna izquierda - Información del mazo */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Información del Mazo</h2>
                 
                 <div className="space-y-4">
@@ -477,7 +470,7 @@ const EditDeckPage: React.FC = () => {
 
             {/* Columna derecha - Cartas */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
                   <div className="flex items-center gap-2">

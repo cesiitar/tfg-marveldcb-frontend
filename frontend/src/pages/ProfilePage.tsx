@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { apiService } from '../services/api'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
+} from '../components/ui/page-header'
+import { AnimatedNumber } from '../components/ui/animated-number'
 
 const ProfilePage: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth()
@@ -52,7 +62,7 @@ const ProfilePage: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8 text-center">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">Perfil de Usuario</h1>
           <p className="text-gray-600">Debes iniciar sesión para ver tu perfil.</p>
         </div>
@@ -61,18 +71,24 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Mi Perfil</h1>
+    <div className="space-y-8">
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Tu cuenta</PageHeaderEyebrow>
+          <PageHeaderTitle>Mi Perfil</PageHeaderTitle>
+          <PageHeaderDescription>{user?.name || 'Usuario'}</PageHeaderDescription>
+        </PageHeaderContent>
+        <PageHeaderActions>
           <button
             onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
+            className={pageHeaderButton.secondary}
           >
             Cerrar Sesión
           </button>
-        </div>
+        </PageHeaderActions>
+      </PageHeader>
 
+      <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Información del usuario */}
           <div className="space-y-4">
@@ -83,7 +99,7 @@ const ProfilePage: React.FC = () => {
                 <img
                   src={user.picture}
                   alt="Avatar"
-                  className="w-16 h-16 rounded-full"
+                  className="w-16 h-16 rounded-xl ring-1 ring-ink-900/10 object-cover"
                 />
                 <div>
                   <p className="text-lg font-medium text-gray-800">
@@ -118,14 +134,14 @@ const ProfilePage: React.FC = () => {
             
             {loading && (
               <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-500 mx-auto mb-2"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto mb-2"></div>
                 <p className="text-gray-600">Cargando estadísticas...</p>
               </div>
             )}
 
             {!loading && (
-              <div className="bg-gray-50 p-6 rounded-lg text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">{deckCount}</div>
+              <div className="bg-gray-50 p-6 rounded-xl text-center ring-1 ring-ink-900/[0.05]">
+                <AnimatedNumber value={deckCount} className="block font-display text-5xl font-extrabold text-brand-600 mb-2" />
                 <div className="text-lg text-gray-600">Mazos Creados</div>
                 <div className="text-sm text-gray-500 mt-2">
                   {deckCount === 0 ? 'Aún no has creado ningún mazo' : 'Total de mazos en tu colección'}

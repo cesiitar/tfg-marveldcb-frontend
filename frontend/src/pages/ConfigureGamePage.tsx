@@ -4,6 +4,14 @@ import { useToast } from '../components/Toast'
 import { apiService } from '../services/api'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Deck } from '../types/card'
+import {
+  PageHeader,
+  PageHeaderContent,
+  PageHeaderEyebrow,
+  PageHeaderTitle,
+  PageHeaderDescription,
+} from '../components/ui/page-header'
+import { CheckCircleIcon, CheckIcon, InfoIcon, LightningIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
 
 const ConfigureGamePage: React.FC = () => {
   const navigate = useNavigate()
@@ -161,24 +169,19 @@ const ConfigureGamePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="min-h-[60vh]">
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800">
-        <div className="absolute inset-0 bg-black opacity-30"></div>
-        
-        <div className="relative z-10 text-center py-12 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Registrar Partida
-            </h1>
-            <p className="text-lg text-gray-300 mb-6">
-              {existingDeckId 
-                ? 'Registra los detalles de una nueva partida con este mazo'
-                : 'Registra los detalles de tu partida para crear el mazo'}
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Partidas</PageHeaderEyebrow>
+          <PageHeaderTitle>Registrar Partida</PageHeaderTitle>
+          <PageHeaderDescription>
+            {existingDeckId
+              ? 'Registra los detalles de una nueva partida con este mazo'
+              : 'Registra los detalles de tu partida para crear el mazo'}
+          </PageHeaderDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
@@ -187,11 +190,9 @@ const ConfigureGamePage: React.FC = () => {
           {/* Columna izquierda y central - Configuración */}
           <div className="lg:col-span-2 space-y-6">
             {/* Nivel de dificultad */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                <LightningIcon className="w-5 h-5 mr-2 text-blue-600" weight="duotone" aria-hidden="true" />
                 Nivel de Dificultad
               </h2>
               
@@ -229,11 +230,9 @@ const ConfigureGamePage: React.FC = () => {
             </div>
 
             {/* Villano */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
+                <WarningIcon className="w-5 h-5 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Villano
               </h2>
               
@@ -266,11 +265,9 @@ const ConfigureGamePage: React.FC = () => {
             </div>
 
             {/* Resultado de la partida */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <CheckCircleIcon className="w-5 h-5 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
                 Resultado de la Partida
               </h2>
               
@@ -286,9 +283,7 @@ const ConfigureGamePage: React.FC = () => {
                   />
                   <div className="ml-3">
                     <div className="font-medium text-gray-900 flex items-center">
-                      <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <CheckIcon className="w-5 h-5 text-green-600 mr-2" weight="bold" aria-hidden="true" />
                       Victoria
                     </div>
                     <div className="text-sm text-gray-600">El mazo funcionó bien contra este villano</div>
@@ -306,9 +301,7 @@ const ConfigureGamePage: React.FC = () => {
                   />
                   <div className="ml-3">
                     <div className="font-medium text-gray-900 flex items-center">
-                      <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <XIcon className="w-5 h-5 text-red-600 mr-2" weight="bold" aria-hidden="true" />
                       Derrota
                     </div>
                     <div className="text-sm text-gray-600">El mazo necesita mejoras para este matchup</div>
@@ -320,7 +313,7 @@ const ConfigureGamePage: React.FC = () => {
 
           {/* Columna derecha - Botones */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6 sticky top-20">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Acciones</h3>
               
               <div className="space-y-3">
@@ -339,9 +332,7 @@ const ConfigureGamePage: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <CheckIcon className="w-5 h-5 mr-2" weight="bold" aria-hidden="true" />
                       {existingDeckId ? 'Guardar Partida' : 'Guardar y Crear Mazo'}
                     </>
                   )}
@@ -363,9 +354,7 @@ const ConfigureGamePage: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <XIcon className="w-5 h-5 mr-2" weight="bold" aria-hidden="true" />
                         Crear sin partida
                       </>
                     )}
@@ -376,9 +365,7 @@ const ConfigureGamePage: React.FC = () => {
               {!existingDeckId && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="flex items-start space-x-2">
-                    <svg className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <InfoIcon className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" weight="duotone" aria-hidden="true" />
                     <p className="text-xs text-gray-500">
                       Puedes registrar la partida más tarde desde "Mis Mazos"
                     </p>
