@@ -11,7 +11,10 @@ import {
   PageHeaderActions,
   pageHeaderButton,
 } from '../components/ui/page-header'
-import { CaretRightIcon, MagnifyingGlassIcon, SmileySadIcon, WarningIcon } from '@phosphor-icons/react'
+import { ArrowRightIcon, CardsThreeIcon, MagnifyingGlassIcon, SmileySadIcon, WarningIcon } from '@phosphor-icons/react'
+import { AnimatedNumber } from '../components/ui/animated-number'
+import { Reveal } from '../components/motion/reveal'
+import { TiltCard } from '../components/motion/tilt-card'
 
 const CardsPage: React.FC = () => {
   const [sets, setSets] = useState<CardSet[]>([])
@@ -49,6 +52,10 @@ const CardsPage: React.FC = () => {
       setFilteredSets(filtered)
     }
   }, [searchTerm, sets])
+
+  // Datos derivados solo para la presentación (barra de tamaño y cifras de la cabecera)
+  const maxCards = Math.max(1, ...sets.map((s) => s.cardCount || 0))
+  const totalCards = sets.reduce((sum, s) => sum + (s.cardCount || 0), 0)
 
   const getSetColor = (index: number) => {
     const colors = [
@@ -105,6 +112,17 @@ const CardsPage: React.FC = () => {
           <PageHeaderDescription>
             Explora y construye mazos con inteligencia artificial
           </PageHeaderDescription>
+          <div className="mt-6 flex items-center gap-6">
+            <div>
+              <AnimatedNumber value={sets.length} className="block font-display text-3xl font-extrabold text-white leading-none" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">Sets</span>
+            </div>
+            <span className="h-9 w-px bg-white/15" aria-hidden="true" />
+            <div>
+              <AnimatedNumber value={totalCards} className="block font-display text-3xl font-extrabold text-white leading-none" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">Cartas</span>
+            </div>
+          </div>
         </PageHeaderContent>
         <PageHeaderActions>
           <Link to="/cards/search" className={pageHeaderButton.primary}>
@@ -116,32 +134,30 @@ const CardsPage: React.FC = () => {
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Buscador de Sets */}
-          <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200 mb-8">
-            <div className="max-w-lg mx-auto">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-1">
-                  Buscar Sets
-                </h2>
-              </div>
-              
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar por nombre del set..."
-                  className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                />
-                <MagnifyingGlassIcon className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" weight="bold" aria-hidden="true" />
-              </div>
-              
+          {/* Barra de búsqueda de sets */}
+          <div className="bg-white rounded-2xl p-2.5 shadow-lg ring-1 ring-ink-900/[0.06] mb-10 flex flex-col sm:flex-row sm:items-center gap-2.5">
+            <label className="relative flex-1">
+              <span className="sr-only">Buscar sets por nombre</span>
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-400" weight="bold" aria-hidden="true" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar set por nombre: Core Set, Hulk, Mutant Genesis…"
+                className="w-full pl-12 pr-4 py-3.5 rounded-xl !bg-ink-50 border border-transparent text-ink-900 placeholder:text-ink-400"
+              />
+            </label>
+            <div className="flex items-center justify-between sm:justify-end gap-3 px-2 sm:px-3">
+              <span className="font-mono text-xs uppercase tracking-[0.14em] text-ink-500 tabular-nums">
+                {filteredSets.length} de {sets.length} sets
+              </span>
               {searchTerm && (
-                <div className="mt-3 text-center">
-                  <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                    {filteredSets.length} set{filteredSets.length !== 1 ? 's' : ''} encontrado{filteredSets.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+                >
+                  Limpiar
+                </button>
               )}
             </div>
           </div>
@@ -158,51 +174,66 @@ const CardsPage: React.FC = () => {
               <p className="text-gray-500 mb-8 text-lg">
                 No hay sets que coincidan con "{searchTerm}"
               </p>
-              <button 
+              <button
                 onClick={() => setSearchTerm('')}
-                className="px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-500 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-500 font-semibold shadow-brand"
               >
                 Limpiar búsqueda
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {filteredSets.map((set, index) => (
-                <Link 
-                  key={set.id}
-                  to={`/cards/set/${set.id}`}
-                  className="group deck-card"
-                >
-                  {/* Header with subtle gradient */}
-                  <div className={`h-2 bg-gradient-to-r ${getSetColor(index)}`}></div>
-                  
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <span className="text-sm font-bold text-gray-700">
-                            {set.id}
-                          </span>
+                <Reveal key={set.id} delay={(index % 4) * 0.06} y={28}>
+                  <Link to={`/cards/set/${set.id}`} className="group block h-full rounded-2xl">
+                    <TiltCard
+                      maxTilt={5}
+                      spotlight="light"
+                      className="h-full rounded-2xl bg-white ring-1 ring-ink-900/[0.07] shadow-sm hover:shadow-xl transition-shadow duration-300"
+                    >
+                      {/* Portada del set */}
+                      <div className={`relative h-32 overflow-hidden bg-gradient-to-br ${getSetColor(index)}`}>
+                        <div className="absolute inset-0 halftone opacity-80" aria-hidden="true" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" aria-hidden="true" />
+                        <span className="absolute left-4 top-4 font-mono text-[10px] uppercase tracking-[0.18em] text-white/85">
+                          Set · {set.cardCount} cartas
+                        </span>
+                        <CardsThreeIcon
+                          className="absolute left-4 bottom-4 w-8 h-8 text-white transition-transform duration-500 ease-out group-hover:-rotate-12 group-hover:scale-110"
+                          weight="duotone"
+                          aria-hidden="true"
+                        />
+                        <span
+                          className="absolute -right-1 -bottom-7 font-display text-[7.5rem] leading-none font-extrabold text-transparent tabular-nums transition-transform duration-500 ease-out group-hover:-translate-x-2 group-hover:-translate-y-1"
+                          style={{ WebkitTextStroke: '1.5px rgb(255 255 255 / 0.6)', fontStretch: '80%' }}
+                          aria-hidden="true"
+                        >
+                          {String(set.id).padStart(2, '0')}
+                        </span>
+                      </div>
+
+                      {/* Información */}
+                      <div className="relative p-5">
+                        <h3 className="text-lg leading-tight text-ink-900 group-hover:text-brand-700 transition-colors duration-200">
+                          {set.name}
+                        </h3>
+                        <div className="mt-4 flex items-center gap-3">
+                          <div className="flex-1 h-1.5 rounded-full bg-ink-100 overflow-hidden" aria-hidden="true">
+                            <div
+                              className="h-full rounded-full bg-ink-800 group-hover:bg-brand-600 transition-colors duration-300"
+                              style={{ width: `${Math.max(6, Math.round((set.cardCount / maxCards) * 100))}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-xs text-ink-500 tabular-nums">{set.cardCount}</span>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-800 mb-1 leading-tight group-hover:text-blue-600 transition-colors duration-200">
-                            {set.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {set.cardCount} cartas
-                          </p>
+                        <div className="mt-5 flex items-center justify-between text-sm font-semibold text-ink-500 group-hover:text-brand-600 transition-colors duration-200">
+                          <span>Ver cartas</span>
+                          <ArrowRightIcon className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" weight="bold" aria-hidden="true" />
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">
-                        Ver cartas
-                      </span>
-                      <CaretRightIcon className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" weight="bold" aria-hidden="true" />
-                    </div>
-                  </div>
-                </Link>
+                    </TiltCard>
+                  </Link>
+                </Reveal>
               ))}
             </div>
           )}

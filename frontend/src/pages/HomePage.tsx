@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import { LazyMotion, domAnimation, m, useInView } from 'motion/react'
+import { m, useInView } from 'motion/react'
 import {
   ArrowRightIcon,
   ArrowUpRightIcon,
@@ -164,7 +164,7 @@ const HomePage: React.FC = () => {
   }, [isAuthenticated, user?.sub])
 
   return (
-    <LazyMotion features={domAnimation} strict>
+    <>
       {/* Progreso de lectura de la página */}
       <div className="scroll-progress fixed left-0 right-0 top-16 z-40 h-[3px] bg-brand-500" aria-hidden="true" />
 
@@ -399,7 +399,7 @@ const HomePage: React.FC = () => {
           </section>
         </Reveal>
       </div>
-    </LazyMotion>
+    </>
   )
 }
 

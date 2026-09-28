@@ -12,6 +12,8 @@ export interface TiltCardProps extends HTMLMotionProps<'div'> {
   maxTilt?: number
   /** Color del foco: claro para fondos oscuros, marca para fondos claros. */
   spotlight?: 'light' | 'brand'
+  /** 'above' pinta el foco sobre el contenido (efecto foil); por defecto va debajo. */
+  spotlightLayer?: 'below' | 'above'
 }
 
 const spotlightColor = {
@@ -21,7 +23,7 @@ const spotlightColor = {
 
 const SPOT = 360
 
-export function TiltCard({ maxTilt = 6, spotlight = 'brand', className, children, ...props }: TiltCardProps) {
+export function TiltCard({ maxTilt = 6, spotlight = 'brand', spotlightLayer = 'below', className, children, ...props }: TiltCardProps) {
   const reduce = useReducedMotion()
   const rect = React.useRef<DOMRect | null>(null)
   const spring = { stiffness: 170, damping: 20, mass: 0.6 }
@@ -68,13 +70,19 @@ export function TiltCard({ maxTilt = 6, spotlight = 'brand', className, children
     >
       <m.div
         aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 z-0 rounded-full"
+        className={cn(
+          'pointer-events-none absolute left-0 top-0 rounded-full',
+          spotlightLayer === 'above' ? 'z-20 mix-blend-soft-light' : 'z-0'
+        )}
         style={{
           width: SPOT,
           height: SPOT,
           transform: spotTransform,
           opacity: spotOpacity,
-          background: spotlightColor[spotlight],
+          background:
+            spotlightLayer === 'above'
+              ? 'radial-gradient(circle, rgb(255 255 255 / 0.6), transparent 60%)'
+              : spotlightColor[spotlight],
         }}
       />
       {children as React.ReactNode}

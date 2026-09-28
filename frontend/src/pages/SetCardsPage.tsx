@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { apiService } from '../services/api'
 import { Card, CardSet } from '../types/card'
-import { translateCardType } from '../utils/typeTranslations'
-import { getClassBadgeStyle, getClassGradientClasses } from '../utils/classColors'
+import { GameCard } from '../components/ui/game-card'
+import { Reveal } from '../components/motion/reveal'
 import {
   PageHeader,
   PageHeaderContent,
@@ -105,8 +105,6 @@ const SetCardsPage: React.FC = () => {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-
-  const getCardGradient = (clase: string) => getClassGradientClasses(clase)
 
   const generateSetStats = (cards: Card[], viewType: string = 'general') => {
     let filteredCards = cards
@@ -336,30 +334,11 @@ const SetCardsPage: React.FC = () => {
             </div>
           ) : (
             <div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
                 {getCurrentPageCards().map((card, index) => (
-                  <div key={index} className={`bg-gradient-to-br ${getCardGradient(card.clase)} border-2 rounded-xl p-5 hover:shadow-lg hover:scale-105 transition-all duration-300 hover:-translate-y-1`}>
-                    <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2">{card.name}</h3>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 text-sm">Aspecto:</span>
-                        <span className={`font-semibold capitalize px-2 py-1 rounded-full text-xs ${getClassBadgeStyle(card.clase)}`}>
-                          {card.clase}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 text-sm">Tipo:</span>
-                        <span className="font-medium text-gray-800">{translateCardType(card.type)}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600 text-sm">Coste:</span>
-                        <span className="font-bold text-lg text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                          {card.cost}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <Reveal key={`${currentPage}-${index}`} delay={(index % 5) * 0.05} y={24}>
+                    <GameCard name={card.name} aspect={card.clase} type={card.type} cost={card.cost} />
+                  </Reveal>
                 ))}
               </div>
               

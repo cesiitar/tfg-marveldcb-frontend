@@ -1,4 +1,5 @@
 import React from 'react'
+import { LazyMotion, domAnimation } from 'motion/react'
 import Header from './Header'
 import Footer from './Footer'
 
@@ -8,6 +9,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
+    <LazyMotion features={domAnimation} strict>
     <div className="min-h-[100dvh] flex flex-col bg-paper overflow-x-clip">
       <a
         href="#contenido"
@@ -21,6 +23,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </main>
       <Footer />
     </div>
+    </LazyMotion>
   )
 }
 
