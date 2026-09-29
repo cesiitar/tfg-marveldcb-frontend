@@ -45,7 +45,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose, duration = 4000 }
   }
 
   return (
-    <div className={`fixed top-4 right-4 z-50 ${getToastStyles()} rounded-xl shadow-2xl ring-1 ring-white/10 p-4 min-w-80 max-w-96 animate-slide-in`}>
+    <div role="status" className={`pointer-events-auto ${getToastStyles()} rounded-xl shadow-2xl ring-1 ring-white/10 p-4 w-full sm:w-auto sm:min-w-80 sm:max-w-96 animate-slide-in`}>
       <div className="flex items-center gap-3">
         <div className="flex-shrink-0">
           {getIcon()}
@@ -78,7 +78,7 @@ export const useToast = () => {
   }
 
   const ToastContainer = () => (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="pointer-events-none fixed top-20 right-4 left-4 sm:left-auto z-[60] flex flex-col items-end gap-2" aria-live="polite">
       {toasts.map(toast => (
         <Toast
           key={toast.id}

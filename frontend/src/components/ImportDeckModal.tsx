@@ -277,7 +277,7 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
                 <button
                   onClick={handlePreview}
                   disabled={loading || importing || !deckUrlOrId.trim()}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="btn btn-primary"
                 >
                   {loading ? 'Cargando...' : 'Vista Previa'}
                 </button>
@@ -367,14 +367,14 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
                   <button
                     onClick={handleImport}
                     disabled={importing || importingCards}
-                    className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                    className="btn btn-primary flex-1"
                   >
                     {importingCards ? 'Importando cartas...' : importing ? 'Importando mazo...' : 'Importar Mazo'}
                   </button>
                   <button
                     onClick={() => setPreviewDeck(null)}
                     disabled={importing}
-                    className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 transition-colors font-medium"
+                    className="btn btn-secondary"
                   >
                     Cancelar
                   </button>

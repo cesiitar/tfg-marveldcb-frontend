@@ -112,7 +112,7 @@ const FavoritesPage: React.FC = () => {
             </div>
             <button
               onClick={() => navigate('/login')}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn btn-primary w-full"
             >
               Iniciar Sesión
             </button>
@@ -148,7 +148,7 @@ const FavoritesPage: React.FC = () => {
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn btn-primary w-full"
             >
               Reintentar
             </button>
@@ -189,7 +189,7 @@ const FavoritesPage: React.FC = () => {
             <p className="text-gray-600 mb-6">Explora los mazos y marca como favoritos los que más te gusten</p>
             <button
               onClick={() => navigate('/mydecks')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn btn-primary"
             >
               Explorar Mazos
             </button>
@@ -234,12 +234,12 @@ const FavoritesPage: React.FC = () => {
                 <div className="p-4">
                   {/* Hero and Aspect Info */}
                   <div className="mb-4">
-                    <div className="flex items-center gap-3 mb-3">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
                           <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                         </div>
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
                           {deck.hero_name || '—'}
                         </span>
                       </div>
@@ -271,7 +271,7 @@ const FavoritesPage: React.FC = () => {
                     <div className="flex items-center gap-1 text-gray-500">
                       <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
                       <span>
-                        {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                        {deck.created_at ? new Date(deck.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                       </span>
                     </div>
                   </div>

@@ -94,7 +94,7 @@ const CardsPage: React.FC = () => {
         <p className="text-secondary-600 mb-6">{error}</p>
         <button 
           onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+          className="btn btn-primary"
         >
           Reintentar
         </button>
@@ -176,7 +176,7 @@ const CardsPage: React.FC = () => {
               </p>
               <button
                 onClick={() => setSearchTerm('')}
-                className="px-6 py-3 bg-brand-600 text-white rounded-xl hover:bg-brand-500 font-semibold shadow-brand"
+                className="btn btn-primary"
               >
                 Limpiar búsqueda
               </button>

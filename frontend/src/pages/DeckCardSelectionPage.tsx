@@ -299,7 +299,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                       const maxQuantity = card.max_quantity
                       const canAddMore = remainingCards > 0 && (maxQuantity ? quantity < maxQuantity : true)
                       return (
-                        <div key={cardKey} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={cardKey} className="flex items-center justify-between gap-3 px-3 py-2.5 bg-white rounded-xl ring-1 ring-inset ring-ink-100 hover:bg-ink-50">
                           <div className="flex-1">
                             <h3 className="text-sm font-medium text-gray-800">{card.name}</h3>
                             <p className="text-xs text-gray-500">
@@ -309,7 +309,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => handleCardQuantityChange(cardKey, Math.max(0, quantity - 1), maxQuantity)}
-                              className="w-6 h-6 bg-gray-300 text-gray-600 rounded-full hover:bg-gray-400 flex items-center justify-center text-sm"
+                              className="w-7 h-7 rounded-md flex items-center justify-center bg-white text-ink-700 ring-1 ring-inset ring-ink-200 hover:bg-ink-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold" aria-label="Quitar una copia"
                               disabled={quantity <= 0}
                             >
                               -
@@ -317,7 +317,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                             <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                             <button
                               onClick={() => handleCardQuantityChange(cardKey, quantity + 1, maxQuantity)}
-                              className="w-6 h-6 bg-blue-600 text-white rounded-full hover:bg-blue-700 flex items-center justify-center text-sm"
+                              className="w-7 h-7 rounded-md flex items-center justify-center bg-white text-ink-700 ring-1 ring-inset ring-ink-200 hover:bg-ink-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold" aria-label="Añadir una copia"
                               disabled={!canAddMore}
                             >
                               +
@@ -388,7 +388,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                       const maxQuantity = card.max_quantity
                       const canAddMore = remainingCards > 0 && (maxQuantity ? quantity < maxQuantity : true)
                       return (
-                        <div key={cardKey} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={cardKey} className="flex items-center justify-between gap-3 px-3 py-2.5 bg-white rounded-xl ring-1 ring-inset ring-ink-100 hover:bg-ink-50">
                           <div className="flex-1">
                             <h3 className="text-sm font-medium text-gray-800">{card.name}</h3>
                             <p className="text-xs text-gray-500">
@@ -398,7 +398,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => handleCardQuantityChange(cardKey, Math.max(0, quantity - 1), maxQuantity)}
-                              className="w-6 h-6 bg-gray-300 text-gray-600 rounded-full hover:bg-gray-400 flex items-center justify-center text-sm"
+                              className="w-7 h-7 rounded-md flex items-center justify-center bg-white text-ink-700 ring-1 ring-inset ring-ink-200 hover:bg-ink-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold" aria-label="Quitar una copia"
                               disabled={quantity <= 0}
                             >
                               -
@@ -406,7 +406,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
                             <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                             <button
                               onClick={() => handleCardQuantityChange(cardKey, quantity + 1, maxQuantity)}
-                              className="w-6 h-6 bg-blue-600 text-white rounded-full hover:bg-blue-700 flex items-center justify-center text-sm"
+                              className="w-7 h-7 rounded-md flex items-center justify-center bg-white text-ink-700 ring-1 ring-inset ring-ink-200 hover:bg-ink-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold" aria-label="Añadir una copia"
                               disabled={!canAddMore}
                             >
                               +
@@ -427,11 +427,7 @@ const DeckCardSelectionPage: React.FC<DeckCardSelectionPageProps> = ({
           <button
             onClick={handleComplete}
             disabled={totalCards < 40 || totalCards > 50}
-            className={`px-8 py-3 rounded-lg font-medium transition-colors duration-200 ${
-              totalCards >= 40 && totalCards <= 50
-                ? 'bg-green-500 text-white hover:bg-green-600'
-                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
-            }`}
+            className="btn btn-primary btn-lg"
           >
             {totalCards >= 40 && totalCards <= 50 ? 'Finalizar Mazo' : totalCards < 40 ? `Necesitas ${40 - totalCards} cartas más` : `Tienes ${totalCards - 50} cartas de más`}
           </button>

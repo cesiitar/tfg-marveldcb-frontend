@@ -167,7 +167,7 @@ const AddGamePage: React.FC = () => {
 
                     {/* Content */}
                     <div className="p-4 flex-1 flex flex-col">
-                      <div className="flex items-center gap-3 mb-3">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
                         <div className="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
                           <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                         </div>
@@ -214,7 +214,7 @@ const AddGamePage: React.FC = () => {
                     {/* Footer button */}
                     <button
                       type="button"
-                      className="w-full px-3 py-2 bg-ink-900 text-white text-sm font-medium flex items-center justify-center gap-1 hover:bg-ink-700 transition-colors duration-200 border-t border-ink-700"
+                      className="btn btn-dark btn-sm w-full justify-center"
                     >
                       <ClipboardTextIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                       Registrar partida con este mazo

@@ -17,7 +17,7 @@ import {
   PageHeaderActions,
   pageHeaderButton,
 } from '../components/ui/page-header'
-import { CalendarBlankIcon, CardsIcon, ClipboardTextIcon, EyeIcon, HeartIcon, PencilSimpleIcon, PlusIcon, SignOutIcon, StarIcon, TrashIcon, UploadSimpleIcon, WarningIcon } from '@phosphor-icons/react'
+import { CalendarBlankIcon, CardsIcon, ClipboardTextIcon, EyeIcon, HeartIcon, MagnifyingGlassIcon, PencilSimpleIcon, PlusIcon, SignOutIcon, StarIcon, TrashIcon, UploadSimpleIcon, WarningIcon } from '@phosphor-icons/react'
 
 const MyDecksPage: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth()
@@ -234,42 +234,36 @@ const MyDecksPage: React.FC = () => {
         <div className="relative -mt-8 z-20 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Search and Actions */}
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-ink-900/[0.06] mb-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex-1 max-w-md">
-                    <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar por nombre de mazo"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                <button
-                  onClick={() => setShowImportModal(true)}
-                  className="px-6 py-3 bg-ink-900 text-white rounded-lg hover:bg-ink-700 transition-colors duration-200 font-medium flex items-center gap-2"
-                >
-                  <UploadSimpleIcon className="w-5 h-5" weight="bold" aria-hidden="true" />
-                  Importar desde MarvelCDB
-                </button>
-                <Link
-                  to="/create-deck"
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium flex items-center gap-2"
-                >
-                  <PlusIcon className="w-5 h-5" weight="bold" aria-hidden="true" />
-                  Crear Nuevo Mazo
-                </Link>
-                    <button
-                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                  className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center gap-2"
-                    >
-                  <SignOutIcon className="w-5 h-5" weight="bold" aria-hidden="true" />
-                  Cerrar Sesión
-                    </button>
-                  </div>
-                </div>
-                  </div>
+          <div className="bg-white rounded-2xl p-2.5 shadow-lg ring-1 ring-ink-900/[0.06] mb-8 flex flex-col lg:flex-row lg:items-center gap-2.5">
+            <label className="relative flex-1 min-w-0">
+              <span className="sr-only">Buscar por nombre de mazo</span>
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-400" weight="bold" aria-hidden="true" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nombre de mazo"
+                className="w-full pl-12 pr-4 py-3 rounded-xl !bg-ink-50 border border-transparent text-ink-900 placeholder:text-ink-400"
+              />
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setShowImportModal(true)} className="btn btn-secondary">
+                <UploadSimpleIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                Importar desde MarvelCDB
+              </button>
+              <Link to="/create-deck" className="btn btn-primary">
+                <PlusIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                Crear nuevo mazo
+              </Link>
+              <button
+                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                className="btn btn-ghost"
+              >
+                <SignOutIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
                   
           {/* Decks Grid */}
           {filteredDecks.length === 0 ? (
@@ -286,7 +280,7 @@ const MyDecksPage: React.FC = () => {
               {!search && (
                 <Link
                   to="/create-deck"
-                  className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium text-lg"
+                  className="btn btn-primary btn-lg"
                 >
                   Crear Mi Primer Mazo
                 </Link>
@@ -343,12 +337,12 @@ const MyDecksPage: React.FC = () => {
                   <div className="p-4">
                     {/* Hero and Aspect Info */}
                     <div className="mb-4">
-                      <div className="flex items-center gap-3 mb-3">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
                             <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                 </div>
-                          <span className="text-lg font-bold text-gray-900">
+                          <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
                             {getDeckHeroName(deck) || '—'}
                           </span>
                 </div>
@@ -376,7 +370,7 @@ const MyDecksPage: React.FC = () => {
                       <div className="flex items-center gap-1 text-gray-500">
                         <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
                         <span>
-                          {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                          {deck.created_at ? new Date(deck.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                         </span>
                   </div>
                   </div>
@@ -396,28 +390,28 @@ const MyDecksPage: React.FC = () => {
                             }
                             navigate(`/decks/${deck.id || 0}`)
                           }}
-                          className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
+                          className="btn btn-secondary btn-sm flex-1"
                         >
                           <EyeIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                           Ver
                     </button>
                   <button
                           onClick={() => handleEditDeck(deck.id || 0)}
-                          className="flex-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
+                          className="btn btn-secondary btn-sm flex-1"
                   >
                           <PencilSimpleIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                           Editar
                   </button>
                   <button
                           onClick={() => handleDeleteDeck(deck.id || 0)}
-                          className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center"
+                          className="btn btn-danger btn-sm" aria-label="Eliminar mazo" title="Eliminar mazo"
                   >
                           <TrashIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                   </button>
                 </div>
             <button 
                         onClick={() => handleConfigureGame(deck)}
-                        className="w-full px-3 py-2 bg-ink-900 text-white rounded-lg hover:bg-ink-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-1"
+                        className="btn btn-dark btn-sm w-full"
             >
                         <ClipboardTextIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                         Registrar Partida

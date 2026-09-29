@@ -6,7 +6,8 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { useToast } from '../components/Toast'
 import { Deck } from '../types/card'
-import { getClassPillClasses } from '../utils/classColors'
+import { getClassColor, getClassPillClasses } from '../utils/classColors'
+import { CardFan } from '../components/home/card-fan'
 import {
   PageHeader,
   PageHeaderContent,
@@ -15,7 +16,7 @@ import {
   PageHeaderDescription,
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
-import { ChartBarIcon, CheckCircleIcon, ClipboardTextIcon, InfoIcon, LightbulbIcon, PencilSimpleIcon, TagIcon, XIcon } from '@phosphor-icons/react'
+import { InfoIcon, SparkleIcon, XIcon } from '@phosphor-icons/react'
 
 
 const AIRecommendationPage: React.FC = () => {
@@ -200,23 +201,25 @@ const AIRecommendationPage: React.FC = () => {
     }
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-[60vh]">
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Recomendación IA</h1>
-            <p className="text-gray-600 mb-6">Debes iniciar sesión para usar la recomendación de IA. Por favor, usa el botón de Login en el header para acceder.</p>
-          </div>
-        </div>
-      </div>
-    )
+  const stepLabel = (n: number, text: string) => (
+    <h2 className="flex items-center gap-3 text-base text-ink-900">
+      <span className="w-6 h-6 rounded-full bg-ink-900 text-white text-xs font-bold flex items-center justify-center tabular-nums" aria-hidden="true">
+        {n}
+      </span>
+      {text}
+    </h2>
+  )
+
+  const resetSelection = () => {
+    setSelectedDeck(null)
+    setDeckName('')
+    setDeckDescription('')
   }
 
-  return (
-    <div className="min-h-[60vh]">
-      <div>
-        <PageHeader className="mb-8">
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[60vh] space-y-8">
+        <PageHeader>
           <PageHeaderContent>
             <PageHeaderEyebrow>Inteligencia artificial</PageHeaderEyebrow>
             <PageHeaderTitle>Recomendación de IA</PageHeaderTitle>
@@ -225,444 +228,390 @@ const AIRecommendationPage: React.FC = () => {
             </PageHeaderDescription>
           </PageHeaderContent>
         </PageHeader>
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-ink-900/[0.06] p-8 text-center max-w-lg mx-auto">
+          <h2 className="text-xl text-ink-900 mb-2">Inicia sesión para usar la IA</h2>
+          <p className="text-ink-500">
+            La recomendación usa tus partidas y guarda los mazos en tu cuenta. Inicia sesión con el botón de la parte superior.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <CheckCircleIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
-                Selecciona un Villano
-              </h2>
-              
-              {loadingVillains ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-2 text-gray-600">Cargando villanos...</p>
-                </div>
-              ) : (
-                <select
-                  value={selectedVillainId || ''}
-                  onChange={(e) => {
-                    const id = parseInt(e.target.value)
-                    setSelectedVillainId(id || null)
-                  }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
-                >
-                  <option value="">Selecciona un villano...</option>
-                  {villains.map((villain) => (
-                    <option key={villain.id} value={villain.id}>
-                      {villain.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
+  const showSkeleton = generatingDeck && generatedDecks.length === 0
 
-            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <ChartBarIcon className="w-6 h-6 mr-2 text-blue-600" weight="duotone" aria-hidden="true" />
-                Dificultad
-              </h2>
-              
-              <div className="space-y-3">
-                <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="difficulty"
-                    value="normal"
-                    checked={difficulty === 'normal'}
-                    onChange={(e) => setDifficulty(e.target.value as 'normal' | 'expert')}
-                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
-                  <div className="ml-3">
-                    <span className="font-medium text-gray-900">Normal</span>
-                    <p className="text-sm text-gray-600">Dificultad estándar</p>
-                  </div>
-                </label>
-                
-                <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="difficulty"
-                    value="expert"
-                    checked={difficulty === 'expert'}
-                    onChange={(e) => setDifficulty(e.target.value as 'normal' | 'expert')}
-                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  />
-                  <div className="ml-3">
-                    <span className="font-medium text-gray-900">Experto</span>
-                    <p className="text-sm text-gray-600">Mayor desafío</p>
-                  </div>
-                </label>
-              </div>
-            </div>
+  return (
+    <div className="min-h-[60vh]">
+      <PageHeader className="mb-8">
+        <PageHeaderContent>
+          <PageHeaderEyebrow>Inteligencia artificial</PageHeaderEyebrow>
+          <PageHeaderTitle>Recomendación de IA</PageHeaderTitle>
+          <PageHeaderDescription>
+            Selecciona un villano y genera un mazo optimizado con inteligencia artificial
+          </PageHeaderDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
-            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <ClipboardTextIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
-                Número de Mazos
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Selecciona cuántos mazos quieres generar (máximo 4). Los mazos estarán ordenados por probabilidad de victoria.
-              </p>
+      <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-12 items-start">
+        {/* Configuración */}
+        <section className="lg:col-span-5 lg:sticky lg:top-20 bg-white rounded-2xl shadow-sm ring-1 ring-ink-900/[0.06] divide-y divide-ink-100">
+          <div className="p-6">
+            {stepLabel(1, 'Elige el villano')}
+            {loadingVillains ? (
+              <div className="mt-4 h-12 rounded-xl bg-ink-100 animate-pulse" />
+            ) : (
               <select
-                value={maxDecks}
-                onChange={(e) => setMaxDecks(parseInt(e.target.value))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+                value={selectedVillainId || ''}
+                onChange={(e) => {
+                  const id = parseInt(e.target.value)
+                  setSelectedVillainId(id || null)
+                }}
+                className="mt-4 w-full px-4 py-3 rounded-xl border border-ink-200 text-base text-ink-900"
+                aria-label="Villano"
               >
-                <option value={1}>1 mazo</option>
-                <option value={2}>2 mazos</option>
-                <option value={3}>3 mazos (recomendado)</option>
-                <option value={4}>4 mazos</option>
+                <option value="">Selecciona un villano...</option>
+                {villains.map((villain) => (
+                  <option key={villain.id} value={villain.id}>
+                    {villain.name}
+                  </option>
+                ))}
               </select>
-            </div>
+            )}
+          </div>
 
-            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <TagIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
-                Parches Disponibles
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Esta funcionalidad se implementará próximamente. Por ahora, la IA generará el mazo sin restricciones de parches.
-              </p>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <p className="text-sm text-gray-500 italic">
-                  Próximamente: Selección de parches y cartas de tu colección
-                </p>
-              </div>
+          <fieldset className="p-6">
+            <legend className="sr-only">Dificultad</legend>
+            {stepLabel(2, 'Dificultad')}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              {([
+                { value: 'normal', label: 'Normal', hint: 'Dificultad estándar' },
+                { value: 'expert', label: 'Experto', hint: 'Mayor desafío' },
+              ] as const).map((opt) => {
+                const active = difficulty === opt.value
+                return (
+                  <label
+                    key={opt.value}
+                    className={`relative cursor-pointer rounded-xl p-4 ring-1 ring-inset transition-colors duration-200 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-500 ${
+                      active ? 'bg-ink-900 text-white ring-ink-900' : 'bg-white text-ink-900 ring-ink-200 hover:ring-ink-300 hover:bg-ink-50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="difficulty"
+                      value={opt.value}
+                      checked={active}
+                      onChange={(e) => setDifficulty(e.target.value as 'normal' | 'expert')}
+                      className="sr-only"
+                    />
+                    <span className="block font-semibold">{opt.label}</span>
+                    <span className={`block text-sm ${active ? 'text-ink-300' : 'text-ink-500'}`}>{opt.hint}</span>
+                  </label>
+                )
+              })}
             </div>
+          </fieldset>
 
+          <div className="p-6">
+            {stepLabel(3, 'Número de mazos')}
+            <div className="mt-4 grid grid-cols-4 gap-2" role="group" aria-label="Número de mazos a generar">
+              {[1, 2, 3, 4].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setMaxDecks(n)}
+                  aria-pressed={maxDecks === n}
+                  className={`relative h-12 rounded-xl font-display text-lg font-extrabold tabular-nums ring-1 ring-inset transition-colors duration-200 ${
+                    maxDecks === n ? 'bg-ink-900 text-white ring-ink-900' : 'bg-white text-ink-700 ring-ink-200 hover:bg-ink-50'
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 text-sm text-ink-500">
+              Recomendado: 3. Los mazos se ordenan por probabilidad de victoria.
+            </p>
+          </div>
+
+          <div className="p-6 space-y-4">
             <button
               onClick={handleGenerateDeck}
               disabled={!selectedVillainId || generatingDeck}
-              className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-colors ${
-                !selectedVillainId || generatingDeck
-                  ? 'bg-gray-400 cursor-not-allowed text-white'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
+              className="btn btn-primary btn-lg w-full"
             >
               {generatingDeck ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <>
+                  <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   Generando mazo...
-                </span>
+                </>
               ) : (
-                `Generar ${maxDecks} Mazo${maxDecks > 1 ? 's' : ''} con IA`
+                <>
+                  <SparkleIcon className="w-5 h-5" weight="fill" aria-hidden="true" />
+                  {`Generar ${maxDecks} mazo${maxDecks > 1 ? 's' : ''} con IA`}
+                </>
               )}
             </button>
+            {!selectedVillainId && (
+              <p className="text-center text-sm text-ink-400">Elige un villano para activar la generación.</p>
+            )}
+            <p className="flex items-start gap-2 text-xs text-ink-400">
+              <InfoIcon className="w-4 h-4 flex-shrink-0" weight="duotone" aria-hidden="true" />
+              Pronto podrás limitar la IA a los parches y cartas de tu colección. Por ahora usa todas las cartas.
+            </p>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-800 font-medium">Error</p>
-                <p className="text-red-600 text-sm mt-1">{error}</p>
+              <div className="rounded-xl bg-red-50 px-4 py-3 ring-1 ring-inset ring-red-200" role="alert">
+                <p className="text-sm font-semibold text-red-800">No se pudo completar</p>
+                <p className="text-sm text-red-700 mt-0.5">{error}</p>
               </div>
             )}
           </div>
+        </section>
 
-          <div className="space-y-6">
-            {generatedDecks.length > 0 ? (
-              <>
-                {totalGenerated < totalRequested && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-start">
-                      <InfoIcon className="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" weight="duotone" aria-hidden="true" />
-                      <div>
-                        <p className="text-sm font-semibold text-yellow-800">
-                          Se generaron {totalGenerated} de {totalRequested} mazos solicitados
-                        </p>
-                        <p className="text-xs text-yellow-700 mt-1">
-                          {totalGenerated === 1 
-                            ? 'Solo hay una combinación disponible con datos históricos.'
-                            : `Solo hay ${totalGenerated} combinaciones disponibles con datos históricos.`
-                          }
-                        </p>
-                      </div>
+        {/* Resultados */}
+        <div className="lg:col-span-7 space-y-5">
+          {showSkeleton ? (
+            <div className="space-y-4" aria-live="polite" aria-busy="true">
+              <p className="text-sm font-medium text-ink-500">Analizando partidas y combinaciones...</p>
+              {Array.from({ length: maxDecks }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] p-6 animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-ink-100" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-1/3 rounded bg-ink-100" />
+                      <div className="h-3 w-1/4 rounded bg-ink-100" />
                     </div>
+                    <div className="h-8 w-16 rounded bg-ink-100" />
                   </div>
-                )}
+                </div>
+              ))}
+            </div>
+          ) : generatedDecks.length > 0 ? (
+            <>
+              {totalGenerated < totalRequested && (
+                <div className="flex items-start gap-3 rounded-2xl bg-amber-50 px-5 py-4 ring-1 ring-inset ring-amber-200">
+                  <InfoIcon className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" weight="duotone" aria-hidden="true" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900">
+                      Se generaron {totalGenerated} de {totalRequested} mazos solicitados
+                    </p>
+                    <p className="text-sm text-amber-800 mt-0.5">
+                      {totalGenerated === 1
+                        ? 'Solo hay una combinación disponible con datos históricos.'
+                        : `Solo hay ${totalGenerated} combinaciones disponibles con datos históricos.`}
+                    </p>
+                  </div>
+                </div>
+              )}
 
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                    <CheckCircleIcon className="w-6 h-6 mr-2 text-brand-600" weight="duotone" aria-hidden="true" />
-                    Mazos Generados ({generatedDecks.length})
-                  </h2>
-                  
-                  {generatedDecks.map((deck, index) => {
-                    const winProbability = deck.win_probability ?? null
-                    const isSelected = selectedDeck && 
-                      selectedDeck.hero_id === deck.hero_id && 
-                      selectedDeck.aspect === deck.aspect &&
-                      selectedDeck.cards.length === deck.cards.length
-                    
-                    return (
+              <div className="flex items-end justify-between">
+                <h2 className="text-2xl text-ink-900">Mazos generados</h2>
+                <span className="text-sm text-ink-500">Toca uno para personalizarlo</span>
+              </div>
+
+              <ol className="space-y-3">
+                {generatedDecks.map((deck, index) => {
+                  const winProbability = deck.win_probability ?? null
+                  const isSelected = !!selectedDeck &&
+                    selectedDeck.hero_id === deck.hero_id &&
+                    selectedDeck.aspect === deck.aspect &&
+                    selectedDeck.cards.length === deck.cards.length
+                  const pct = winProbability !== null ? Math.round(winProbability * 100) : null
+
+                  return (
+                    <li key={index}>
                       <div
-                        key={index}
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={isSelected}
                         onClick={() => handleSelectDeck(deck)}
-                        className={`bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6 border-2 cursor-pointer transition-all ${
-                          isSelected 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200 hover:border-blue-300 hover:shadow-xl'
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            handleSelectDeck(deck)
+                          }
+                        }}
+                        className={`group relative flex items-center gap-4 md:gap-6 rounded-2xl bg-white p-5 md:p-6 cursor-pointer ring-1 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-lg ${
+                          isSelected ? 'ring-2 ring-brand-600 shadow-lg' : 'ring-ink-900/[0.06] shadow-sm'
                         }`}
                       >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                              index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
-                              index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-500' :
-                              index === 2 ? 'bg-gradient-to-r from-orange-400 to-orange-600' :
-                              'bg-gradient-to-r from-blue-400 to-blue-600'
-                            }`}>
-                              {index + 1}
-                            </div>
-                            <div>
-                              <h3 className="font-bold text-lg text-gray-900">
-                                Opción {index + 1}
-                              </h3>
-                              {winProbability !== null && (
-                                <p className="text-sm text-gray-600">
-                                  {Math.round(winProbability * 100)}% probabilidad de victoria
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                              Seleccionado
-                            </div>
-                          )}
-                        </div>
+                        <span
+                          className={`w-11 h-11 flex-shrink-0 rounded-full flex items-center justify-center font-display text-lg font-extrabold tabular-nums ${
+                            index === 0 ? 'bg-brand-600 text-white' : 'bg-ink-100 text-ink-700'
+                          }`}
+                          aria-label={`Opción ${index + 1}`}
+                        >
+                          {index + 1}
+                        </span>
 
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-700">Héroe:</span>
-                            <span className="text-gray-900">{deck.hero_name}</span>
-                          </div>
-                          {deck.aspect && (
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-gray-700">Aspecto:</span>
-                              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getClassPillClasses(deck.aspect)}`}>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-lg font-semibold text-ink-900 truncate">{deck.hero_name}</p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink-500">
+                            {deck.aspect && (
+                              <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-semibold capitalize ${getClassPillClasses(deck.aspect)}`}>
                                 {deck.aspect}
                               </span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-700">Total de cartas:</span>
-                            <span className="text-gray-900">
-                              {deck.cards.reduce((sum, card) => sum + card.quantity, 0)} cartas
-                            </span>
+                            )}
+                            <span className="tabular-nums">{deck.cards.reduce((sum, card) => sum + card.quantity, 0)} cartas</span>
+                            {index === 0 && <span className="font-semibold text-brand-700">Mejor opción</span>}
                           </div>
                         </div>
 
-                        {winProbability !== null && (
-                          <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-green-800">
-                                Probabilidad de Victoria
-                              </span>
-                              <AnimatedNumber
-                                value={Math.round(winProbability * 100)}
-                                format={(n) => `${n}%`}
-                                className="font-display text-2xl font-extrabold text-green-700"
-                              />
+                        {pct !== null && (
+                          <div className="w-28 md:w-36 flex-shrink-0 text-right">
+                            <AnimatedNumber
+                              value={pct}
+                              format={(n) => `${n}%`}
+                              className="block font-display text-3xl font-extrabold text-ink-900 leading-none"
+                            />
+                            <p className="mt-1 text-xs text-ink-500">prob. de victoria</p>
+                            <div className="mt-2 h-1.5 rounded-full bg-ink-100 overflow-hidden" aria-hidden="true">
+                              <div className="h-full rounded-full bg-green-600" style={{ width: `${pct}%` }} />
                             </div>
                           </div>
                         )}
                       </div>
-                    )
-                  })}
-                </div>
+                    </li>
+                  )
+                })}
+              </ol>
 
-                {selectedDeck && (
-                  <div className="bg-white rounded-2xl shadow-xl ring-1 ring-ink-900/[0.04] p-8 border-t-4 border-brand-600 sticky top-20">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-                        <PencilSimpleIcon className="w-8 h-8 mr-3 text-blue-600" weight="duotone" aria-hidden="true" />
-                        Personalizar Mazo Seleccionado
-                      </h2>
+              {selectedDeck && (
+                <section className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.06] overflow-hidden animate-rise-in">
+                  <div className="flex items-center justify-between gap-4 bg-ink-900 halftone px-6 py-5 text-white">
+                    <div className="min-w-0">
+                      <h2 className="text-2xl text-white">Personaliza el mazo</h2>
+                      <p className="mt-1 text-sm text-ink-300 truncate">
+                        {selectedDeck.hero_name}
+                        {selectedDeck.aspect && <span className="capitalize"> · {selectedDeck.aspect}</span>}
+                        {selectedDeck.win_probability !== null && selectedDeck.win_probability !== undefined && (
+                          <> · {Math.round(selectedDeck.win_probability * 100)}% de victoria</>
+                        )}
+                      </p>
+                    </div>
+                    <button
+                      onClick={resetSelection}
+                      className="p-2 rounded-lg text-ink-300 hover:text-white hover:bg-white/10 transition-colors"
+                      aria-label="Cerrar personalización"
+                      title="Cerrar"
+                    >
+                      <XIcon className="w-5 h-5" weight="bold" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-5">
+                    <div>
+                      <label htmlFor="ai-deck-name" className="block text-sm font-semibold text-ink-800 mb-2">
+                        Nombre del mazo <span className="text-brand-600">*</span>
+                      </label>
+                      <input
+                        id="ai-deck-name"
+                        type="text"
+                        value={deckName}
+                        onChange={(e) => setDeckName(e.target.value)}
+                        placeholder="Por ejemplo: Spider-Man contra Rhino"
+                        className="w-full px-4 py-3 rounded-xl border border-ink-200 text-ink-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="ai-deck-desc" className="block text-sm font-semibold text-ink-800 mb-2">
+                        Descripción <span className="text-brand-600">*</span>
+                      </label>
+                      <textarea
+                        id="ai-deck-desc"
+                        value={deckDescription}
+                        onChange={(e) => setDeckDescription(e.target.value)}
+                        placeholder="Cuenta la estrategia del mazo..."
+                        rows={3}
+                        className="w-full px-4 py-3 rounded-xl border border-ink-200 resize-none text-ink-900"
+                      />
+                    </div>
+
+                    <p className="flex items-start gap-2 rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-600">
+                      <SparkleIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-brand-600" weight="fill" aria-hidden="true" />
+                      La IA ha elegido el héroe y el aspecto con más probabilidades de ganar a este villano.
+                    </p>
+
+                    <div className="border-t border-ink-100 pt-5">
+                      <h3 className="flex items-baseline justify-between text-lg text-ink-900">
+                        <span>Lista de cartas</span>
+                        <span className="text-sm font-medium text-ink-500 tabular-nums">
+                          {selectedDeck.cards.reduce((sum, card) => sum + card.quantity, 0)} cartas
+                        </span>
+                      </h3>
+                      <ul className="mt-3 max-h-[420px] overflow-y-auto sm:columns-2 sm:gap-8 pr-1">
+                        {selectedDeck.cards.map((card, index) => (
+                          <li
+                            key={`${card.card_id}-${index}`}
+                            className="break-inside-avoid flex items-center gap-3 rounded-md px-2 py-1.5 -mx-2 hover:bg-ink-50"
+                            title={(card.card_set || card.set) ? `Set: ${card.card_set || card.set}` : undefined}
+                          >
+                            <span className="w-6 text-right text-sm font-semibold text-ink-400 tabular-nums">{card.quantity}×</span>
+                            <span className={`w-1 self-stretch rounded-full flex-shrink-0 ${getClassColor(card.clase || 'basic')}`} aria-hidden="true" />
+                            <span className="flex-1 min-w-0 truncate text-sm font-medium text-ink-800">{card.card_name}</span>
+                            {card.clase && <span className="text-[11px] font-medium capitalize text-ink-400">{card.clase}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="border-t border-ink-100 pt-5 flex flex-col sm:flex-row gap-3">
                       <button
-                        onClick={() => {
-                          setSelectedDeck(null)
-                          setDeckName('')
-                          setDeckDescription('')
-                        }}
-                        className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                        title="Cerrar"
+                        onClick={handleUseDeck}
+                        disabled={generatingDeck || !deckName.trim() || !deckDescription.trim()}
+                        className="btn btn-primary btn-lg flex-1"
                       >
-                        <XIcon className="w-6 h-6" weight="bold" aria-hidden="true" />
+                        {generatingDeck ? 'Guardando...' : 'Guardar y ver mazo'}
+                      </button>
+                      <button onClick={resetSelection} disabled={generatingDeck} className="btn btn-secondary btn-lg">
+                        Cancelar
                       </button>
                     </div>
-                    
-                    <div className="bg-ink-50 border border-ink-200 rounded-xl p-4 mb-6">
-                      <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div>
-                          <p className="text-sm font-semibold text-ink-500 mb-1">Héroe</p>
-                          <p className="text-lg font-bold text-ink-900">{selectedDeck.hero_name}</p>
-                        </div>
-                        {selectedDeck.aspect && (
-                          <div>
-                            <p className="text-sm font-semibold text-ink-500 mb-1">Aspecto</p>
-                            <span className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${getClassPillClasses(selectedDeck.aspect)}`}>
-                              {selectedDeck.aspect}
-                            </span>
-                          </div>
-                        )}
-                        {selectedDeck.win_probability !== null && selectedDeck.win_probability !== undefined && (
-                          <div className="text-right">
-                            <p className="text-sm font-semibold text-ink-500 mb-1">Probabilidad</p>
-                            <AnimatedNumber
-                              value={Math.round(selectedDeck.win_probability * 100)}
-                              format={(n) => `${n}%`}
-                              className="block font-display text-2xl font-extrabold text-green-700"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block font-semibold text-gray-700 mb-2">
-                          Nombre del Mazo <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={deckName}
-                          onChange={(e) => setDeckName(e.target.value)}
-                          placeholder="Ingresa un nombre para tu mazo"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Personaliza el nombre de tu mazo</p>
-                      </div>
-                      
-                      <div>
-                        <label className="block font-semibold text-gray-700 mb-2">
-                          Descripción <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                          value={deckDescription}
-                          onChange={(e) => setDeckDescription(e.target.value)}
-                          placeholder="Describe tu mazo o estrategia..."
-                          rows={3}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">Añade una descripción para tu mazo</p>
-                      </div>
-                      
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                        <p className="text-sm text-blue-800">
-                          <span className="font-semibold">Seleccionado automáticamente por IA:</span> La inteligencia artificial ha elegido el mejor héroe y aspecto para enfrentar a este villano.
-                        </p>
-                      </div>
-                      
-                      <div className="border-t border-gray-200 pt-6">
-                        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center justify-between">
-                          <span>Lista de Cartas</span>
-                          <span className="text-sm font-normal text-gray-500">
-                            {selectedDeck.cards.length} tipos • {selectedDeck.cards.reduce((sum, card) => sum + card.quantity, 0)} total
-                          </span>
-                        </h3>
-                        <div className="bg-gray-50 rounded-lg p-4 max-h-[500px] overflow-y-auto">
-                          <div className="space-y-2">
-                            {selectedDeck.cards.map((card, index) => (
-                              <div
-                                key={`${card.card_id}-${index}`}
-                                className="flex items-center justify-between bg-white rounded-lg p-3 border border-gray-200 hover:border-blue-300 transition-colors"
-                              >
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-medium text-gray-900">{card.card_name}</span>
-                                    {card.clase && (
-                                      card.clase === 'basic' ? (
-                                        <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">
-                                          basic
-                                        </span>
-                                      ) : (
-                                        <span className={`text-xs px-2 py-0.5 rounded-full ${getClassPillClasses(card.clase)}`}>
-                                          {card.clase}
-                                        </span>
-                                      )
-                                    )}
-                                    {(card.card_set || card.set) && (
-                                      <span className="text-xs text-gray-500">({card.card_set || card.set})</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                  <span className="text-sm text-gray-600 font-semibold">x{card.quantity}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-4 border-t border-gray-200 flex gap-3">
-                        <button
-                          onClick={handleUseDeck}
-                          disabled={generatingDeck || !deckName.trim() || !deckDescription.trim()}
-                          className={`flex-1 py-3 px-6 rounded-lg transition-colors font-medium ${
-                            generatingDeck || !deckName.trim() || !deckDescription.trim()
-                              ? 'bg-gray-400 cursor-not-allowed text-white'
-                              : 'bg-blue-600 text-white hover:bg-blue-700'
-                          }`}
-                        >
-                          {generatingDeck ? 'Guardando...' : 'Guardar y Ver Mazo'}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedDeck(null)
-                            setDeckName('')
-                            setDeckDescription('')
-                          }}
-                          disabled={generatingDeck}
-                          className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
                   </div>
-                )}
+                </section>
+              )}
 
-                {!selectedDeck && (
-                  <button
-                    onClick={() => {
-                      setGeneratedDecks([])
-                      setSelectedDeck(null)
-                      setDeckName('')
-                      setDeckDescription('')
-                      setError(null)
-                    }}
-                    disabled={generatingDeck || !selectedVillainId}
-                    className="w-full py-3 px-6 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
-                  >
-                    Generar Otros Mazos
-                  </button>
-                )}
-              </>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-                <div className="text-center py-12">
-                  <LightbulbIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" weight="duotone" aria-hidden="true" />
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">Mazos Generados</h3>
-                  <p className="text-gray-500">
-                    Selecciona un villano y genera mazos optimizados con IA
-                  </p>
-                </div>
+              {!selectedDeck && (
+                <button
+                  onClick={() => {
+                    setGeneratedDecks([])
+                    setSelectedDeck(null)
+                    setDeckName('')
+                    setDeckDescription('')
+                    setError(null)
+                  }}
+                  disabled={generatingDeck || !selectedVillainId}
+                  className="btn btn-secondary w-full"
+                >
+                  Generar otros mazos
+                </button>
+              )}
+            </>
+          ) : (
+            <div className="relative overflow-hidden rounded-2xl bg-ink-900 halftone text-white px-6 sm:px-10 pt-10 pb-8">
+              <div
+                className="absolute -bottom-32 -right-20 w-[420px] h-[420px] rounded-full bg-brand-600/30 blur-3xl pointer-events-none"
+                aria-hidden="true"
+              />
+              <div className="relative max-w-md">
+                <h2 className="text-2xl md:text-3xl text-white">Tus mazos aparecerán aquí</h2>
+                <p className="mt-3 text-ink-300 leading-relaxed">
+                  Elige un villano y la dificultad. La IA combinará héroes, aspectos y cartas
+                  y te los ordenará por probabilidad de victoria.
+                </p>
               </div>
-            )}
-          </div>
+              <CardFan className="relative mt-4 scale-[0.72] sm:scale-90 -mb-10 sm:-mb-4" />
+            </div>
+          )}
         </div>
       </div>
       <ToastContainer />
     </div>
   )
-  
-  
-  
 }
 
 export default AIRecommendationPage

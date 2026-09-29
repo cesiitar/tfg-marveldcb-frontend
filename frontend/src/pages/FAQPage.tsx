@@ -100,19 +100,19 @@ const FAQPage: React.FC = () => {
             <div className="flex flex-wrap justify-center gap-4 mb-6">
               <a
                 href="/"
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                className="btn btn-primary"
               >
                 Volver al Inicio
               </a>
               <a
                 href="/decks"
-                className="px-6 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-medium"
+                className="btn btn-secondary"
               >
                 Explorar Mazos
               </a>
               <a
                 href="/cards/search"
-                className="px-6 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-medium"
+                className="btn btn-secondary"
               >
                 Buscar Cartas
               </a>
@@ -126,7 +126,7 @@ const FAQPage: React.FC = () => {
                   href={`https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_EMAIL}&su=Reporte de Error - AIForge&body=Por favor, describe el error o sugerencia:`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                  className="btn btn-primary"
                 >
                   <EnvelopeSimpleIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
                   Enviar Correo (Gmail)

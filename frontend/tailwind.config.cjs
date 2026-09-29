@@ -32,6 +32,10 @@ const crimson = {
 }
 
 module.exports = {
+  // Los hover: solo se aplican en dispositivos con ratón (evita el hover "pegado" tras tocar en móvil)
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",

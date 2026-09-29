@@ -81,7 +81,7 @@ const Header: React.FC = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-ink-900 border-b border-white/[0.06] shadow-[0_1px_0_0_rgb(0_0_0/0.2)]">
+    <header className="sticky top-0 z-50 bg-ink-900 pt-[env(safe-area-inset-top)] px-[env(safe-area-inset-left)] border-b border-white/[0.06] shadow-[0_1px_0_0_rgb(0_0_0/0.2)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 gap-6">
           <Logo />

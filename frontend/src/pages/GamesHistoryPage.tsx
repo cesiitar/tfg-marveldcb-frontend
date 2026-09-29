@@ -11,6 +11,8 @@ import {
   PageHeaderEyebrow,
   PageHeaderTitle,
   PageHeaderDescription,
+  PageHeaderActions,
+  pageHeaderButton,
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { CaretLeftIcon, CaretRightIcon, ChartBarIcon, CheckIcon, ClipboardTextIcon, EyeIcon, MagnifyingGlassIcon, PlusIcon, TrashIcon, XIcon } from '@phosphor-icons/react'
@@ -195,19 +197,21 @@ const GamesHistoryPage: React.FC = () => {
     return getClassBadgeStyle(aspect)
   }
 
-  // Obtener color de dificultad
-  const getDifficultyColor = (difficulty: string) => {
-    return difficulty === 'expert' 
-      ? 'bg-blue-100 text-blue-800' 
-      : 'bg-blue-100 text-blue-800'
-  }
+  const wins = games.filter(g => g.result === 'win').length
+  const losses = games.filter(g => g.result === 'loss').length
+  const winRate = games.length > 0 ? Math.round((wins / games.length) * 100) : 0
+
+  const segmentClass = (active: boolean) =>
+    `px-3.5 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${
+      active ? 'bg-white text-ink-900 shadow-sm' : 'text-ink-500 hover:text-ink-900'
+    }`
 
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando historial de partidas...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-ink-200 border-t-brand-600 mx-auto mb-4"></div>
+          <p className="text-ink-500">Cargando historial de partidas...</p>
         </div>
       </div>
     )
@@ -224,335 +228,288 @@ const GamesHistoryPage: React.FC = () => {
             {isAuthenticated && filterMyGames ? 'Tus partidas jugadas' : 'Registro de todas las partidas jugadas'}
           </PageHeaderDescription>
         </PageHeaderContent>
+        <PageHeaderActions>
+          {isAuthenticated && (
+            <div className="inline-flex rounded-lg bg-white/10 p-1 ring-1 ring-inset ring-white/15" role="group" aria-label="Qué partidas mostrar">
+              <button
+                type="button"
+                onClick={() => setFilterMyGames(false)}
+                aria-pressed={!filterMyGames}
+                className={`px-3.5 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${!filterMyGames ? 'bg-white text-ink-900' : 'text-ink-200 hover:text-white'}`}
+              >
+                Todas
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterMyGames(true)}
+                aria-pressed={filterMyGames}
+                className={`px-3.5 py-2 rounded-md text-sm font-semibold transition-colors duration-200 ${filterMyGames ? 'bg-white text-ink-900' : 'text-ink-200 hover:text-white'}`}
+              >
+                Mis partidas
+              </button>
+            </div>
+          )}
+          <Link to="/add-game" className={pageHeaderButton.primary}>
+            <PlusIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+            Añadir partida
+          </Link>
+        </PageHeaderActions>
       </PageHeader>
 
       {/* Main Content */}
       <div className="relative -mt-8 z-20 px-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Filtros */}
-        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {/* Búsqueda */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar partidas
+          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.06] p-2.5 flex flex-col lg:flex-row lg:items-center gap-2.5">
+            <label className="relative flex-1 min-w-0">
+              <span className="sr-only">Buscar partidas</span>
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-400" weight="bold" aria-hidden="true" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por mazo, héroe o villano"
+                className="w-full pl-12 pr-4 py-3 rounded-xl !bg-ink-50 border border-transparent text-ink-900 placeholder:text-ink-400"
+              />
+            </label>
+
+            <div className="inline-flex rounded-lg bg-ink-100 p-1" role="group" aria-label="Filtrar por resultado">
+              <button type="button" onClick={() => setFilterResult('all')} aria-pressed={filterResult === 'all'} className={segmentClass(filterResult === 'all')}>
+                Todas
+              </button>
+              <button type="button" onClick={() => setFilterResult('win')} aria-pressed={filterResult === 'win'} className={segmentClass(filterResult === 'win')}>
+                Victorias
+              </button>
+              <button type="button" onClick={() => setFilterResult('loss')} aria-pressed={filterResult === 'loss'} className={segmentClass(filterResult === 'loss')}>
+                Derrotas
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 lg:w-[22rem]">
+              <label className="block">
+                <span className="sr-only">Dificultad</span>
+                <select
+                  value={filterDifficulty}
+                  onChange={(e) => setFilterDifficulty(e.target.value as 'all' | 'normal' | 'expert')}
+                  className="w-full px-3 py-3 rounded-xl border border-ink-200 text-sm text-ink-800"
+                >
+                  <option value="all">Toda dificultad</option>
+                  <option value="normal">Normal</option>
+                  <option value="expert">Experto</option>
+                </select>
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Mazo, héroe o villano..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" weight="bold" aria-hidden="true" />
+              <label className="block">
+                <span className="sr-only">Villano</span>
+                <select
+                  value={filterVillain}
+                  onChange={(e) => setFilterVillain(e.target.value)}
+                  className="w-full px-3 py-3 rounded-xl border border-ink-200 text-sm text-ink-800"
+                >
+                  <option value="all">Todos los villanos</option>
+                  {availableVillains.map(villain => (
+                    <option key={villain} value={villain}>{villain}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          {/* Estadísticas rápidas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-ink-100 rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm overflow-hidden">
+            <div className="bg-white p-5 md:p-6">
+              <p className="flex items-center gap-2 text-sm font-medium text-ink-500">
+                <ClipboardTextIcon className="w-4 h-4 text-ink-400" weight="duotone" aria-hidden="true" />
+                Partidas
+              </p>
+              <AnimatedNumber value={games.length} className="mt-2 block font-display text-4xl font-extrabold text-ink-900" />
+            </div>
+            <div className="bg-white p-5 md:p-6">
+              <p className="flex items-center gap-2 text-sm font-medium text-ink-500">
+                <CheckIcon className="w-4 h-4 text-green-600" weight="bold" aria-hidden="true" />
+                Victorias
+              </p>
+              <AnimatedNumber value={wins} className="mt-2 block font-display text-4xl font-extrabold text-ink-900" />
+            </div>
+            <div className="bg-white p-5 md:p-6">
+              <p className="flex items-center gap-2 text-sm font-medium text-ink-500">
+                <XIcon className="w-4 h-4 text-red-600" weight="bold" aria-hidden="true" />
+                Derrotas
+              </p>
+              <AnimatedNumber value={losses} className="mt-2 block font-display text-4xl font-extrabold text-ink-900" />
+            </div>
+            <div className="bg-white p-5 md:p-6">
+              <p className="flex items-center gap-2 text-sm font-medium text-ink-500">
+                <ChartBarIcon className="w-4 h-4 text-brand-600" weight="duotone" aria-hidden="true" />
+                Tasa de victoria
+              </p>
+              <AnimatedNumber value={winRate} format={(n) => `${n}%`} className="mt-2 block font-display text-4xl font-extrabold text-ink-900" />
+              <div className="mt-3 h-1.5 rounded-full bg-red-100 overflow-hidden" aria-hidden="true">
+                <div className="h-full rounded-full bg-green-600 transition-[width] duration-700 ease-out" style={{ width: `${winRate}%` }} />
               </div>
             </div>
+          </div>
 
-            {/* Filtro por resultado */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Resultado
-              </label>
-              <select
-                value={filterResult}
-                onChange={(e) => setFilterResult(e.target.value as 'all' | 'win' | 'loss')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Todos</option>
-                <option value="win">Victorias</option>
-                <option value="loss">Derrotas</option>
-              </select>
+          {/* Lista de partidas */}
+          <div className="bg-white rounded-2xl shadow-sm ring-1 ring-ink-900/[0.06] overflow-hidden">
+            <div className="px-5 md:px-6 py-4 border-b border-ink-100 flex items-center justify-between">
+              <h2 className="text-xl text-ink-900">Partidas jugadas</h2>
+              <span className="text-sm font-medium text-ink-500 tabular-nums">{filteredGames.length} resultados</span>
             </div>
 
-            {/* Filtro por dificultad */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Dificultad
-              </label>
-              <select
-                value={filterDifficulty}
-                onChange={(e) => setFilterDifficulty(e.target.value as 'all' | 'normal' | 'expert')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Todas</option>
-                <option value="normal">Normal</option>
-                <option value="expert">Experto</option>
-              </select>
-            </div>
-
-            {/* Filtro por Villano */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Villano
-              </label>
-              <select
-                value={filterVillain}
-                onChange={(e) => setFilterVillain(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="all">Todos</option>
-                {availableVillains.map(villain => (
-                  <option key={villain} value={villain}>{villain}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Filtro por Mis Partidas (solo si está autenticado) */}
-            {isAuthenticated && (
+            {filteredGames.length === 0 ? (
+              <div className="text-center py-16 px-6">
+                <div className="w-14 h-14 rounded-2xl bg-ink-100 flex items-center justify-center mx-auto">
+                  <ClipboardTextIcon className="h-7 w-7 text-ink-500" weight="duotone" aria-hidden="true" />
+                </div>
+                <h3 className="mt-4 text-lg text-ink-900">
+                  {games.length === 0 ? 'Todavía no hay partidas' : 'Ninguna partida coincide con los filtros'}
+                </h3>
+                <p className="mt-1 text-sm text-ink-500 max-w-sm mx-auto">
+                  {games.length === 0
+                    ? 'Crea un mazo, juega y registra el resultado para empezar tu historial.'
+                    : 'Prueba a quitar algún filtro o a buscar otro nombre.'}
+                </p>
+                {games.length === 0 && (
+                  <Link to="/create-deck" className="btn btn-primary mt-6">
+                    <PlusIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                    Crear primer mazo
+                  </Link>
+                )}
+              </div>
+            ) : (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Filtro
-                </label>
-                <select
-                  value={filterMyGames ? 'my' : 'all'}
-                  onChange={(e) => setFilterMyGames(e.target.value === 'my')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="all">Todas las Partidas</option>
-                  <option value="my">Mis Partidas</option>
-                </select>
+                <ul className="divide-y divide-ink-100">
+                  {getCurrentPageGames().map((game) => {
+                    const isWin = game.result === 'win'
+                    return (
+                      <li
+                        key={game.id}
+                        className={`relative grid grid-cols-1 md:grid-cols-[8.5rem_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 md:gap-5 md:items-center px-5 md:px-6 py-4 hover:bg-ink-50/70 transition-colors before:absolute before:left-0 before:top-3 before:bottom-3 before:w-1 before:rounded-r ${
+                          isWin ? 'before:bg-green-500' : 'before:bg-red-500'
+                        }`}
+                      >
+                        {/* Resultado */}
+                        <div className="flex items-center gap-2">
+                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${isWin ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                            {isWin ? (
+                              <CheckIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                            ) : (
+                              <XIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                            )}
+                          </span>
+                          <span className={`font-semibold ${isWin ? 'text-green-700' : 'text-red-700'}`}>
+                            {isWin ? 'Victoria' : 'Derrota'}
+                          </span>
+                        </div>
+
+                        {/* Mazo */}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-ink-900 truncate">{game.deck_name}</p>
+                          <p className="mt-0.5 text-sm text-ink-500 truncate">
+                            {game.hero_name}
+                            {game.creator_name && <span className="text-ink-400"> · de {game.creator_name}</span>}
+                          </p>
+                        </div>
+
+                        {/* Villano */}
+                        <div className="min-w-0">
+                          <p className="text-sm text-ink-500">contra</p>
+                          <p className="font-semibold text-ink-900 truncate">{game.villain_name}</p>
+                        </div>
+
+                        {/* Etiquetas y fecha */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${game.difficulty === 'expert' ? 'bg-ink-900 text-white' : 'bg-ink-100 text-ink-700'}`}>
+                            {game.difficulty === 'expert' ? 'Experto' : 'Normal'}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${getAspectColor(game.aspect)}`}>
+                            {game.aspect.charAt(0).toUpperCase() + game.aspect.slice(1)}
+                          </span>
+                          <span className="basis-full text-xs text-ink-400 tabular-nums">{formatDate(game.played_at)}</span>
+                        </div>
+
+                        {/* Acciones */}
+                        <div className="flex items-center gap-2 md:justify-end">
+                          <Link to={`/decks/${game.deck_id}`} className="btn btn-secondary btn-sm">
+                            <EyeIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
+                            Ver mazo
+                          </Link>
+                          {isAuthenticated && user?.sub && user?.name && game.creator_name === user.name && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                setGameToDelete(game.id)
+                              }}
+                              disabled={deleting}
+                              className="btn btn-danger btn-sm"
+                              aria-label={`Eliminar partida contra ${game.villain_name}`}
+                            >
+                              <TrashIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
+                              <span className="md:sr-only lg:not-sr-only">Eliminar</span>
+                            </button>
+                          )}
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+
+                {getTotalPages() > 1 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-ink-100 px-5 md:px-6 py-4">
+                    <div className="text-sm text-ink-500 tabular-nums">
+                      {((currentPage - 1) * gamesPerPage) + 1}–{Math.min(currentPage * gamesPerPage, filteredGames.length)} de {filteredGames.length} partidas
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="page-btn"
+                        aria-label="Página anterior"
+                      >
+                        <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                      </button>
+
+                      {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
+                        const showPage = page === 1 || page === getTotalPages() ||
+                                       (page >= currentPage - 2 && page <= currentPage + 2)
+
+                        if (!showPage) {
+                          if (page === currentPage - 3 || page === currentPage + 3) {
+                            return <span key={page} className="px-1 text-ink-400">…</span>
+                          }
+                          return null
+                        }
+
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            aria-current={currentPage === page ? 'page' : undefined}
+                            className={`page-btn ${currentPage === page ? 'page-btn-active' : ''}`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      })}
+
+                      <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === getTotalPages()}
+                        className="page-btn"
+                        aria-label="Página siguiente"
+                      >
+                        <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
-
-        {/* Estadísticas rápidas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <ClipboardTextIcon className="w-6 h-6 text-blue-600" weight="duotone" aria-hidden="true" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Partidas</p>
-                <AnimatedNumber value={games.length} className="block font-display text-3xl font-extrabold text-gray-900" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckIcon className="w-6 h-6 text-green-600" weight="bold" aria-hidden="true" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Victorias</p>
-                <AnimatedNumber
-                  value={games.filter(g => g.result === 'win').length}
-                  className="block font-display text-3xl font-extrabold text-gray-900"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <XIcon className="w-6 h-6 text-red-600" weight="bold" aria-hidden="true" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Derrotas</p>
-                <AnimatedNumber
-                  value={games.filter(g => g.result === 'loss').length}
-                  className="block font-display text-3xl font-extrabold text-gray-900"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <ChartBarIcon className="w-6 h-6 text-blue-600" weight="duotone" aria-hidden="true" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">% Victorias</p>
-                <AnimatedNumber
-                  value={games.length > 0
-                    ? Math.round((games.filter(g => g.result === 'win').length / games.length) * 100)
-                    : 0}
-                  format={(n) => `${n}%`}
-                  className="block font-display text-3xl font-extrabold text-gray-900"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Lista de partidas */}
-        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Partidas Jugadas ({filteredGames.length})
-            </h2>
-          </div>
-
-          {filteredGames.length === 0 ? (
-            <div className="text-center py-12">
-              <ClipboardTextIcon className="mx-auto h-12 w-12 text-gray-400" weight="duotone" aria-hidden="true" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No hay partidas</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {games.length === 0 
-                  ? 'Aún no has jugado ninguna partida. ¡Crea un mazo y juega!'
-                  : 'No se encontraron partidas con los filtros seleccionados.'
-                }
-              </p>
-              {games.length === 0 && (
-                <div className="mt-6">
-                  <Link
-                    to="/create-deck"
-                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    <PlusIcon className="w-4 h-4 mr-2" weight="bold" aria-hidden="true" />
-                    Crear Primer Mazo
-                  </Link>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>
-              <div className="divide-y divide-gray-200">
-                {getCurrentPageGames().map((game) => (
-                <div key={game.id} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-2">
-                        {/* Resultado */}
-                        <div className={`flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          game.result === 'win' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {game.result === 'win' ? (
-                            <CheckIcon className="w-3 h-3 mr-1" weight="bold" aria-hidden="true" />
-                          ) : (
-                            <XIcon className="w-3 h-3 mr-1" weight="bold" aria-hidden="true" />
-                          )}
-                          {game.result === 'win' ? 'Victoria' : 'Derrota'}
-                        </div>
-
-                        {/* Dificultad */}
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(game.difficulty)}`}>
-                          {game.difficulty === 'expert' ? 'Experto' : 'Normal'}
-                        </div>
-
-                        {/* Aspecto */}
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${getAspectColor(game.aspect)}`}>
-                          {game.aspect.charAt(0).toUpperCase() + game.aspect.slice(1)}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Mazo */}
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{game.deck_name}</p>
-                          <p className="text-sm text-gray-600">{game.hero_name}</p>
-                          {game.creator_name && (
-                            <p className="text-xs text-gray-500 mt-1">by {game.creator_name}</p>
-                          )}
-                        </div>
-
-                        {/* Villano */}
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">vs {game.villain_name}</p>
-                          <p className="text-sm text-gray-600">Villano</p>
-                        </div>
-
-                        {/* Fecha */}
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{formatDate(game.played_at)}</p>
-                          <p className="text-sm text-gray-600">Fecha</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Botones: Ver mazo y Eliminar (solo en "Mis Partidas") */}
-                    <div className="ml-6 flex items-center gap-2">
-                      <Link
-                        to={`/decks/${game.deck_id}`}
-                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        <EyeIcon className="w-4 h-4 mr-2" weight="duotone" aria-hidden="true" />
-                        Ver Mazo
-                      </Link>
-                      {isAuthenticated && user?.sub && user?.name && game.creator_name === user.name && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            setGameToDelete(game.id)
-                          }}
-                          disabled={deleting}
-                          className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-                        >
-                          <TrashIcon className="w-4 h-4 mr-2" weight="duotone" aria-hidden="true" />
-                          Eliminar
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              </div>
-              
-              {getTotalPages() > 1 && (
-                <div className="mt-8 flex items-center justify-center border-t border-gray-200 pt-6">
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                      <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
-                    </button>
-                    
-                    {Array.from({ length: getTotalPages() }, (_, i) => i + 1).map((page) => {
-                      const showPage = page === 1 || page === getTotalPages() || 
-                                     (page >= currentPage - 2 && page <= currentPage + 2)
-                      
-                      if (!showPage) {
-                        if (page === currentPage - 3 || page === currentPage + 3) {
-                          return <span key={page} className="px-2 text-gray-400">...</span>
-                        }
-                        return null
-                      }
-                      
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                            currentPage === page
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      )
-                    })}
-                    
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === getTotalPages()}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                    >
-                      <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
-                    </button>
-                  </div>
-                  
-                  <div className="ml-6 text-sm text-gray-500">
-                    Mostrando {((currentPage - 1) * gamesPerPage) + 1} - {Math.min(currentPage * gamesPerPage, filteredGames.length)} de {filteredGames.length} partidas
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        </div>
       </div>
-      
+
       {/* Confirmación eliminar partida */}
       <ConfirmDialog
         isOpen={gameToDelete !== null}

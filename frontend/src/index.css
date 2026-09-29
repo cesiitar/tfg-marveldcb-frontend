@@ -7,6 +7,33 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Móvil: sin destello gris al tocar y sin inflado de texto en horizontal */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Móvil: respuesta inmediata al tocar y sin selección de texto al mantener pulsado un control */
+  button,
+  [role='button'],
+  .btn,
+  .page-btn {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* iOS hace zoom en campos con texto menor de 16px: en pantallas táctiles se sube a 16px */
+  @media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Las listas con scroll propio no arrastran la página al llegar al final */
+  .overflow-y-auto {
+    overscroll-behavior: contain;
   }
 
   body {
@@ -119,6 +146,43 @@
 @layer components {
   .eyebrow {
     @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-brand-600;
+  }
+
+  /* ---------------- Botones (un único sistema para toda la web) ---------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold leading-none whitespace-nowrap;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+  }
+  .btn-lg {
+    @apply px-6 py-3.5 text-base;
+  }
+  .btn-sm {
+    @apply px-3 py-2 text-xs;
+  }
+  .btn-primary {
+    @apply bg-brand-600 text-white shadow-brand hover:bg-brand-500;
+  }
+  .btn-dark {
+    @apply bg-ink-900 text-white hover:bg-ink-700;
+  }
+  .btn-secondary {
+    @apply bg-white text-ink-800 ring-1 ring-inset ring-ink-200 hover:bg-ink-50 hover:ring-ink-300;
+  }
+  .btn-danger {
+    @apply bg-white text-red-700 ring-1 ring-inset ring-red-200 hover:bg-red-50 hover:ring-red-300;
+  }
+  .btn-ghost {
+    @apply text-ink-600 hover:text-ink-900 hover:bg-ink-100;
+  }
+
+  /* Paginación */
+  .page-btn {
+    @apply inline-flex min-w-[2.25rem] h-9 items-center justify-center rounded-lg px-2.5 text-sm font-semibold tabular-nums;
+    @apply bg-white text-ink-600 ring-1 ring-inset ring-ink-200 hover:bg-ink-50 hover:text-ink-900;
+    @apply disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .page-btn-active {
+    @apply bg-ink-900 text-white ring-ink-900 hover:bg-ink-900 hover:text-white;
   }
 
   /* Tarjeta de mazo/set común a todas las páginas */

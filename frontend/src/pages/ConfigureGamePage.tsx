@@ -320,7 +320,7 @@ const ConfigureGamePage: React.FC = () => {
                 <button
                   onClick={handleSave}
                   disabled={saving || !villainId || !gameResult}
-                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
+                  className="btn btn-primary w-full justify-center"
                 >
                   {saving ? (
                     <>
@@ -342,7 +342,7 @@ const ConfigureGamePage: React.FC = () => {
                   <button
                     onClick={handleSkip}
                     disabled={saving}
-                    className="w-full px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 font-medium flex items-center justify-center border border-gray-300 hover:border-gray-400"
+                    className="btn btn-secondary w-full justify-center"
                   >
                     {saving ? (
                       <>

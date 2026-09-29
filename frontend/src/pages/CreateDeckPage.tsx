@@ -338,7 +338,7 @@ const CreateDeckPage: React.FC = () => {
           <button
             onClick={handleContinueToCards}
             disabled={!selectedHero || !selectedAspect || !deckName.trim()}
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+            className="btn btn-primary w-full"
           >
             Continuar a Selección de Cartas
           </button>

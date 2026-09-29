@@ -306,7 +306,7 @@ const CardSearchPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-10 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-500 transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center"
+                className="btn btn-primary"
               >
                 {isLoading ? (
                   <>

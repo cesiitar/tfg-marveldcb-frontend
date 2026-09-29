@@ -305,7 +305,7 @@ const DecksPage: React.FC = () => {
           <p className="text-gray-600 mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+            className="btn btn-primary"
           >
             Reintentar
           </button>
@@ -465,12 +465,12 @@ const DecksPage: React.FC = () => {
                   <div className="p-4">
                     {/* Hero and Aspect Info */}
                     <div className="mb-4">
-                      <div className="flex items-center gap-3 mb-3">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
                             <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
                           </div>
-                          <span className="text-lg font-bold text-gray-900">
+                          <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
                             {getDeckHeroName(deck) || '—'}
                           </span>
                         </div>
@@ -502,7 +502,7 @@ const DecksPage: React.FC = () => {
                       <div className="flex items-center gap-1 text-gray-500">
                         <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
                         <span>
-                          {deck.created_at ? new Date(deck.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                          {deck.created_at ? new Date(deck.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                         </span>
                       </div>
                     </div>
@@ -518,7 +518,7 @@ const DecksPage: React.FC = () => {
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                      className="page-btn"
                     >
                       <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
@@ -538,11 +538,7 @@ const DecksPage: React.FC = () => {
                         <button
                           key={page}
                           onClick={() => handlePageChange(page)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                            currentPage === page
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
-                          }`}
+                          className={`page-btn ${currentPage === page ? 'page-btn-active' : ''}`}
                         >
                           {page}
                         </button>
@@ -552,7 +548,7 @@ const DecksPage: React.FC = () => {
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === getTotalPages()}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                      className="page-btn"
                     >
                       <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>

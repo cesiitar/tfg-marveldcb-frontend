@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="relative mt-20 bg-ink-900 text-ink-300 overflow-hidden">
+    <footer className="relative mt-20 bg-ink-900 text-ink-300 overflow-hidden pb-[env(safe-area-inset-bottom)]">
       <div className="absolute inset-0 halftone opacity-60 pointer-events-none" aria-hidden="true" />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">

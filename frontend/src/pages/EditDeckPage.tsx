@@ -5,8 +5,8 @@ import { apiService } from '../services/api'
 import { Deck, Card } from '../types/card'
 import { useToast } from '../components/Toast'
 import { translateCardType } from '../utils/typeTranslations'
-import { getAspectHeaderGradient } from '../utils/classColors'
-import { ArrowLeftIcon, CardsThreeIcon, TagIcon, UserIcon } from '@phosphor-icons/react'
+import { getClassColor } from '../utils/classColors'
+import { ArrowLeftIcon, MagnifyingGlassIcon, MinusIcon, PlusIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
 
 const EditDeckPage: React.FC = () => {
   const { id } = useParams()
@@ -294,9 +294,9 @@ const EditDeckPage: React.FC = () => {
   if (!isAuthenticated) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h2>
-          <p className="text-gray-600 mb-6">Necesitas iniciar sesión para editar mazos</p>
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-ink-900/[0.06] p-8 text-center max-w-sm">
+          <h2 className="text-xl text-ink-900 mb-2">Inicia sesión para editar</h2>
+          <p className="text-ink-500">Necesitas iniciar sesión para editar tus mazos.</p>
         </div>
       </div>
     )
@@ -306,8 +306,8 @@ const EditDeckPage: React.FC = () => {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando mazo...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-ink-200 border-t-brand-600 mx-auto mb-4"></div>
+          <p className="text-ink-500">Cargando mazo...</p>
         </div>
       </div>
     )
@@ -316,13 +316,13 @@ const EditDeckPage: React.FC = () => {
   if (error || !deck) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Error</h2>
-          <p className="text-gray-600 mb-6">{error || 'Mazo no encontrado'}</p>
-          <button 
-            onClick={() => navigate('/mydecks')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
-          >
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-ink-900/[0.06] p-8 text-center max-w-sm">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
+            <WarningIcon className="w-7 h-7 text-red-600" weight="duotone" aria-hidden="true" />
+          </div>
+          <h2 className="text-xl text-ink-900 mb-2">No se pudo abrir el mazo</h2>
+          <p className="text-ink-500 mb-6">{error || 'Mazo no encontrado'}</p>
+          <button onClick={() => navigate('/mydecks')} className="btn btn-primary">
             Volver a Mis Mazos
           </button>
         </div>
@@ -330,313 +330,260 @@ const EditDeckPage: React.FC = () => {
     )
   }
 
+  const aspectColor = getClassColor(deck.aspect)
+  const isValidSize = totalCards >= 40 && totalCards <= 50
+  const sizeHint =
+    totalCards < 40
+      ? `Faltan ${40 - totalCards} cartas para llegar al mínimo de 40.`
+      : totalCards > 50
+        ? `Sobran ${totalCards - 50} cartas: el máximo es 50.`
+        : remainingCards === 0
+          ? 'Mazo completo.'
+          : `Puedes añadir hasta ${remainingCards} cartas más.`
+
+  const renderCardRow = (card: Card) => {
+    const quantity = selectedCards.get(getCardKey(card)) || 0
+    const maxQuantity = card.max_quantity || 3
+    const canAddMore = remainingCards > 0 && quantity < maxQuantity
+
+    return (
+      <li
+        key={card.id}
+        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ring-1 ring-inset transition-colors ${
+          quantity > 0 ? 'bg-brand-50/60 ring-brand-200' : 'bg-white ring-ink-100 hover:bg-ink-50'
+        }`}
+      >
+        <div className="flex-1 min-w-0">
+          <p className="truncate text-sm font-semibold text-ink-900">{card.name}</p>
+          <p className="truncate text-xs text-ink-500">
+            {translateCardType(card.type)} · coste {card.cost} · {card.set} · máx. {maxQuantity}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1 rounded-lg bg-white ring-1 ring-inset ring-ink-200 p-0.5">
+          <button
+            onClick={() => removeCard(card)}
+            disabled={quantity === 0}
+            className="w-7 h-7 rounded-md flex items-center justify-center text-ink-600 hover:bg-ink-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label={`Quitar una copia de ${card.name}`}
+          >
+            <MinusIcon className="w-3.5 h-3.5" weight="bold" aria-hidden="true" />
+          </button>
+          <span className={`w-6 text-center text-sm font-bold tabular-nums ${quantity > 0 ? 'text-brand-700' : 'text-ink-400'}`}>{quantity}</span>
+          <button
+            onClick={() => addCard(card)}
+            disabled={!canAddMore}
+            className="w-7 h-7 rounded-md flex items-center justify-center text-ink-600 hover:bg-ink-100 disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label={`Añadir una copia de ${card.name}`}
+          >
+            <PlusIcon className="w-3.5 h-3.5" weight="bold" aria-hidden="true" />
+          </button>
+        </div>
+      </li>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header mejorado */}
-        <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] overflow-hidden mb-8">
-          <div className={`bg-gradient-to-r ${getAspectHeaderGradient(deck.aspect)} px-6 py-8`}>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Editar Mazo</h1>
-                <div className="flex flex-wrap items-center gap-3 text-blue-100">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
-                    <span className="font-medium">{deck.hero_name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <TagIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
-                    <span className="font-medium capitalize">{deck.aspect}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CardsThreeIcon className="w-5 h-5" weight="duotone" aria-hidden="true" />
-                    <span className="font-medium">{totalCards} cartas</span>
-                  </div>
-                </div>
+    <div className="space-y-8">
+      {/* Cabecera */}
+      <section className="animate-rise-in relative overflow-hidden rounded-2xl bg-ink-900 halftone text-white shadow-xl">
+        <div className={`absolute inset-y-0 left-0 w-1.5 ${aspectColor}`} aria-hidden="true" />
+        <div className={`absolute -top-40 -right-28 w-[480px] h-[480px] rounded-full opacity-30 blur-3xl pointer-events-none ${aspectColor}`} aria-hidden="true" />
+
+        <div className="relative px-6 sm:px-10 pt-7 pb-9 md:pt-8 md:pb-10">
+          <button
+            onClick={() => navigate('/mydecks')}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-ink-300 hover:text-white transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+            Mis Mazos
+          </button>
+
+          <div className="mt-6 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className="inline-flex items-center gap-2 rounded-md bg-white/10 px-2.5 py-1 text-sm font-semibold ring-1 ring-inset ring-white/15">
+                  <UserIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
+                  {deck.hero_name}
+                </span>
+                {deck.aspect && (
+                  <span className="inline-flex items-center gap-2 rounded-md bg-white/10 px-2.5 py-1 text-sm font-semibold capitalize ring-1 ring-inset ring-white/15">
+                    <span className={`w-2.5 h-2.5 rotate-45 ${aspectColor}`} aria-hidden="true" />
+                    {deck.aspect}
+                  </span>
+                )}
               </div>
+              <h1 className="text-4xl md:text-5xl text-white">Editar mazo</h1>
+              <p className="mt-3 text-ink-300 truncate">{deckName || deck.name}</p>
+            </div>
+
+            <div className="min-w-[14rem]">
+              <p className="font-display text-4xl font-extrabold leading-none tabular-nums">
+                {totalCards}<span className="text-ink-400 text-2xl">/50</span>
+              </p>
+              <p className={`mt-1 text-sm ${isValidSize ? 'text-ink-300' : 'text-amber-300'}`}>{sizeHint}</p>
+              <div className="mt-3 relative h-1.5 w-full rounded-full bg-white/10 overflow-hidden" aria-hidden="true">
+                <div className={`h-full rounded-full ${isValidSize ? aspectColor : 'bg-amber-400'}`} style={{ width: `${Math.min(100, (totalCards / 50) * 100)}%` }} />
+                <span className="absolute top-0 bottom-0 w-px bg-white/40" style={{ left: '80%' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        {/* Información del mazo */}
+        <aside className="lg:col-span-4 lg:sticky lg:top-20 bg-white rounded-2xl shadow-sm ring-1 ring-ink-900/[0.06] p-6 space-y-5">
+          <h2 className="text-lg text-ink-900">Información del mazo</h2>
+
+          <div>
+            <label htmlFor="edit-deck-name" className="block text-sm font-semibold text-ink-800 mb-2">
+              Nombre
+            </label>
+            <input
+              id="edit-deck-name"
+              type="text"
+              value={deckName}
+              onChange={(e) => setDeckName(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-ink-200 text-ink-900"
+              placeholder="Nombre del mazo"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="edit-deck-desc" className="block text-sm font-semibold text-ink-800 mb-2">
+              Descripción
+            </label>
+            <textarea
+              id="edit-deck-desc"
+              value={deckDescription}
+              onChange={(e) => setDeckDescription(e.target.value)}
+              rows={4}
+              className="w-full px-4 py-3 rounded-xl border border-ink-200 text-ink-900"
+              placeholder="Describe tu estrategia o tema del mazo..."
+            />
+          </div>
+
+          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-ink-100 ring-1 ring-ink-100 text-sm">
+            <div className="bg-ink-50 px-4 py-3">
+              <dt className="text-ink-500">Cartas del héroe</dt>
+              <dd className="mt-0.5 font-display text-xl font-extrabold text-ink-900 tabular-nums">{heroCardsCount}</dd>
+            </div>
+            <div className="bg-ink-50 px-4 py-3">
+              <dt className="text-ink-500">Seleccionadas</dt>
+              <dd className="mt-0.5 font-display text-xl font-extrabold text-ink-900 tabular-nums">{totalSelectedCards}</dd>
+            </div>
+            <div className="bg-ink-50 px-4 py-3">
+              <dt className="text-ink-500">Total</dt>
+              <dd className="mt-0.5 font-display text-xl font-extrabold text-ink-900 tabular-nums">{totalCards}/50</dd>
+            </div>
+            <div className="bg-ink-50 px-4 py-3">
+              <dt className="text-ink-500">Restantes</dt>
+              <dd className={`mt-0.5 font-display text-xl font-extrabold tabular-nums ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-ink-900'}`}>
+                {remainingCards}
+              </dd>
+            </div>
+          </dl>
+
+          <div className="space-y-2">
+            <div className="flex gap-3">
               <button
-                onClick={() => navigate('/mydecks')}
-                className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
+                onClick={handleSave}
+                disabled={saving || totalCards < 40 || totalCards > 50}
+                className="btn btn-primary btn-lg flex-1"
               >
-                <ArrowLeftIcon className="w-4 h-4 mr-2" weight="bold" aria-hidden="true" />
-                Volver a Mis Mazos
+                {saving ? 'Guardando...' : 'Guardar cambios'}
+              </button>
+              <button onClick={() => navigate('/mydecks')} className="btn btn-secondary btn-lg">
+                Cancelar
               </button>
             </div>
+            {!isValidSize && (
+              <p className="text-sm text-amber-700">El mazo debe tener entre 40 y 50 cartas para poder guardarlo.</p>
+            )}
           </div>
-          
-          {/* Información adicional en el header */}
-          <div className="px-6 py-4 bg-gray-50 border-t">
-            <div className="flex flex-wrap items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">Cartas del héroe:</span>
-                <span className="font-medium text-gray-900">{heroCardsCount}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">Cartas seleccionadas:</span>
-                <span className="font-medium text-gray-900">{totalSelectedCards}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">Total:</span>
-                <span className="font-medium text-gray-900">{totalCards}/50 cartas</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">Restantes:</span>
-                <span className={`font-medium ${remainingCards < 0 ? 'text-red-600' : remainingCards === 0 ? 'text-green-600' : 'text-orange-600'}`}>
-                  {remainingCards}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        </aside>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-            
-            {/* Columna izquierda - Información del mazo */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Información del Mazo</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre del Mazo
-                    </label>
-                    <input
-                      type="text"
-                      value={deckName}
-                      onChange={(e) => setDeckName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Nombre del mazo"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Descripción
-                    </label>
-                    <textarea
-                      value={deckDescription}
-                      onChange={(e) => setDeckDescription(e.target.value)}
-                      rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Describe tu estrategia o tema del mazo..."
-                    />
-                  </div>
-                  
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">Información del Mazo</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Héroe:</span>
-                        <span className="font-medium">{deck.hero_name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Aspecto:</span>
-                        <span className="font-medium capitalize">{deck.aspect}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Cartas del héroe:</span>
-                        <span className="font-medium">{heroCardsCount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Cartas seleccionadas:</span>
-                        <span className="font-medium">{totalSelectedCards}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Total de cartas:</span>
-                        <span className="font-medium">{totalCards}/50</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleSave}
-                      disabled={saving || totalCards < 40 || totalCards > 50}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
-                    >
-                      {saving ? 'Guardando...' : 'Guardar Cambios'}
-                    </button>
-                    <button
-                      onClick={() => navigate('/mydecks')}
-                      className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
+        {/* Cartas */}
+        <div className="lg:col-span-8 space-y-6">
+          {[
+            {
+              key: 'basic',
+              title: 'Cartas básicas',
+              search: basicSearchTerm,
+              setSearch: setBasicSearchTerm,
+              setFilter: basicSetFilter,
+              setSetFilter: setBasicSetFilter,
+              sets: uniqueBasicSets,
+              cards: filteredBasicCards,
+              placeholder: 'Buscar cartas básicas',
+              empty: 'No se encontraron cartas básicas',
+              dot: getClassColor('basic'),
+            },
+            {
+              key: 'aspect',
+              title: `Cartas de ${deck?.aspect || 'aspecto'}`,
+              search: aspectSearchTerm,
+              setSearch: setAspectSearchTerm,
+              setFilter: aspectSetFilter,
+              setSetFilter: setAspectSetFilter,
+              sets: uniqueAspectSets,
+              cards: filteredAspectCards,
+              placeholder: 'Buscar cartas del aspecto',
+              empty: 'No se encontraron cartas del aspecto',
+              dot: aspectColor,
+            },
+          ].map((group) => (
+            <section key={group.key} className="bg-white rounded-2xl shadow-sm ring-1 ring-ink-900/[0.06] p-6">
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="flex items-center gap-2.5 text-lg text-ink-900">
+                  <span className={`w-2.5 h-2.5 rotate-45 ${group.dot}`} aria-hidden="true" />
+                  {group.title}
+                </h2>
+                <span className="text-sm text-ink-500 tabular-nums">{group.cards.length} cartas</span>
               </div>
-            </div>
 
-            {/* Columna derecha - Cartas */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Cartas del Mazo</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">
-                      {totalCards}/50 cartas
-                    </span>
-                    <div className={`w-3 h-3 rounded-full ${totalCards >= 40 && totalCards <= 50 ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                  </div>
-                </div>
-                
-                {/* Cartas Básicas */}
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Cartas Básicas
-                    {(basicSearchTerm || basicSetFilter) && (
-                      <span className="text-sm text-gray-500 ml-2">
-                        ({filteredBasicCards.length})
-                      </span>
-                    )}
-                  </h3>
-                  
-                  <div className="mb-3 space-y-2">
-                    <input
-                      type="text"
-                      value={basicSearchTerm}
-                      onChange={(e) => setBasicSearchTerm(e.target.value)}
-                      placeholder="Buscar cartas básicas..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                    />
-                    {/* Filtro de set para cartas básicas */}
-                    <select
-                      value={basicSetFilter}
-                      onChange={(e) => setBasicSetFilter(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                    >
-                      <option value="">Todos los sets</option>
-                      {uniqueBasicSets.map((set) => (
-                        <option key={set} value={set}>
-                          {set}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="max-h-48 overflow-y-auto space-y-2">
-                    {filteredBasicCards.length === 0 && (basicSearchTerm || basicSetFilter) ? (
-                      <p className="text-gray-500 text-center py-4">No se encontraron cartas básicas</p>
-                    ) : (
-                      filteredBasicCards.map((card) => {
-                        const quantity = selectedCards.get(getCardKey(card)) || 0
-                        const maxQuantity = card.max_quantity || 3
-                        const canAddMore = remainingCards > 0 && quantity < maxQuantity
-                        
-                        return (
-                          <div key={card.id} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
-                              <p className="text-xs text-gray-600">
-                                {translateCardType(card.type)} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
-                              </p>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => removeCard(card)}
-                                disabled={quantity === 0}
-                                className="w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
-                              >
-                                -
-                              </button>
-                              <span className="w-6 text-center font-medium text-sm">{quantity}</span>
-                              <button
-                                onClick={() => addCard(card)}
-                                disabled={!canAddMore}
-                                className="w-6 h-6 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )}
-                  </div>
-                </div>
-                
-                {/* Cartas del Aspecto */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                    Cartas de {deck?.aspect || 'Aspecto'}
-                    {(aspectSearchTerm || aspectSetFilter) && (
-                      <span className="text-sm text-gray-500 ml-2">
-                        ({filteredAspectCards.length})
-                      </span>
-                    )}
-                  </h3>
-                  
-                  <div className="mb-3 space-y-2">
-                    <input
-                      type="text"
-                      value={aspectSearchTerm}
-                      onChange={(e) => setAspectSearchTerm(e.target.value)}
-                      placeholder="Buscar cartas del aspecto..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                    />
-                    {/* Filtro de set para cartas de la clase */}
-                    <select
-                      value={aspectSetFilter}
-                      onChange={(e) => setAspectSetFilter(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
-                    >
-                      <option value="">Todos los sets</option>
-                      {uniqueAspectSets.map((set) => (
-                        <option key={set} value={set}>
-                          {set}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="max-h-48 overflow-y-auto space-y-2">
-                    {filteredAspectCards.length === 0 && (aspectSearchTerm || aspectSetFilter) ? (
-                      <p className="text-gray-500 text-center py-4">No se encontraron cartas del aspecto</p>
-                    ) : (
-                      filteredAspectCards.map((card) => {
-                        const quantity = selectedCards.get(getCardKey(card)) || 0
-                        const maxQuantity = card.max_quantity || 3
-                        const canAddMore = remainingCards > 0 && quantity < maxQuantity
-                        
-                        return (
-                          <div key={card.id} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg hover:bg-gray-50">
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-900 text-sm">{card.name}</h4>
-                              <p className="text-xs text-gray-600">
-                                {translateCardType(card.type)} • Coste: {card.cost} • Set: {card.set} • Max: {maxQuantity}
-                              </p>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => removeCard(card)}
-                                disabled={quantity === 0}
-                                className="w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
-                              >
-                                -
-                              </button>
-                              <span className="w-6 text-center font-medium text-sm">{quantity}</span>
-                              <button
-                                onClick={() => addCard(card)}
-                                disabled={!canAddMore}
-                                className="w-6 h-6 bg-green-500 text-white rounded-full hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center text-xs"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )}
-                  </div>
-                </div>
+              <div className="mt-4 grid sm:grid-cols-[1fr_14rem] gap-2">
+                <label className="relative">
+                  <span className="sr-only">{group.placeholder}</span>
+                  <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" weight="bold" aria-hidden="true" />
+                  <input
+                    type="text"
+                    value={group.search}
+                    onChange={(e) => group.setSearch(e.target.value)}
+                    placeholder={group.placeholder}
+                    className="w-full pl-10 pr-3 py-2.5 rounded-xl !bg-ink-50 border border-transparent text-sm text-ink-900 placeholder:text-ink-400"
+                  />
+                </label>
+                <label>
+                  <span className="sr-only">Filtrar por set</span>
+                  <select
+                    value={group.setFilter}
+                    onChange={(e) => group.setSetFilter(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-ink-200 text-sm text-ink-800"
+                  >
+                    <option value="">Todos los sets</option>
+                    {group.sets.map((set) => (
+                      <option key={set} value={set}>
+                        {set}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
-            </div>
-          </div>
+
+              {group.cards.length === 0 && (group.search || group.setFilter) ? (
+                <p className="mt-6 text-center text-sm text-ink-400">{group.empty}</p>
+              ) : (
+                <ul className="mt-4 max-h-80 overflow-y-auto space-y-1.5 pr-1">
+                  {group.cards.map(renderCardRow)}
+                </ul>
+              )}
+            </section>
+          ))}
         </div>
-      
+      </div>
+
       {/* Toast Container */}
       <ToastContainer />
     </div>

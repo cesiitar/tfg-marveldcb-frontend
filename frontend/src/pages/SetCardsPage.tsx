@@ -183,7 +183,7 @@ const SetCardsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Set no encontrado</h1>
           <button
             onClick={() => navigate('/cards')}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="btn btn-primary"
           >
             Volver a cartas
           </button>
@@ -348,7 +348,7 @@ const SetCardsPage: React.FC = () => {
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                      className="page-btn"
                     >
                       <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
@@ -368,11 +368,7 @@ const SetCardsPage: React.FC = () => {
                         <button
                           key={page}
                           onClick={() => handlePageChange(page)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
-                            currentPage === page
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-700'
-                          }`}
+                          className={`page-btn ${currentPage === page ? 'page-btn-active' : ''}`}
                         >
                           {page}
                         </button>
@@ -382,7 +378,7 @@ const SetCardsPage: React.FC = () => {
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === getTotalPages()}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                      className="page-btn"
                     >
                       <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
