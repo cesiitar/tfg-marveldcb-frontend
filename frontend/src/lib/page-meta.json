@@ -1,6 +1,6 @@
 {
   "home": {
-    "description": "AIForge es una plataforma gratuita para crear y optimizar mazos de Marvel Champions con inteligencia artificial: constructor de mazos, recomendaciones por villano y registro de partidas."
+    "description": "Crea y optimiza mazos de Marvel Champions con inteligencia artificial: constructor de mazos, recomendaciones por villano y registro de partidas. Gratis."
   },
   "decks": {
     "title": "Mazos públicos de Marvel Champions",
@@ -20,6 +20,6 @@
   },
   "faq": {
     "title": "Preguntas frecuentes",
-    "description": "Respuestas sobre AIForge: cómo crear mazos de Marvel Champions, cómo funciona la recomendación con IA, reglas de construcción (40-50 cartas) y registro de partidas."
+    "description": "Respuestas sobre AIForge: cómo crear mazos de Marvel Champions, cómo funciona la recomendación con IA, reglas de construcción y registro de partidas."
   }
 }

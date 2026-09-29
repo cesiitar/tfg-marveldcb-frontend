@@ -21,7 +21,7 @@ const DIST = path.join(ROOT, 'dist')
 const SITE = 'https://aiforgedecks.com'
 const SITE_NAME = 'AIForge'
 const API = (process.env.PRERENDER_API_URL || 'https://marveldcb-backend.onrender.com/api').replace(/\/+$/, '')
-const DEFAULT_TITLE = 'AIForge: mazos de Marvel Champions con inteligencia artificial'
+const DEFAULT_TITLE = 'AIForge: mazos de Marvel Champions con IA'
 
 const pageMeta = JSON.parse(await readFile(path.join(ROOT, 'src/lib/page-meta.json'), 'utf8'))
 const faqs = JSON.parse(await readFile(path.join(ROOT, 'src/data/faqs.json'), 'utf8'))
@@ -141,6 +141,13 @@ ${main}
   </footer>
 </div>`
 
+const setByName = new Map(sets.map((st) => [st.name, st.id]))
+const setLink = (name) => {
+  if (!name) return ''
+  const id = setByName.get(name)
+  return id ? ` (<a href="/cards/set/${id}">${esc(name)}</a>)` : ` (${esc(name)})`
+}
+
 const deckLine = (d) =>
   `<li><a href="/decks/${d.id}">${esc(d.name)}</a> — ${esc(d.hero_name || 'Héroe desconocido')}${d.aspect ? ` · ${esc(cap(d.aspect))}` : ''} · ${totalCards(d)} cartas · por ${esc(d.creator_name || 'Anónimo')}${d.created_at ? ` · ${fmtDate(d.created_at)}` : ''}</li>`
 
@@ -211,6 +218,7 @@ for (const d of decks) {
   const byType = {}
   for (const c of d.cards || []) (byType[c.type || 'otros'] ||= []).push(c)
   const description = cleanDescription(d.description)
+  const sameHero = decks.filter((o) => o.id !== d.id && o.hero_name === d.hero_name)
   routes.push({
     path: `/decks/${d.id}`,
     title: `${d.name} · mazo de ${d.hero_name} | ${SITE_NAME}`,
@@ -239,8 +247,10 @@ ${description ? `<h2>Descripción</h2>\n<p>${esc(description)}</p>` : ''}
 <h2>Lista de cartas</h2>
 ${Object.entries(byType)
   .map(([type, cards]) => `<h3>${esc(TYPE_LABELS[type] || cap(type))}</h3>
-<ul>${cards.map((c) => `<li>${c.quantity || 1}× ${esc(c.card_name)}${c.set || c.card_set ? ` (${esc(c.set || c.card_set)})` : ''}</li>`).join('')}</ul>`)
-  .join('\n')}`,
+<ul>${cards.map((c) => `<li>${c.quantity || 1}× ${esc(c.card_name)}${setLink(c.set || c.card_set)}</li>`).join('')}</ul>`)
+  .join('\n')}
+${sameHero.length ? `<h2>Más mazos de ${esc(d.hero_name)}</h2>\n<ul>${sameHero.slice(0, 5).map(deckLine).join('\n')}</ul>` : ''}
+<p>Volver a los <a href="/decks">mazos públicos</a> o explorar las <a href="/cards">cartas por set</a>.</p>`,
   })
 }
 
@@ -300,8 +310,18 @@ routes.push({
   description: pageMeta.cardSearch.description,
   jsonld: [crumbs([['Inicio', '/'], ['Cartas', '/cards'], ['Buscador', '/cards/search']])],
   main: `<h1>${pageMeta.cardSearch.title}</h1>
-<p>Busca cualquier carta de Marvel Champions combinando filtros: nombre, aspecto (agresión, justicia, liderazgo, protección, básica, pool), tipo de carta (aliado, evento, mejora, apoyo, recurso…), coste y set.</p>
-<p>También puedes explorar el <a href="/cards">catálogo completo por sets</a>.</p>`,
+<p>Busca cualquier carta de Marvel Champions: The Card Game${totalSetCards ? ` entre las ${totalSetCards} del catálogo` : ''} combinando filtros. Los resultados muestran cada carta con su tipo, aspecto, coste y set.</p>
+<h2>Filtros disponibles</h2>
+<ul>
+  <li><strong>Nombre:</strong> busca por el nombre de la carta, completo o parcial.</li>
+  <li><strong>Aspecto:</strong> agresión (aggression), justicia (justice), liderazgo (leadership), protección (protection), básica (basic), pool, héroe y campaña.</li>
+  <li><strong>Tipo de carta:</strong> aliado, evento, mejora, apoyo, recurso, accesorio, esbirro, traición, plan secundario, villano y más.</li>
+  <li><strong>Coste:</strong> de 0 a 10 recursos.</li>
+  <li><strong>Set:</strong> cualquiera de los ${sets.length || 'más de 50'} sets y expansiones publicados.</li>
+</ul>
+${sets.length ? `<h2>Explorar por set</h2>
+<ul>${sets.slice(0, 12).map((st) => `<li><a href="/cards/set/${st.id}">${esc(st.name)}</a> (${st.cardCount} cartas)</li>`).join('')}</ul>` : ''}
+<p>Consulta el <a href="/cards">catálogo completo por sets</a> o los <a href="/decks">mazos públicos</a> de la comunidad para ver cómo se combinan las cartas.</p>`,
 })
 
 // Historial de partidas

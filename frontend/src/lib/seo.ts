@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom'
 
 export const SITE_URL = 'https://aiforgedecks.com'
 export const SITE_NAME = 'AIForge'
-const DEFAULT_TITLE = 'AIForge: mazos de Marvel Champions con inteligencia artificial'
+const DEFAULT_TITLE = 'AIForge: mazos de Marvel Champions con IA'
 const DEFAULT_DESCRIPTION =
   'AIForge: crea, comparte y analiza mazos de Marvel Champions con ayuda de inteligencia artificial.'
 
