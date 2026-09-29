@@ -61,7 +61,7 @@ const InfoPage: React.FC<{ page: PageKey }> = ({ page }) => {
       <div className="relative -mt-8 z-20 px-4">
         <article className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-6 md:p-10">
           {(data.sections as Section[]).map((section) => (
-            <section key={section.title} className="border-b border-gray-200 last:border-b-0 py-6 first:pt-0 last:pb-0">
+            <section key={section.title} className="border-b border-gray-200 last-of-type:border-b-0 py-6 first:pt-0 last-of-type:pb-0">
               <h2 className="text-2xl text-ink-900 mb-3">{section.title}</h2>
               {section.paragraphs?.map((p, i) => (
                 <p key={i} className="text-ink-600 leading-relaxed mb-3 last:mb-0">
