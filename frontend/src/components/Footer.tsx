@@ -36,10 +36,12 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Contacto */}
+          {/* Proyecto y contacto */}
           <div className="md:col-span-3">
-            <p className="eyebrow !text-ink-400 mb-4">Contacto</p>
+            <p className="eyebrow !text-ink-400 mb-4">Proyecto</p>
             <ul className="space-y-2.5">
+              <li><Link to="/about" className="hover:text-white transition-colors">Sobre AIForge</Link></li>
+              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacidad</Link></li>
               <li>
                 <a href="mailto:aiforge.soporte@gmail.com" className="hover:text-white transition-colors">
                   Soporte
@@ -61,6 +63,14 @@ const Footer: React.FC = () => {
           <p>© 2024–{new Date().getFullYear()} AIForge. Proyecto TFG · Todos los derechos reservados.</p>
           <p className="font-mono text-xs uppercase tracking-[0.16em]">Hecho para Marvel Champions</p>
         </div>
+        <p className="mt-4 text-xs leading-relaxed text-ink-500 max-w-3xl">
+          Proyecto fan sin ánimo de lucro, no afiliado a Fantasy Flight Games ni a Marvel. Marvel Champions: The Card
+          Game es un producto de Fantasy Flight Games. Datos de cartas:{' '}
+          <a href="https://marvelcdb.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white transition-colors">
+            MarvelCDB
+          </a>
+          .
+        </p>
       </div>
     </footer>
   )

@@ -19,6 +19,7 @@ import GamesHistoryPage from './pages/GamesHistoryPage'
 import AIRecommendationPage from './pages/AIRecommendationPage'
 import AddGamePage from './pages/AddGamePage'
 import NotFoundPage from './pages/NotFoundPage'
+import InfoPage from './pages/InfoPage'
 
 function App() {
   return (
@@ -82,6 +83,8 @@ function App() {
         <Route path="/cards/set/:setId" element={<SetCardsPage />} />
         <Route path="/cards/search" element={<CardSearchPage />} />
         <Route path="/faq" element={<FAQPage />} />
+        <Route path="/about" element={<InfoPage key="about" page="about" />} />
+        <Route path="/privacy" element={<InfoPage key="privacy" page="privacy" />} />
               <Route
                 path="/profile"
                 element={

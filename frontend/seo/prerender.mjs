@@ -6,7 +6,7 @@
 // real en HTML semántico. Con JavaScript, ese bloque se oculta y React lo sustituye
 // al arrancar (ver #seo-static en index.html), así que la experiencia no cambia.
 //
-// - Rutas: /, /decks, /decks/:id, /cards, /cards/set/:id, /cards/search, /faq, /games-history
+// - Rutas: /, /decks, /decks/:id, /cards, /cards/set/:id, /cards/search, /faq, /games-history, /about, /privacy
 // - Además: dist/app.html (shell para rutas privadas y 404), sitemap.xml y llms.txt.
 // - Si el backend no responde, genera lo que pueda y NO rompe el build.
 // - Los títulos y descripciones deben coincidir con los de usePageMeta (src/lib/seo.ts).
@@ -25,6 +25,7 @@ const DEFAULT_TITLE = 'AIForge: mazos de Marvel Champions con inteligencia artif
 
 const pageMeta = JSON.parse(await readFile(path.join(ROOT, 'src/lib/page-meta.json'), 'utf8'))
 const faqs = JSON.parse(await readFile(path.join(ROOT, 'src/data/faqs.json'), 'utf8'))
+const infoPages = JSON.parse(await readFile(path.join(ROOT, 'src/data/legal-pages.json'), 'utf8'))
 
 // ---------------------------------------------------------------- utilidades
 
@@ -34,6 +35,12 @@ const esc = (v) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+
+// Mismo mini-formato que InfoPage.tsx: **negrita** y [enlace](https://…)
+const inline = (text) =>
+  esc(text)
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
 
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '')
 const fmtDate = (iso) => {
@@ -129,7 +136,8 @@ const layout = (main) => `<div id="seo-static">
 ${main}
   </main>
   <footer>
-    <p>AIForge es un proyecto de fin de grado, gratuito y sin ánimo de lucro, creado por fans de Marvel Champions: The Card Game. Contacto: aiforge.soporte@gmail.com</p>
+    <ul><li><a href="/about">Sobre AIForge</a></li><li><a href="/privacy">Privacidad</a></li><li><a href="/faq">Preguntas frecuentes</a></li></ul>
+    <p>AIForge es un Trabajo de Fin de Grado gratuito y sin ánimo de lucro. Proyecto fan no afiliado a Fantasy Flight Games ni a Marvel. Datos de cartas: <a href="https://marvelcdb.com">MarvelCDB</a>. Contacto: aiforge.soporte@gmail.com</p>
   </footer>
 </div>`
 
@@ -330,6 +338,38 @@ routes.push({
 ${faqs.map((f) => `<h2>${esc(f.question)}</h2>\n<p>${esc(f.answer)}</p>`).join('\n')}`,
 })
 
+// Sobre AIForge y Política de privacidad
+for (const [key, pg] of Object.entries(infoPages)) {
+  routes.push({
+    path: pg.path,
+    title: `${pg.title} | ${SITE_NAME}`,
+    description: pg.description,
+    jsonld: [
+      {
+        '@type': key === 'about' ? 'AboutPage' : 'WebPage',
+        name: pg.heading,
+        url: SITE + pg.path,
+        dateModified: pg.updated,
+        inLanguage: 'es',
+        isPartOf: { '@id': `${SITE}/#website` },
+        ...(key === 'about' ? { about: { '@id': `${SITE}/#organization` } } : {}),
+      },
+      crumbs([['Inicio', '/'], [pg.heading, pg.path]]),
+    ],
+    main: `<h1>${esc(pg.heading)}</h1>
+<p>${esc(pg.lead)}</p>
+${pg.sections
+  .map((sec) => [
+    `<h2>${esc(sec.title)}</h2>`,
+    ...(sec.paragraphs || []).map((t) => `<p>${inline(t)}</p>`),
+    sec.items ? `<ul>${sec.items.map((t) => `<li>${inline(t)}</li>`).join('')}</ul>` : '',
+    ...(sec.after || []).map((t) => `<p>${inline(t)}</p>`),
+  ].join('\n'))
+  .join('\n')}
+<p>Última actualización: <time datetime="${pg.updated}">${fmtDate(pg.updated)}</time></p>`,
+  })
+}
+
 // ---------------------------------------------------------------- escritura
 
 // Shell sin contenido ni canonical: rutas privadas, 404 y cualquier otra ruta de la SPA.
@@ -370,7 +410,8 @@ for (const r of routes) {
 // Sitemap con todas las rutas prerenderizadas (sustituye al estático de public/).
 const lastmod = (r) => {
   const d = r.path.startsWith('/decks/') && decks.find((x) => `/decks/${x.id}` === r.path)
-  return d ? isoDay(d.updated_at || d.created_at) : null
+  if (d) return isoDay(d.updated_at || d.created_at)
+  return Object.values(infoPages).find((pg) => pg.path === r.path)?.updated || null
 }
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -400,6 +441,8 @@ const llms = `# AIForge
 - [Buscador de cartas](${SITE}/cards/search): búsqueda por nombre, tipo, aspecto, coste y set
 - [Historial de partidas](${SITE}/games-history): partidas registradas con villano, dificultad y resultado
 - [Preguntas frecuentes](${SITE}/faq): cómo funciona AIForge
+- [Sobre AIForge](${SITE}/about): quién lo hace y cómo funciona el modelo de IA (SVM entrenado con las partidas registradas)
+- [Política de privacidad](${SITE}/privacy): qué datos se guardan y para qué
 
 ## Opcional
 

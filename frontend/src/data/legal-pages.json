@@ -1,0 +1,115 @@
+{
+  "about": {
+    "path": "/about",
+    "eyebrow": "Proyecto",
+    "heading": "Sobre AIForge",
+    "lead": "Qué es AIForge, cómo funciona su recomendación con inteligencia artificial y quién está detrás.",
+    "title": "Sobre AIForge",
+    "description": "AIForge es un Trabajo de Fin de Grado: una web gratuita para crear mazos de Marvel Champions con un modelo de machine learning (SVM) entrenado con partidas reales. Cómo funciona y quién lo hace.",
+    "updated": "2026-09-29",
+    "sections": [
+      {
+        "title": "Qué es AIForge",
+        "paragraphs": [
+          "AIForge es una plataforma web gratuita para crear, compartir y optimizar mazos de **Marvel Champions: The Card Game** usando inteligencia artificial. Permite construir mazos carta a carta o importarlos desde MarvelCDB, explorar el catálogo completo de cartas, registrar partidas y pedir a la IA un mazo pensado para un villano y una dificultad concretos.",
+          "Nació como Trabajo de Fin de Grado (TFG) y sigue en marcha como proyecto personal, sin publicidad ni suscripciones."
+        ]
+      },
+      {
+        "title": "Cómo funciona la recomendación con IA",
+        "paragraphs": [
+          "El núcleo de AIForge es un modelo de **máquina de vectores de soporte (SVM)** de scikit-learn que estima la probabilidad de victoria de un mazo contra un villano. Usa 9 características generales:"
+        ],
+        "items": [
+          "Héroe, aspecto, villano y dificultad de la partida.",
+          "Coste medio del mazo.",
+          "Proporción de eventos, aliados, mejoras y apoyos."
+        ],
+        "after": [
+          "El modelo no usa cartas individuales como características: con millones de combinaciones posibles y relativamente pocas partidas, eso solo producía sobreajuste. Por eso trabaja con la «forma» del mazo, y las cartas concretas del mazo recomendado se eligen a partir de los mazos que han ganado contra ese villano con ese aspecto.",
+          "Cada vez que alguien registra una partida, el modelo se reentrena en segundo plano (división de entrenamiento y prueba 80/20 estratificada). La probabilidad que muestra es una estimación: su precisión depende de cuántas partidas se hayan registrado contra cada villano."
+        ]
+      },
+      {
+        "title": "De dónde salen los datos",
+        "paragraphs": [
+          "El catálogo de cartas, sets, héroes y villanos se importa de la API pública de [MarvelCDB](https://marvelcdb.com), la base de datos de referencia de la comunidad. Las partidas, los mazos y los comentarios los aportan los propios usuarios de AIForge."
+        ]
+      },
+      {
+        "title": "Quién está detrás",
+        "paragraphs": [
+          "AIForge lo ha diseñado y programado [cesiitar](https://github.com/cesiitar) como Trabajo de Fin de Grado. El código es público para consulta: [frontend](https://github.com/cesiitar/tfg-marveldcb-frontend) (React y TypeScript) y [backend](https://github.com/cesiitar/tfg-marveldcb-backend) (FastAPI, scikit-learn y SQLite).",
+          "Para dudas, errores o sugerencias: aiforge.soporte@gmail.com"
+        ]
+      },
+      {
+        "title": "Aviso de proyecto fan",
+        "paragraphs": [
+          "AIForge es un proyecto académico y de fans, sin ánimo de lucro, y no está afiliado ni respaldado por Fantasy Flight Games ni por Marvel. Marvel Champions: The Card Game es un producto de Fantasy Flight Games; los personajes y nombres de Marvel son propiedad de Marvel. Los datos de cartas proceden de MarvelCDB."
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "path": "/privacy",
+    "eyebrow": "Legal",
+    "heading": "Política de privacidad",
+    "lead": "Qué datos guarda AIForge, para qué los usa y cómo puedes pedir que se borren.",
+    "title": "Política de privacidad",
+    "description": "Qué datos personales guarda AIForge (cuenta de Auth0, mazos, partidas y comentarios), para qué se usan, qué servicios intervienen y cómo ejercer tus derechos.",
+    "updated": "2026-09-29",
+    "sections": [
+      {
+        "title": "Responsable",
+        "paragraphs": [
+          "AIForge es un proyecto personal y académico (Trabajo de Fin de Grado) sin ánimo de lucro. Para cualquier cuestión sobre privacidad puedes escribir a aiforge.soporte@gmail.com."
+        ]
+      },
+      {
+        "title": "Qué datos se guardan",
+        "paragraphs": [
+          "Puedes navegar por los mazos, las cartas, el historial y las preguntas frecuentes sin registrarte. Si inicias sesión, se guardan:"
+        ],
+        "items": [
+          "**Datos de la cuenta**, que llegan desde Auth0 al iniciar sesión con Google o con email: identificador de Auth0, email, nombre y foto de perfil.",
+          "**Contenido que creas**: mazos, comentarios, favoritos y partidas registradas (héroe, aspecto, villano, dificultad y resultado)."
+        ],
+        "after": [
+          "Los mazos, los comentarios y las partidas son públicos y muestran tu nombre de usuario como autor. Tu email no se muestra a otros usuarios."
+        ]
+      },
+      {
+        "title": "Para qué se usan",
+        "items": [
+          "Identificarte y mostrarte tus mazos, favoritos y estadísticas.",
+          "Mostrar los mazos, comentarios y partidas públicos de la comunidad.",
+          "Entrenar el modelo de recomendación: las partidas registradas son los datos con los que aprende la IA."
+        ],
+        "after": [
+          "No se venden ni se ceden datos a terceros, y no se usan para publicidad."
+        ]
+      },
+      {
+        "title": "Almacenamiento en tu navegador",
+        "paragraphs": [
+          "AIForge usa el almacenamiento local del navegador (localStorage) para mantener tu sesión iniciada (lo gestiona Auth0) y para recordar tus filtros y el último mazo que viste. No se usan cookies publicitarias ni herramientas de analítica. Si esto cambia, se actualizará esta página."
+        ]
+      },
+      {
+        "title": "Servicios que intervienen",
+        "items": [
+          "**Auth0** (Okta): inicio de sesión y gestión de la cuenta.",
+          "**Vercel**: alojamiento de la web.",
+          "**Render**: alojamiento del servidor y de la base de datos."
+        ]
+      },
+      {
+        "title": "Tus derechos",
+        "paragraphs": [
+          "Puedes pedir acceso a tus datos, corregirlos o borrar tu cuenta y tu contenido escribiendo a aiforge.soporte@gmail.com. También puedes borrar tus mazos y comentarios directamente desde la web."
+        ]
+      }
+    ]
+  }
+}
