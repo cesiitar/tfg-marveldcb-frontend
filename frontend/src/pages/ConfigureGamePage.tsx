@@ -12,8 +12,10 @@ import {
   PageHeaderDescription,
 } from '../components/ui/page-header'
 import { CheckCircleIcon, CheckIcon, InfoIcon, LightningIcon, WarningIcon, XIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const ConfigureGamePage: React.FC = () => {
+  usePageMeta({ title: 'Configurar partida', noindex: true })
   const navigate = useNavigate()
   const location = useLocation()
   const { showToast, ToastContainer } = useToast()

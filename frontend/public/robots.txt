@@ -1,0 +1,5 @@
+# AIForge — https://aiforgedecks.com
+User-agent: *
+Allow: /
+
+Sitemap: https://aiforgedecks.com/sitemap.xml

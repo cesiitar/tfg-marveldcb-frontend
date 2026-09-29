@@ -16,8 +16,10 @@ import {
   pageHeaderButton,
 } from '../components/ui/page-header'
 import { CardsIcon, ClipboardTextIcon, HeartIcon, StarIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const AddGamePage: React.FC = () => {
+  usePageMeta({ title: 'Añadir partida', noindex: true })
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()

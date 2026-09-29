@@ -1,4 +1,13 @@
 {
+  "headers": [
+    { "source": "/mydecks", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/create-deck", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/ai-recommendation", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/favorites", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/profile", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/configure-game", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
+    { "source": "/decks/:id/edit", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
@@ -6,4 +15,3 @@
     }
   ]
 }
-

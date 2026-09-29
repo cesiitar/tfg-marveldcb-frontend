@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
@@ -13,9 +13,10 @@ import {
   PageHeaderDescription,
 } from '../components/ui/page-header'
 import { CalendarBlankIcon, CardsIcon, CaretLeftIcon, CaretRightIcon, HeartIcon, StarIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const DecksPage: React.FC = () => {
-  const navigate = useNavigate()
+  usePageMeta({ title: 'Mazos públicos de Marvel Champions', description: 'Explora los mazos de Marvel Champions creados por la comunidad de AIForge. Filtra por héroe y aspecto, ordena por popularidad y guarda tus favoritos.' })
   const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
   const [decks, setDecks] = useState<Deck[]>([])
@@ -338,11 +339,13 @@ const DecksPage: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre de mazo"
+                aria-label="Buscar por nombre de mazo"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   />
                   <select
                 value={heroFilter}
                 onChange={(e) => setHeroFilter(e.target.value)}
+                aria-label="Filtrar por héroe"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   >
                 <option value="">Todos los héroes</option>
@@ -353,6 +356,7 @@ const DecksPage: React.FC = () => {
               <select
                 value={aspectFilter}
                 onChange={(e) => setAspectFilter(e.target.value)}
+                aria-label="Filtrar por aspecto"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
                 <option value="">Todos los aspectos</option>
@@ -363,6 +367,7 @@ const DecksPage: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'most_favorites' | 'alphabetical')}
+                aria-label="Ordenar mazos"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               >
                 <option value="newest">Más nuevos</option>
@@ -379,9 +384,9 @@ const DecksPage: React.FC = () => {
               <div className="w-24 h-24 bg-ink-100 ring-1 ring-ink-900/5 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <CardsIcon className="w-12 h-12 text-gray-400" weight="duotone" aria-hidden="true" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-4">
+              <h2 className="text-2xl font-bold text-gray-700 mb-4">
                 No hay mazos que coincidan
-              </h3>
+              </h2>
               <p className="text-gray-500 mb-8 text-lg">
                 Ajusta los filtros o limpia la búsqueda
               </p>
@@ -404,30 +409,35 @@ const DecksPage: React.FC = () => {
                 <div 
                   key={deck.id}
                   id={isLastViewed ? `deck-${deck.id}` : undefined}
-                  className={`group deck-card cursor-pointer ${
+                  className={`group deck-card relative has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand-500 ${
                     isLastViewed 
                       ? 'border-blue-500 border-2 shadow-lg ring-2 ring-blue-200' 
                       : 'border-ink-900/[0.08] hover:border-ink-300'
                   }`}
-                  onClick={() => {
-                    // Guardar el ID antes de navegar
-                    if (deck.id) {
-                      try {
-                        localStorage.setItem('lastViewedDeckId', deck.id.toString())
-                      } catch (err) {
-                        console.error('Error guardando último mazo visto:', err)
-                      }
-                    }
-                    navigate(`/decks/${deck.id}`)
-                  }}
                 >
                   {/* Header Section - Clean and Professional */}
                   <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
-                        {deck.name}
-                      </h3>
-                      <div className="flex items-center gap-2">
+                      <h2 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
+                        {/* Enlace real (rastreable) estirado sobre toda la tarjeta */}
+                        <Link
+                          to={`/decks/${deck.id}`}
+                          className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+                          onClick={() => {
+                            // Guardar el ID antes de navegar
+                            if (deck.id) {
+                              try {
+                                localStorage.setItem('lastViewedDeckId', deck.id.toString())
+                              } catch (err) {
+                                console.error('Error guardando último mazo visto:', err)
+                              }
+                            }
+                          }}
+                        >
+                          {deck.name}
+                        </Link>
+                      </h2>
+                      <div className="relative z-10 flex items-center gap-2">
                         {/* Botón de favorito con contador - solo si está autenticado */}
                         {isAuthenticated ? (
                           <button
@@ -519,6 +529,7 @@ const DecksPage: React.FC = () => {
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
                       className="page-btn"
+                      aria-label="Página anterior"
                     >
                       <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
@@ -539,6 +550,7 @@ const DecksPage: React.FC = () => {
                           key={page}
                           onClick={() => handlePageChange(page)}
                           className={`page-btn ${currentPage === page ? 'page-btn-active' : ''}`}
+                          aria-current={currentPage === page ? 'page' : undefined}
                         >
                           {page}
                         </button>
@@ -549,6 +561,7 @@ const DecksPage: React.FC = () => {
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === getTotalPages()}
                       className="page-btn"
+                      aria-label="Página siguiente"
                     >
                       <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>

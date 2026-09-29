@@ -18,8 +18,10 @@ import {
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { InfoIcon, SparkleIcon, XIcon } from '@phosphor-icons/react'
 
+import { usePageMeta } from '../lib/seo'
 
 const AIRecommendationPage: React.FC = () => {
+  usePageMeta({ title: 'Recomendación con IA', noindex: true })
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth0()
   const { showToast, ToastContainer } = useToast()

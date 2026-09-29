@@ -11,8 +11,10 @@ import {
   PageHeaderDescription,
 } from '../components/ui/page-header'
 import { ArrowsClockwiseIcon, CardsIcon, CaretDownIcon, CheckCircleIcon, MagnifyingGlassIcon, SmileySadIcon, TagIcon, TrashIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const CardSearchPage: React.FC = () => {
+  usePageMeta({ title: 'Buscador de cartas de Marvel Champions', description: 'Busca cartas de Marvel Champions por nombre, tipo, aspecto, coste y set, con filtros combinables.' })
   // Cargar filtros desde localStorage al inicializar
   const loadFiltersFromStorage = () => {
     try {
@@ -171,6 +173,8 @@ const CardSearchPage: React.FC = () => {
               </h3>
               <div className="relative">
                 <input
+                  id="search-name"
+                  aria-label="Nombre de la carta"
                   type="text"
                   name="name"
                   value={searchForm.name}
@@ -214,11 +218,12 @@ const CardSearchPage: React.FC = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                  <label htmlFor="search-type" className="block text-sm font-semibold text-gray-700">
                     Tipo de Carta
                   </label>
                   <div className="relative">
                     <select
+                      id="search-type"
                       name="type"
                       value={searchForm.type}
                       onChange={handleInputChange}
@@ -247,10 +252,11 @@ const CardSearchPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                  <label htmlFor="search-cost" className="block text-sm font-semibold text-gray-700">
                     Coste de la Carta
                   </label>
                   <input
+                    id="search-cost"
                     type="number"
                     name="cost"
                     value={searchForm.cost}
@@ -271,11 +277,12 @@ const CardSearchPage: React.FC = () => {
                 Set de Cartas
               </h3>
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">
+                <label htmlFor="search-set" className="block text-sm font-semibold text-gray-700">
                   Seleccionar Set
                 </label>
                 <div className="relative">
                   <select
+                    id="search-set"
                     name="set_name"
                     value={searchForm.set_name}
                     onChange={handleInputChange}

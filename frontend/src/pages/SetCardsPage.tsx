@@ -15,12 +15,14 @@ import {
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { CardsIcon, CaretDownIcon, CaretLeftIcon, CaretRightIcon, ChartBarIcon, FunnelIcon, MagnifyingGlassIcon, SmileySadIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const SetCardsPage: React.FC = () => {
   const { setId } = useParams<{ setId: string }>()
   const navigate = useNavigate()
   
   const [set, setSet] = useState<CardSet | null>(null)
+  usePageMeta({ title: set ? `Cartas del set ${set.name}` : 'Cartas del set', description: set ? `Todas las cartas del set ${set.name} de Marvel Champions, con estadísticas por tipo, aspecto y coste.` : undefined, canonical: !!set })
   const [cards, setCards] = useState<Card[]>([])
   const [isLoading, setIsLoading] = useState(false)
   
@@ -225,6 +227,7 @@ const SetCardsPage: React.FC = () => {
               <select
                 value={statsView}
                 onChange={(e) => setStatsView(e.target.value)}
+                aria-label="Vista de estadísticas"
                 className="px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white text-sm font-medium"
               >
                 <option value="general">Resumen General</option>
@@ -262,11 +265,12 @@ const SetCardsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Buscador */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
+              <label htmlFor="set-search" className="block text-sm font-semibold text-gray-700">
                 Buscar por nombre
               </label>
               <div className="relative">
                 <input
+                  id="set-search"
                   type="text"
                   value={search}
                   onChange={handleSearchChange}
@@ -279,11 +283,12 @@ const SetCardsPage: React.FC = () => {
 
             {/* Ordenamiento */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
+              <label htmlFor="set-sort" className="block text-sm font-semibold text-gray-700">
                 Ordenar por
               </label>
               <div className="relative">
                 <select
+                  id="set-sort"
                   value={sortBy}
                   onChange={handleSortChange}
                   className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
@@ -349,6 +354,7 @@ const SetCardsPage: React.FC = () => {
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
                       className="page-btn"
+                      aria-label="Página anterior"
                     >
                       <CaretLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>
@@ -369,6 +375,7 @@ const SetCardsPage: React.FC = () => {
                           key={page}
                           onClick={() => handlePageChange(page)}
                           className={`page-btn ${currentPage === page ? 'page-btn-active' : ''}`}
+                          aria-current={currentPage === page ? 'page' : undefined}
                         >
                           {page}
                         </button>
@@ -379,6 +386,7 @@ const SetCardsPage: React.FC = () => {
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === getTotalPages()}
                       className="page-btn"
+                      aria-label="Página siguiente"
                     >
                       <CaretRightIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
                     </button>

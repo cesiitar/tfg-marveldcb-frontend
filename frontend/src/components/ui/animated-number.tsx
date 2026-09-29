@@ -21,6 +21,14 @@ export interface AnimatedNumberProps
   precision?: number
   /** Formato del número mostrado (por defecto, separadores de miles en español). */
   format?: (value: number) => string
+  /**
+   * Si se indica, el número cuenta desde este valor cuando `play` pasa a true.
+   * Hasta entonces el DOM ya contiene el valor final (visible para buscadores y
+   * lectores de pantalla aunque nunca se haga scroll).
+   */
+  countFrom?: number
+  /** Dispara el conteo desde `countFrom` (por ejemplo, al entrar en pantalla). */
+  play?: boolean
   onAnimationStart?: () => void
   onAnimationComplete?: () => void
 }
@@ -34,6 +42,8 @@ export function AnimatedNumber({
   damping = 15,
   precision = 0,
   format = defaultFormat,
+  countFrom,
+  play = true,
   onAnimationStart,
   onAnimationComplete,
   className,
@@ -51,10 +61,17 @@ export function AnimatedNumber({
     if (ref.current) ref.current.textContent = latest
   })
 
+  const playedRef = React.useRef(countFrom === undefined)
+
   React.useEffect(() => {
     if (reduceMotion) {
       spring.jump(value)
       return
+    }
+    if (!playedRef.current) {
+      if (!play) return
+      playedRef.current = true
+      spring.jump(countFrom!)
     }
     spring.set(value)
     onAnimationStart?.()
@@ -62,7 +79,7 @@ export function AnimatedNumber({
       if (spring.get() === value) onAnimationComplete?.()
     })
     return () => unsubscribe()
-  }, [spring, value, reduceMotion, onAnimationStart, onAnimationComplete])
+  }, [spring, value, reduceMotion, play, countFrom, onAnimationStart, onAnimationComplete])
 
   return (
     <span

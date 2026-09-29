@@ -11,8 +11,10 @@ import {
   pageHeaderButton,
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
+import { usePageMeta } from '../lib/seo'
 
 const ProfilePage: React.FC = () => {
+  usePageMeta({ title: 'Mi perfil', noindex: true })
   const { user, isAuthenticated, logout } = useAuth()
   const [deckCount, setDeckCount] = useState<number>(0)
   const [loading, setLoading] = useState(false)

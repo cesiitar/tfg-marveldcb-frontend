@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
 
           {/* Enlaces rápidos */}
           <div className="md:col-span-3">
-            <h3 className="eyebrow !text-ink-400 mb-4">Explorar</h3>
+            <p className="eyebrow !text-ink-400 mb-4">Explorar</p>
             <ul className="space-y-2.5">
               <li><Link to="/mydecks" className="hover:text-white transition-colors">Mis Mazos</Link></li>
               <li><Link to="/decks" className="hover:text-white transition-colors">Mazos de la comunidad</Link></li>
@@ -38,7 +38,7 @@ const Footer: React.FC = () => {
 
           {/* Contacto */}
           <div className="md:col-span-3">
-            <h3 className="eyebrow !text-ink-400 mb-4">Contacto</h3>
+            <p className="eyebrow !text-ink-400 mb-4">Contacto</p>
             <ul className="space-y-2.5">
               <li>
                 <a href="mailto:aiforge.soporte@gmail.com" className="hover:text-white transition-colors">
@@ -58,7 +58,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-white/[0.08] mt-12 pt-6 flex flex-col sm:flex-row gap-2 justify-between text-sm text-ink-500">
-          <p>© 2024 AIForge. Proyecto TFG · Todos los derechos reservados.</p>
+          <p>© 2024–{new Date().getFullYear()} AIForge. Proyecto TFG · Todos los derechos reservados.</p>
           <p className="font-mono text-xs uppercase tracking-[0.16em]">Hecho para Marvel Champions</p>
         </div>
       </div>

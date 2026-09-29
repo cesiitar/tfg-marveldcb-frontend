@@ -15,8 +15,10 @@ import { ArrowRightIcon, CardsThreeIcon, MagnifyingGlassIcon, SmileySadIcon, War
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { Reveal } from '../components/motion/reveal'
 import { TiltCard } from '../components/motion/tilt-card'
+import { usePageMeta } from '../lib/seo'
 
 const CardsPage: React.FC = () => {
+  usePageMeta({ title: 'Cartas de Marvel Champions por set', description: 'Catálogo de cartas de Marvel Champions organizado por set y expansión: héroes, aspectos, cartas básicas y encuentros.' })
   const [sets, setSets] = useState<CardSet[]>([])
   const [filteredSets, setFilteredSets] = useState<CardSet[]>([])
   const [loading, setLoading] = useState(true)
@@ -168,9 +170,9 @@ const CardsPage: React.FC = () => {
               <div className="w-24 h-24 bg-ink-100 ring-1 ring-ink-900/5 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <SmileySadIcon className="w-12 h-12 text-gray-400" weight="duotone" aria-hidden="true" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-4">
+              <h2 className="text-2xl font-bold text-gray-700 mb-4">
                 No se encontraron sets
-              </h3>
+              </h2>
               <p className="text-gray-500 mb-8 text-lg">
                 No hay sets que coincidan con "{searchTerm}"
               </p>
@@ -214,9 +216,9 @@ const CardsPage: React.FC = () => {
 
                       {/* Información */}
                       <div className="relative p-5">
-                        <h3 className="text-lg leading-tight text-ink-900 group-hover:text-brand-700 transition-colors duration-200">
+                        <h2 className="text-lg leading-tight text-ink-900 group-hover:text-brand-700 transition-colors duration-200">
                           {set.name}
-                        </h3>
+                        </h2>
                         <div className="mt-4 flex items-center gap-3">
                           <div className="flex-1 h-1.5 rounded-full bg-ink-100 overflow-hidden" aria-hidden="true">
                             <div

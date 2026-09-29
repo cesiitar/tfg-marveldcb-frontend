@@ -8,12 +8,14 @@ import { getClassColor } from '../utils/classColors'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { ArrowLeftIcon, CardsIcon, ChartBarIcon, ChatCircleDotsIcon, FileTextIcon, HeartIcon, PaperPlaneTiltIcon, PencilSimpleIcon, TrashIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const DeckDetailPage: React.FC = () => {
   const { id } = useParams()
   const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
   const [deck, setDeck] = useState<Deck | null>(null)
+  usePageMeta({ title: deck ? `${deck.name} · mazo de ${deck.hero_name}` : 'Mazo', description: deck ? `Mazo de Marvel Champions con ${deck.hero_name}${deck.creator_name ? ` creado por ${deck.creator_name}` : ''}: lista de cartas, estadísticas y comentarios en AIForge.` : undefined, canonical: !!deck })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)

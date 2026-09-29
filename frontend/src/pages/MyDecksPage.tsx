@@ -18,8 +18,10 @@ import {
   pageHeaderButton,
 } from '../components/ui/page-header'
 import { CalendarBlankIcon, CardsIcon, ClipboardTextIcon, EyeIcon, HeartIcon, MagnifyingGlassIcon, PencilSimpleIcon, PlusIcon, SignOutIcon, StarIcon, TrashIcon, UploadSimpleIcon, WarningIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const MyDecksPage: React.FC = () => {
+  usePageMeta({ title: 'Mis mazos', noindex: true })
   const { isAuthenticated, user, logout } = useAuth()
   const { user: auth0User } = useAuth0()
   const navigate = useNavigate()
@@ -188,7 +190,7 @@ const MyDecksPage: React.FC = () => {
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <WarningIcon className="w-8 h-8 text-red-600" weight="duotone" aria-hidden="true" />
           </div>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h2>
+          <h1 className="text-2xl font-semibold text-gray-800 mb-4">Acceso Restringido</h1>
           <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tus mazos. Por favor, usa el botón de Login en el header para acceder.</p>
         </div>
       </div>

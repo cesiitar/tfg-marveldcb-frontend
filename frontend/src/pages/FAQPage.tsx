@@ -7,6 +7,7 @@ import {
   PageHeaderDescription,
 } from '../components/ui/page-header'
 import { EnvelopeSimpleIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 // Correo de contacto para reportar errores
 const CONTACT_EMAIL = 'aiforge.soporte@gmail.com' // Cambiar por tu correo de Gmail
@@ -40,7 +41,7 @@ const FAQPage: React.FC = () => {
     },
     {
       question: "¿Cómo registro una partida?",
-      answer: "Después de crear un mazo, puedes registrar una partida desde la página 'Crear Mazo' o desde 'Registrar Partida'. Selecciona el villano, la dificultad, y registra el resultado (victoria o derrota). Esto ayuda a mejorar la generación de mazos con IA."
+      answer: "Después de crear un mazo, puedes registrar una partida desde la página 'Crear Mazo' o desde 'Añadir Partida'. Selecciona el villano, la dificultad, y registra el resultado (victoria o derrota). Esto ayuda a mejorar la generación de mazos con IA."
     },
     {
       question: "¿Es gratis usar la plataforma?",
@@ -56,8 +57,25 @@ const FAQPage: React.FC = () => {
     }
   ]
 
+  usePageMeta({
+    title: 'Preguntas frecuentes',
+    description:
+      'Respuestas sobre AIForge: cómo crear mazos de Marvel Champions, cómo funciona la recomendación con IA, reglas de construcción (40-50 cartas) y registro de partidas.',
+  })
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  }
+
   return (
     <div className="min-h-[60vh]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       {/* Header */}
       <PageHeader>
         <PageHeaderContent>
@@ -77,10 +95,10 @@ const FAQPage: React.FC = () => {
             <div className="p-6 space-y-4">
               {faqs.map((faq, index) => (
                 <div key={index} className="border-b border-gray-200 last:border-b-0 pb-4 last:pb-0">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-start">
-                    <span className="text-blue-600 mr-3 font-bold">Q{index + 1}:</span>
+                  <h2 className="text-lg font-semibold text-gray-800 mb-2 flex items-start">
+                    <span className="text-blue-600 mr-3 font-bold" aria-hidden="true">Q{index + 1}:</span>
                     <span>{faq.question}</span>
-                  </h3>
+                  </h2>
                   <p className="text-gray-600 leading-relaxed ml-8">
                     {faq.answer}
                   </p>

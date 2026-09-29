@@ -15,8 +15,10 @@ import {
   pageHeaderButton,
 } from '../components/ui/page-header'
 import { LightbulbIcon, PencilSimpleIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const CreateDeckPage: React.FC = () => {
+  usePageMeta({ title: 'Crear mazo', noindex: true })
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()
   const { ToastContainer } = useToast()

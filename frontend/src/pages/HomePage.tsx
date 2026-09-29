@@ -22,6 +22,7 @@ import { TiltCard } from '../components/motion/tilt-card'
 import { Magnetic } from '../components/motion/magnetic'
 import { CardFan } from '../components/home/card-fan'
 import { ScrollMarquee } from '../components/home/scroll-marquee'
+import { usePageMeta } from '../lib/seo'
 
 /** Cifra global grande; cuenta desde 0 cuando entra en pantalla. */
 const BandStat: React.FC<{ label: string; value: number; loading: boolean; Icon: Icon }> = ({ label, value, loading, Icon }) => {
@@ -37,7 +38,9 @@ const BandStat: React.FC<{ label: string; value: number; loading: boolean; Icon:
         <div className="mt-4 h-14 w-24 bg-ink-100 rounded-lg animate-pulse" />
       ) : (
         <AnimatedNumber
-          value={inView ? value : 0}
+          value={value}
+          countFrom={0}
+          play={inView}
           stiffness={40}
           damping={14}
           className="mt-3 block font-display text-6xl md:text-7xl font-extrabold text-ink-900 leading-none"
@@ -66,6 +69,7 @@ const UserStat: React.FC<{ label: string; value: number; loading: boolean; Icon:
 )
 
 const HomePage: React.FC = () => {
+  usePageMeta({ description: 'AIForge es una plataforma gratuita para crear y optimizar mazos de Marvel Champions con inteligencia artificial: constructor de mazos, recomendaciones por villano y registro de partidas.' })
   const { isAuthenticated, user } = useAuth0()
   const [stats, setStats] = useState({
     // Estadísticas globales
@@ -197,8 +201,9 @@ const HomePage: React.FC = () => {
               />
               <Reveal delay={0.55} y={16}>
                 <p className="mt-6 text-lg text-ink-300 max-w-xl leading-relaxed">
-                  Construye tus mazos, registra cada partida y deja que la inteligencia artificial
-                  te proponga combinaciones pensadas para cada villano.
+                  AIForge es una plataforma gratuita para crear mazos de Marvel Champions: construye
+                  tus mazos, registra cada partida y deja que la inteligencia artificial te proponga
+                  combinaciones pensadas para cada villano.
                 </p>
               </Reveal>
               <Reveal delay={0.7} y={16} className="mt-9 flex flex-col sm:flex-row flex-wrap gap-3">

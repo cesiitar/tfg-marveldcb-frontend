@@ -7,8 +7,10 @@ import { useToast } from '../components/Toast'
 import { translateCardType } from '../utils/typeTranslations'
 import { getClassColor } from '../utils/classColors'
 import { ArrowLeftIcon, MagnifyingGlassIcon, MinusIcon, PlusIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const EditDeckPage: React.FC = () => {
+  usePageMeta({ title: 'Editar mazo', noindex: true })
   const { id } = useParams()
   const navigate = useNavigate()
   const { isAuthenticated, user } = useAuth()

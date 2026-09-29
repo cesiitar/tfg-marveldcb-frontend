@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useToast } from '../components/Toast'
 import { apiService } from '../services/api'
@@ -16,8 +16,10 @@ import {
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { ArrowLeftIcon, CalendarBlankIcon, HeartIcon, LockIcon, StarIcon, UserIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import { usePageMeta } from '../lib/seo'
 
 const FavoritesPage: React.FC = () => {
+  usePageMeta({ title: 'Mis favoritos', noindex: true })
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
@@ -96,10 +98,6 @@ const FavoritesPage: React.FC = () => {
     }
   }
 
-  const handleViewDeck = (deckId: number) => {
-    navigate(`/decks/${deckId}`)
-  }
-
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -107,7 +105,7 @@ const FavoritesPage: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg ring-1 ring-ink-900/[0.04] p-8">
             <div className="mb-6">
               <LockIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" weight="duotone" aria-hidden="true" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Acceso Restringido</h1>
               <p className="text-gray-600 mb-6">Necesitas iniciar sesión para ver tus favoritos</p>
             </div>
             <button
@@ -199,16 +197,20 @@ const FavoritesPage: React.FC = () => {
             {favorites.map((deck) => (
               <div 
                 key={deck.id}
-                className="group deck-card cursor-pointer"
-                onClick={() => handleViewDeck(deck.id!)}
+                className="group deck-card relative has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand-500"
               >
                 {/* Header Section */}
                 <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
-                      {deck.name}
-                    </h3>
-                    <div className="flex items-center gap-2">
+                    <h2 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
+                      <Link
+                        to={`/decks/${deck.id}`}
+                        className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+                      >
+                        {deck.name}
+                      </Link>
+                    </h2>
+                    <div className="relative z-10 flex items-center gap-2">
                       {/* Botón de eliminar favorito con contador */}
                       {isAuthenticated && (
                         <button

@@ -18,6 +18,7 @@ import FavoritesPage from './pages/FavoritesPage'
 import GamesHistoryPage from './pages/GamesHistoryPage'
 import AIRecommendationPage from './pages/AIRecommendationPage'
 import AddGamePage from './pages/AddGamePage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
@@ -89,6 +90,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>
     </AuthProvider>
