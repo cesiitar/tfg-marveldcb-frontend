@@ -23,6 +23,7 @@ import { Magnetic } from '../components/motion/magnetic'
 import { CardFan } from '../components/home/card-fan'
 import { ScrollMarquee } from '../components/home/scroll-marquee'
 import { usePageMeta } from '../lib/seo'
+import pageMeta from '../lib/page-meta.json'
 
 /** Cifra global grande; cuenta desde 0 cuando entra en pantalla. */
 const BandStat: React.FC<{ label: string; value: number; loading: boolean; Icon: Icon }> = ({ label, value, loading, Icon }) => {
@@ -69,7 +70,7 @@ const UserStat: React.FC<{ label: string; value: number; loading: boolean; Icon:
 )
 
 const HomePage: React.FC = () => {
-  usePageMeta({ description: 'AIForge es una plataforma gratuita para crear y optimizar mazos de Marvel Champions con inteligencia artificial: constructor de mazos, recomendaciones por villano y registro de partidas.' })
+  usePageMeta(pageMeta.home)
   const { isAuthenticated, user } = useAuth0()
   const [stats, setStats] = useState({
     // Estadísticas globales

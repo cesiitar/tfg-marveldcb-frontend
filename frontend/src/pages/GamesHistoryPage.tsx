@@ -17,6 +17,7 @@ import {
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { CaretLeftIcon, CaretRightIcon, ChartBarIcon, CheckIcon, ClipboardTextIcon, EyeIcon, MagnifyingGlassIcon, PlusIcon, TrashIcon, XIcon } from '@phosphor-icons/react'
 import { usePageMeta } from '../lib/seo'
+import pageMeta from '../lib/page-meta.json'
 
 interface GameHistory {
   id: number
@@ -33,7 +34,7 @@ interface GameHistory {
 }
 
 const GamesHistoryPage: React.FC = () => {
-  usePageMeta({ title: 'Historial de partidas', description: 'Historial de partidas de Marvel Champions registradas en AIForge: villanos, dificultad, héroes y resultados de victoria o derrota.' })
+  usePageMeta(pageMeta.gamesHistory)
   const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
   const [games, setGames] = useState<GameHistory[]>([])

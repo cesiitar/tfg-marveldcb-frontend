@@ -12,9 +12,10 @@ import {
 } from '../components/ui/page-header'
 import { ArrowsClockwiseIcon, CardsIcon, CaretDownIcon, CheckCircleIcon, MagnifyingGlassIcon, SmileySadIcon, TagIcon, TrashIcon } from '@phosphor-icons/react'
 import { usePageMeta } from '../lib/seo'
+import pageMeta from '../lib/page-meta.json'
 
 const CardSearchPage: React.FC = () => {
-  usePageMeta({ title: 'Buscador de cartas de Marvel Champions', description: 'Busca cartas de Marvel Champions por nombre, tipo, aspecto, coste y set, con filtros combinables.' })
+  usePageMeta(pageMeta.cardSearch)
   // Cargar filtros desde localStorage al inicializar
   const loadFiltersFromStorage = () => {
     try {

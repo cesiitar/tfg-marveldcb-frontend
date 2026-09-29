@@ -1,0 +1,42 @@
+[
+  {
+    "question": "¿Qué es AIForge?",
+    "answer": "AIForge es una plataforma web diseñada para crear y optimizar mazos de Marvel Champions usando inteligencia artificial. Permite crear mazos personalizados, explorar todas las cartas disponibles, registrar tus partidas, generar mazos optimizados con IA, y compartir tus creaciones con la comunidad."
+  },
+  {
+    "question": "¿Cómo puedo crear mi primer mazo?",
+    "answer": "Puedes crear mazos de dos formas: manualmente desde 'Crear Mazo' eligiendo héroe, aspecto y cartas, o usando la recomendación de IA que genera un mazo optimizado para un villano específico. Ambas opciones están disponibles en la página 'Crear Mazo'."
+  },
+  {
+    "question": "¿Cómo funciona la recomendación de IA?",
+    "answer": "La IA analiza tu historial de partidas y genera mazos optimizados para enfrentar villanos específicos. Selecciona un villano y la dificultad, y la IA elegirá automáticamente el mejor héroe, aspecto y combinación de cartas para maximizar tus probabilidades de victoria."
+  },
+  {
+    "question": "¿Puedo tener mazos con el mismo nombre?",
+    "answer": "No, los nombres de mazos deben ser únicos en toda la plataforma (no pueden coincidir con ningún otro mazo, sin importar mayúsculas o minúsculas). Si intentas crear o editar un mazo con un nombre que ya existe, recibirás un mensaje de error."
+  },
+  {
+    "question": "¿Cuántas cartas debe tener un mazo?",
+    "answer": "Un mazo válido debe tener entre 40 y 50 cartas (sin contar las cartas del héroe, que se añaden automáticamente). El sistema te avisará si tu mazo está fuera de estos límites."
+  },
+  {
+    "question": "¿Puedo compartir mis mazos con otros usuarios?",
+    "answer": "Sí, todos los mazos que crees son públicos por defecto y aparecen en la sección 'Decklists Públicos'. Otros usuarios pueden verlos, añadirlos a favoritos y usarlos como inspiración para sus propios mazos."
+  },
+  {
+    "question": "¿Cómo registro una partida?",
+    "answer": "Después de crear un mazo, puedes registrar una partida desde la página 'Crear Mazo' o desde 'Añadir Partida'. Selecciona el villano, la dificultad, y registra el resultado (victoria o derrota). Esto ayuda a mejorar la generación de mazos con IA."
+  },
+  {
+    "question": "¿Es gratis usar la plataforma?",
+    "answer": "Sí, AIForge es completamente gratuito para todos los usuarios. No hay costos ocultos ni suscripciones premium. Todas las funcionalidades están disponibles sin restricciones."
+  },
+  {
+    "question": "¿Puedo editar un mazo después de crearlo?",
+    "answer": "Sí, puedes editar tus propios mazos desde la página 'Mis Mazos'. Haz clic en el botón 'Editar' de cualquier mazo que hayas creado para modificar su nombre, descripción, cartas, héroe o aspecto."
+  },
+  {
+    "question": "¿Qué pasa si elimino un mazo?",
+    "answer": "Si eliminas un mazo, se eliminará permanentemente de tu colección. Sin embargo, si otros usuarios lo tenían en favoritos, seguirá apareciendo en sus listas hasta que lo eliminen manualmente."
+  }
+]

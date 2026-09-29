@@ -1,12 +1,14 @@
 // Metadatos por página (título, descripción, canonical y robots) para una SPA.
 // Cada ruta llama a usePageMeta; al desmontarse se restauran los valores del
 // index.html para que nunca quede el canonical de otra página.
+// El HTML inicial de las rutas públicas ya trae estos mismos valores: lo genera
+// seo/prerender.mjs en el build (mantener los textos sincronizados).
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export const SITE_URL = 'https://aiforgedecks.com'
 export const SITE_NAME = 'AIForge'
-const DEFAULT_TITLE = 'AIForge - Construcción de mazos con inteligencia artificial'
+const DEFAULT_TITLE = 'AIForge: mazos de Marvel Champions con inteligencia artificial'
 const DEFAULT_DESCRIPTION =
   'AIForge: crea, comparte y analiza mazos de Marvel Champions con ayuda de inteligencia artificial.'
 
@@ -50,6 +52,7 @@ export function usePageMeta({ title, description, noindex = false, canonical = t
       }
       const path = pathname === '/' ? '/' : pathname.replace(/\/+$/, '')
       link.href = SITE_URL + path
+      upsertMeta('meta[property="og:url"]', { property: 'og:url', content: SITE_URL + path })
     } else if (link) {
       link.remove()
     }
@@ -64,6 +67,7 @@ export function usePageMeta({ title, description, noindex = false, canonical = t
       upsertMeta('meta[property="og:title"]', { property: 'og:title', content: DEFAULT_TITLE })
       upsertMeta('meta[property="og:description"]', { property: 'og:description', content: DEFAULT_DESCRIPTION })
       document.head.querySelector('link[rel="canonical"]')?.remove()
+      document.head.querySelector('meta[property="og:url"]')?.remove()
       document.head.querySelector('meta[name="robots"]')?.remove()
     }
   }, [title, description, noindex, canonical, pathname])

@@ -16,9 +16,10 @@ import { AnimatedNumber } from '../components/ui/animated-number'
 import { Reveal } from '../components/motion/reveal'
 import { TiltCard } from '../components/motion/tilt-card'
 import { usePageMeta } from '../lib/seo'
+import pageMeta from '../lib/page-meta.json'
 
 const CardsPage: React.FC = () => {
-  usePageMeta({ title: 'Cartas de Marvel Champions por set', description: 'Catálogo de cartas de Marvel Champions organizado por set y expansión: héroes, aspectos, cartas básicas y encuentros.' })
+  usePageMeta(pageMeta.cards)
   const [sets, setSets] = useState<CardSet[]>([])
   const [filteredSets, setFilteredSets] = useState<CardSet[]>([])
   const [loading, setLoading] = useState(true)

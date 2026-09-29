@@ -14,9 +14,10 @@ import {
 } from '../components/ui/page-header'
 import { CalendarBlankIcon, CardsIcon, CaretLeftIcon, CaretRightIcon, HeartIcon, StarIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
 import { usePageMeta } from '../lib/seo'
+import pageMeta from '../lib/page-meta.json'
 
 const DecksPage: React.FC = () => {
-  usePageMeta({ title: 'Mazos públicos de Marvel Champions', description: 'Explora los mazos de Marvel Champions creados por la comunidad de AIForge. Filtra por héroe y aspecto, ordena por popularidad y guarda tus favoritos.' })
+  usePageMeta(pageMeta.decks)
   const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
   const [decks, setDecks] = useState<Deck[]>([])
