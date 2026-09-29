@@ -351,7 +351,7 @@ const DeckDetailPage: React.FC = () => {
                 {deck.created_at && (
                   <>
                     {' el '}
-                    <span className="tabular-nums">{new Date(deck.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                    <time dateTime={deck.created_at} className="tabular-nums">{new Date(deck.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</time>
                   </>
                 )}
               </p>

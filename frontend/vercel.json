@@ -1,18 +1,146 @@
 {
   "cleanUrls": true,
   "headers": [
-    { "source": "/mydecks", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/create-deck", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/ai-recommendation", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/favorites", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/profile", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/configure-game", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/add-game", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] },
-    { "source": "/decks/:id/edit", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] }
+    {
+      "source": "/mydecks",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/create-deck",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/ai-recommendation",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/favorites",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/profile",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/configure-game",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/add-game",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    },
+    {
+      "source": "/decks/:id/edit",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
+    }
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/decks",
+      "destination": "/app"
+    },
+    {
+      "source": "/decks/:id",
+      "destination": "/app"
+    },
+    {
+      "source": "/decks/:id/edit",
+      "destination": "/app"
+    },
+    {
+      "source": "/mydecks",
+      "destination": "/app"
+    },
+    {
+      "source": "/create-deck",
+      "destination": "/app"
+    },
+    {
+      "source": "/configure-game",
+      "destination": "/app"
+    },
+    {
+      "source": "/add-game",
+      "destination": "/app"
+    },
+    {
+      "source": "/favorites",
+      "destination": "/app"
+    },
+    {
+      "source": "/games-history",
+      "destination": "/app"
+    },
+    {
+      "source": "/ai-recommendation",
+      "destination": "/app"
+    },
+    {
+      "source": "/cards",
+      "destination": "/app"
+    },
+    {
+      "source": "/cards/set/:id",
+      "destination": "/app"
+    },
+    {
+      "source": "/cards/search",
+      "destination": "/app"
+    },
+    {
+      "source": "/faq",
+      "destination": "/app"
+    },
+    {
+      "source": "/about",
+      "destination": "/app"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/app"
+    },
+    {
+      "source": "/profile",
       "destination": "/app"
     }
   ]

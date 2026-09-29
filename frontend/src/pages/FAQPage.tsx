@@ -50,6 +50,12 @@ const FAQPage: React.FC = () => {
                 </div>
               ))}
             </div>
+            <p className="px-6 py-4 border-t border-gray-200 font-mono text-xs uppercase tracking-[0.14em] text-ink-400">
+              Última revisión:{' '}
+              <time dateTime={pageMeta.faq.reviewed}>
+                {new Date(pageMeta.faq.reviewed).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </time>
+            </p>
           </div>
 
           {/* Contact Section */}

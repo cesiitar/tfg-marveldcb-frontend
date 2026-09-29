@@ -355,7 +355,8 @@ routes.push({
     crumbs([['Inicio', '/'], ['Preguntas frecuentes', '/faq']]),
   ],
   main: `<h1>Preguntas frecuentes sobre AIForge</h1>
-${faqs.map((f) => `<h2>${esc(f.question)}</h2>\n<p>${esc(f.answer)}</p>`).join('\n')}`,
+${faqs.map((f) => `<h2>${esc(f.question)}</h2>\n<p>${esc(f.answer)}</p>`).join('\n')}
+<p>Última revisión: <time datetime="${pageMeta.faq.reviewed}">${fmtDate(pageMeta.faq.reviewed)}</time>. Más detalles sobre el modelo de IA en <a href="/about">Sobre AIForge</a>.</p>`,
 })
 
 // Sobre AIForge y Política de privacidad
@@ -396,6 +397,9 @@ ${pg.sections
 // Es la copia intacta del index.html de Vite (si ya existe, el script se está repitiendo).
 const SHELL = path.join(DIST, 'app.html')
 if (!existsSync(SHELL)) await copyFile(path.join(DIST, 'index.html'), SHELL)
+// Vercel sirve 404.html (con estado 404) a cualquier ruta que no esté en los rewrites:
+// es el mismo shell, y React muestra la página "no encontrada" con noindex.
+await copyFile(SHELL, path.join(DIST, '404.html'))
 const template = await readFile(SHELL, 'utf8')
 if (!template.includes('<div id="root"></div>')) throw new Error('[prerender] el index.html de Vite no tiene <div id="root"></div>')
 
@@ -431,6 +435,7 @@ for (const r of routes) {
 const lastmod = (r) => {
   const d = r.path.startsWith('/decks/') && decks.find((x) => `/decks/${x.id}` === r.path)
   if (d) return isoDay(d.updated_at || d.created_at)
+  if (r.path === '/faq') return pageMeta.faq.reviewed
   return Object.values(infoPages).find((pg) => pg.path === r.path)?.updated || null
 }
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

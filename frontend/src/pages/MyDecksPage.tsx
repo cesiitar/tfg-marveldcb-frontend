@@ -371,9 +371,9 @@ const MyDecksPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1 text-gray-500">
                         <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
-                        <span>
+                        <time dateTime={deck.created_at || undefined}>
                           {deck.created_at ? new Date(deck.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                        </span>
+                        </time>
                   </div>
                   </div>
                   

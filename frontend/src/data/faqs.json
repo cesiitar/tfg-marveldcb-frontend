@@ -9,7 +9,7 @@
   },
   {
     "question": "¿Cómo funciona la recomendación de IA?",
-    "answer": "La IA analiza tu historial de partidas y genera mazos optimizados para enfrentar villanos específicos. Selecciona un villano y la dificultad, y la IA elegirá automáticamente el mejor héroe, aspecto y combinación de cartas para maximizar tus probabilidades de victoria."
+    "answer": "La IA usa un modelo de machine learning (SVM) entrenado con las partidas que registran los usuarios. Seleccionas un villano y la dificultad, y el modelo estima qué héroe, aspecto y tipo de mazo tienen más probabilidades de ganar; las cartas concretas se eligen a partir de mazos que ya han ganado en ese enfrentamiento. Es una estimación que mejora cuantas más partidas se registran. Lo explicamos en detalle en la página «Sobre AIForge»."
   },
   {
     "question": "¿Puedo tener mazos con el mismo nombre?",
