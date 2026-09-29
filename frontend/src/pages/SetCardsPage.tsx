@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { apiService } from '../services/api'
 import { Card, CardSet } from '../types/card'
@@ -16,6 +16,7 @@ import {
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { CardsIcon, CaretDownIcon, CaretLeftIcon, CaretRightIcon, ChartBarIcon, FunnelIcon, MagnifyingGlassIcon, SmileySadIcon } from '@phosphor-icons/react'
 import { usePageMeta } from '../lib/seo'
+import { usePageParam } from '../lib/use-page-param'
 
 const SetCardsPage: React.FC = () => {
   const { setId } = useParams<{ setId: string }>()
@@ -32,7 +33,7 @@ const SetCardsPage: React.FC = () => {
   const [statsView, setStatsView] = useState<string>('general')
   
   // Paginación
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = usePageParam()
   const [cardsPerPage] = useState(20)
 
   // Cargar datos del set
@@ -79,9 +80,15 @@ const SetCardsPage: React.FC = () => {
   }
 
   // Recargar cartas cuando cambien los filtros
+  const filtersKey = JSON.stringify([search, sortBy])
+  const prevFiltersKey = useRef(filtersKey)
   useEffect(() => {
     loadCards()
-    setCurrentPage(1) // Resetear página cuando cambien los filtros
+    // Resetear página cuando cambien los filtros (no al entrar: se respeta ?page=N)
+    if (prevFiltersKey.current !== filtersKey) {
+      prevFiltersKey.current = filtersKey
+      setCurrentPage(1)
+    }
   }, [search, sortBy])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +111,7 @@ const SetCardsPage: React.FC = () => {
   }
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
+    setCurrentPage(page, { push: true })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

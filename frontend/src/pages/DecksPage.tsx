@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
@@ -14,6 +14,7 @@ import {
 } from '../components/ui/page-header'
 import { CalendarBlankIcon, CardsIcon, CaretLeftIcon, CaretRightIcon, HeartIcon, StarIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
 import { usePageMeta } from '../lib/seo'
+import { usePageParam } from '../lib/use-page-param'
 import pageMeta from '../lib/page-meta.json'
 
 const DecksPage: React.FC = () => {
@@ -31,14 +32,12 @@ const DecksPage: React.FC = () => {
       const savedHeroFilter = localStorage.getItem('decksPage_heroFilter') || ''
       const savedAspectFilter = localStorage.getItem('decksPage_aspectFilter') || ''
       const savedSortBy = (localStorage.getItem('decksPage_sortBy') || 'newest') as 'newest' | 'oldest' | 'most_favorites' | 'alphabetical'
-      const savedCurrentPage = parseInt(localStorage.getItem('decksPage_currentPage') || '1', 10)
       
       return {
         search: savedSearch,
         heroFilter: savedHeroFilter,
         aspectFilter: savedAspectFilter,
-        sortBy: savedSortBy,
-        currentPage: savedCurrentPage
+        sortBy: savedSortBy
       }
     } catch (err) {
       console.error('Error cargando filtros desde localStorage:', err)
@@ -46,8 +45,7 @@ const DecksPage: React.FC = () => {
         search: '',
         heroFilter: '',
         aspectFilter: '',
-        sortBy: 'newest' as const,
-        currentPage: 1
+        sortBy: 'newest' as const
       }
     }
   }
@@ -59,8 +57,8 @@ const DecksPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'most_favorites' | 'alphabetical'>(initialFilters.sortBy)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   
-  // Paginación
-  const [currentPage, setCurrentPage] = useState(initialFilters.currentPage)
+  // Paginación (en la URL: ?page=N)
+  const [currentPage, setCurrentPage] = usePageParam()
   const [decksPerPage] = useState(16)
   
   // Guardar filtros en localStorage cuando cambien
@@ -70,11 +68,10 @@ const DecksPage: React.FC = () => {
       localStorage.setItem('decksPage_heroFilter', heroFilter)
       localStorage.setItem('decksPage_aspectFilter', aspectFilter)
       localStorage.setItem('decksPage_sortBy', sortBy)
-      localStorage.setItem('decksPage_currentPage', currentPage.toString())
     } catch (err) {
       console.error('Error guardando filtros en localStorage:', err)
     }
-  }, [search, heroFilter, aspectFilter, sortBy, currentPage])
+  }, [search, heroFilter, aspectFilter, sortBy])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -276,14 +273,18 @@ const DecksPage: React.FC = () => {
   }
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
+    setCurrentPage(page, { push: true })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Resetear página cuando cambien los filtros
+  // Resetear página cuando cambien los filtros (no al entrar: se respeta ?page=N)
+  const filtersKey = JSON.stringify([search, heroFilter, aspectFilter, sortBy])
+  const prevFiltersKey = useRef(filtersKey)
   useEffect(() => {
+    if (prevFiltersKey.current === filtersKey) return
+    prevFiltersKey.current = filtersKey
     setCurrentPage(1)
-  }, [search, heroFilter, aspectFilter, sortBy])
+  }, [filtersKey, setCurrentPage])
 
   if (loading) {
     return (
