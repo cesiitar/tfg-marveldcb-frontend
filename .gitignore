@@ -96,3 +96,5 @@ DEFENSA_TFG_*.pptx
 DEFENSA_TFG_*.zip
 ~$*
 scripts/
+# TypeScript
+*.tsbuildinfo
