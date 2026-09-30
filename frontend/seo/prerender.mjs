@@ -7,7 +7,8 @@
 // al arrancar (ver #seo-static en index.html), así que la experiencia no cambia.
 //
 // - Rutas: /, /decks, /decks/:id, /cards, /cards/set/:id, /cards/search, /faq, /games-history, /about, /privacy
-// - Además: dist/app.html (shell para rutas privadas y 404), sitemap.xml y llms.txt.
+// - Además: dist/app.html (shell para rutas privadas y 404), sitemap.xml, llms.txt y una
+//   imagen para redes por mazo (dist/og/deck-<id>.png, ver og-image.mjs).
 // - Si el backend no responde, genera lo que pueda y NO rompe el build.
 // - Los títulos y descripciones deben coincidir con los de usePageMeta (src/lib/seo.ts),
 //   y cada <h1> con el que pinta React (los de las páginas fijas salen de page-meta.json).
@@ -258,6 +259,12 @@ for (const d of decks) {
     title: brand(`${d.name} · mazo de ${d.hero_name}`),
     description: `Mazo de Marvel Champions con ${d.hero_name}${d.creator_name ? ` creado por ${d.creator_name}` : ''}: lista de cartas, estadísticas y comentarios en AIForge.`,
     crumbs,
+    // Imagen propia al compartir el mazo (se genera más abajo; si falla, queda la genérica)
+    image: {
+      file: `og/deck-${d.id}.png`,
+      alt: `${d.name}: mazo de ${d.hero_name}${d.aspect ? ` (${cap(d.aspect)})` : ''} en AIForge`,
+      data: { name: d.name, hero: d.hero_name, aspect: d.aspect, cards: totalCards(d), creator: d.creator_name },
+    },
     pageExtra: { mainEntity: { '@id': `${SITE}/decks/${d.id}#deck` } },
     entities: [
       {
@@ -459,6 +466,11 @@ function renderPage(r) {
   html = setMeta(html, 'name', 'description', r.description)
   html = setMeta(html, 'property', 'og:title', r.title)
   html = setMeta(html, 'property', 'og:description', r.description)
+  if (r.image?.ok) {
+    html = setMeta(html, 'property', 'og:image', `${SITE}/${r.image.file}`)
+    html = setMeta(html, 'property', 'og:image:alt', r.image.alt)
+    html = setMeta(html, 'name', 'twitter:image', `${SITE}/${r.image.file}`)
+  }
   const head = [
     `<link rel="canonical" href="${url}" />`,
     `<meta property="og:url" content="${url}" />`,
@@ -467,6 +479,25 @@ function renderPage(r) {
   html = html.replace(/\s*<\/head>/, `\n    ${head.join('\n    ')}\n  </head>`)
   html = html.replace(/\s*<noscript>[\s\S]*?<\/noscript>/, '')
   return html.replace('<div id="root"></div>', `<div id="root">${layout(r.main)}</div>`)
+}
+
+// Imágenes para redes de los mazos. Un fallo aquí no debe romper el build: el generador
+// se importa de forma diferida porque depende de un binario nativo (resvg).
+let images = 0
+const renderDeckImage = await import('./og-image.mjs').then((m) => m.renderDeckImage).catch((err) => {
+  console.warn(`[prerender] aviso: generador de imágenes no disponible (${err.message}); los mazos usan la imagen genérica.`)
+  return null
+})
+for (const r of renderDeckImage ? routes.filter((x) => x.image) : []) {
+  try {
+    const file = path.join(DIST, r.image.file)
+    await mkdir(path.dirname(file), { recursive: true })
+    await writeFile(file, await renderDeckImage(r.image.data))
+    r.image.ok = true
+    images++
+  } catch (err) {
+    console.warn(`[prerender] aviso: no se pudo generar la imagen de ${r.path} (${err.message}); usa la genérica.`)
+  }
 }
 
 for (const r of routes) {
@@ -520,4 +551,4 @@ const llms = `# AIForge
 `
 await writeFile(path.join(DIST, 'llms.txt'), llms)
 
-console.log(`[prerender] ${routes.length} páginas + app.html, sitemap.xml (${routes.length} URLs) y llms.txt`)
+console.log(`[prerender] ${routes.length} páginas + app.html, sitemap.xml (${routes.length} URLs), llms.txt y ${images} imágenes de mazo`)
