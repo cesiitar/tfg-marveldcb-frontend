@@ -6,7 +6,7 @@
     "lead": "Qué es AIForge, cómo funciona su recomendación con inteligencia artificial y quién está detrás.",
     "title": "Sobre AIForge",
     "description": "Qué es AIForge, cómo su modelo de machine learning (SVM) recomienda mazos de Marvel Champions a partir de partidas reales y quién está detrás.",
-    "updated": "2026-09-29",
+    "updated": "2026-09-30",
     "sections": [
       {
         "title": "Qué es AIForge",
@@ -39,7 +39,7 @@
       {
         "title": "Quién está detrás",
         "paragraphs": [
-          "AIForge lo ha diseñado y programado [cesiitar](https://github.com/cesiitar) como Trabajo de Fin de Grado. El código es público para consulta: [frontend](https://github.com/cesiitar/tfg-marveldcb-frontend) (React y TypeScript) y [backend](https://github.com/cesiitar/tfg-marveldcb-backend) (FastAPI, scikit-learn y SQLite).",
+          "AIForge lo ha diseñado y programado **César González** ([cesiitar](https://github.com/cesiitar) en GitHub) como Trabajo de Fin de Grado. El código es público para consulta: [frontend](https://github.com/cesiitar/tfg-marveldcb-frontend) (React y TypeScript) y [backend](https://github.com/cesiitar/tfg-marveldcb-backend) (FastAPI, scikit-learn y SQLite).",
           "Para dudas, errores o sugerencias: aiforge.soporte@gmail.com"
         ]
       },
