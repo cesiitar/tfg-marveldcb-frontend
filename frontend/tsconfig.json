@@ -15,7 +15,6 @@
     "jsx": "react-jsx",
 
     /* Alias (compatible con registros shadcn / Cult UI) */
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
