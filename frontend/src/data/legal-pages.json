@@ -58,7 +58,7 @@
     "lead": "Qué datos guarda AIForge, para qué los usa y cómo puedes pedir que se borren.",
     "title": "Política de privacidad",
     "description": "Qué datos personales guarda AIForge (cuenta de Auth0, mazos, partidas y comentarios), para qué se usan, qué servicios intervienen y cómo ejercer tus derechos.",
-    "updated": "2026-09-29",
+    "updated": "2026-09-30",
     "sections": [
       {
         "title": "Responsable",
@@ -76,7 +76,7 @@
           "**Contenido que creas**: mazos, comentarios, favoritos y partidas registradas (héroe, aspecto, villano, dificultad y resultado)."
         ],
         "after": [
-          "Los mazos, los comentarios y las partidas son públicos y muestran tu nombre de usuario como autor. Tu email no se muestra a otros usuarios."
+          "Los mazos, los comentarios y las partidas son públicos y muestran tu **nombre público** como autor. Puedes cambiarlo cuando quieras en tu perfil; por defecto se genera a partir de tu nombre, sin el apellido completo. Tu nombre completo y tu email no se muestran a otros usuarios."
         ]
       },
       {

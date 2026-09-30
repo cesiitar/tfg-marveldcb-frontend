@@ -257,6 +257,34 @@ class ApiService {
   }
 
   // Método para obtener los mazos del usuario
+  /** Nombre público del usuario: el que ven los demás en mazos, comentarios y partidas. */
+  async getDisplayName(auth0Id: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      headers: { 'X-Auth0-ID': auth0Id },
+    })
+    if (!response.ok) {
+      throw new Error('Error al obtener el perfil del usuario')
+    }
+    const data = await response.json()
+    return data.display_name || ''
+  }
+
+  async updateDisplayName(auth0Id: string, displayName: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth0-ID': auth0Id,
+      },
+      body: JSON.stringify({ display_name: displayName }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(typeof data.detail === 'string' ? data.detail : 'No se pudo guardar el nombre público')
+    }
+    return data.display_name
+  }
+
   async getUserDecks(auth0Id: string): Promise<Deck[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/user/decks`, {

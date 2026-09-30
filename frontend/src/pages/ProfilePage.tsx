@@ -12,6 +12,7 @@ import {
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { usePageMeta } from '../lib/seo'
+import { useToast } from '../components/Toast'
 
 const ProfilePage: React.FC = () => {
   usePageMeta({ title: 'Mi perfil', noindex: true })
@@ -19,6 +20,27 @@ const ProfilePage: React.FC = () => {
   const [deckCount, setDeckCount] = useState<number>(0)
   const [loading, setLoading] = useState(false)
   const [, setError] = useState<string | null>(null)
+  const { showToast, ToastContainer } = useToast()
+  // Nombre público: lo que ven los demás en mazos, comentarios y partidas
+  const [displayName, setDisplayName] = useState('')
+  const [savedDisplayName, setSavedDisplayName] = useState('')
+  const [savingName, setSavingName] = useState(false)
+
+  const handleSaveDisplayName = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user?.sub) return
+    setSavingName(true)
+    try {
+      const saved = await apiService.updateDisplayName(user.sub, displayName)
+      setDisplayName(saved)
+      setSavedDisplayName(saved)
+      showToast('Nombre público actualizado', 'success')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'No se pudo guardar el nombre público', 'error')
+    } finally {
+      setSavingName(false)
+    }
+  }
 
   // Cargar estadísticas del usuario
   const loadUserStats = async () => {
@@ -60,6 +82,17 @@ const ProfilePage: React.FC = () => {
       loadUserStats()
     }
   }, [isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.sub) return
+    apiService
+      .getDisplayName(user.sub)
+      .then((name) => {
+        setDisplayName(name)
+        setSavedDisplayName(name)
+      })
+      .catch((err) => console.error('Error cargando el nombre público:', err))
+  }, [isAuthenticated, user?.sub])
 
   if (!isAuthenticated) {
     return (
@@ -128,6 +161,40 @@ const ProfilePage: React.FC = () => {
                 </span>
               </div>
             </div>
+
+            {/* Nombre público */}
+            <form onSubmit={handleSaveDisplayName} className="pt-4 border-t border-gray-200 space-y-2">
+              <label htmlFor="display-name" className="block font-medium text-gray-700">
+                Nombre público
+              </label>
+              <p className="text-sm text-gray-500">
+                Es el nombre que ven los demás en tus mazos, comentarios y partidas. Tu nombre completo y tu email no se muestran.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  id="display-name"
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  minLength={3}
+                  maxLength={30}
+                  required
+                  autoComplete="nickname"
+                  placeholder="Ej: Valkiria_07"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                />
+                <button
+                  type="submit"
+                  disabled={savingName || displayName.trim().length < 3 || displayName.trim() === savedDisplayName}
+                  className="btn btn-primary shrink-0"
+                >
+                  {savingName ? 'Guardando…' : 'Guardar'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                De 3 a 30 caracteres: letras, números, espacios, puntos y guiones.
+              </p>
+            </form>
           </div>
 
           {/* Estadísticas */}
@@ -153,6 +220,8 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   )
 }
