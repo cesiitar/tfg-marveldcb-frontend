@@ -226,7 +226,7 @@ const GamesHistoryPage: React.FC = () => {
       <PageHeader>
         <PageHeaderContent>
           <PageHeaderEyebrow>Partidas</PageHeaderEyebrow>
-          <PageHeaderTitle>Historial de Partidas</PageHeaderTitle>
+          <PageHeaderTitle>{pageMeta.gamesHistory.heading}</PageHeaderTitle>
           <PageHeaderDescription>
             {isAuthenticated && filterMyGames ? 'Tus partidas jugadas' : 'Registro de todas las partidas jugadas'}
           </PageHeaderDescription>

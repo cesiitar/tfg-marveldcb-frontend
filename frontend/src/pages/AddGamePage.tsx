@@ -157,8 +157,16 @@ const AddGamePage: React.FC = () => {
                 {filteredDecks.map(deck => (
                   <div
                     key={deck.id}
-                    className="group deck-card cursor-pointer flex flex-col"
+                    role="button"
+                    tabIndex={0}
+                    className="group deck-card cursor-pointer flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
                     onClick={() => handleSelectDeck(deck)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleSelectDeck(deck)
+                      }
+                    }}
                   >
                     {/* Header */}
                     <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">

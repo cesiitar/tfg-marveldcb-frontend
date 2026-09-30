@@ -15,7 +15,7 @@ import {
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
 import { CardsIcon, CaretDownIcon, CaretLeftIcon, CaretRightIcon, ChartBarIcon, FunnelIcon, MagnifyingGlassIcon, SmileySadIcon } from '@phosphor-icons/react'
-import { usePageMeta } from '../lib/seo'
+import { usePageMeta, SERVED_FROM_FALLBACK } from '../lib/seo'
 import { usePageParam } from '../lib/use-page-param'
 
 const SetCardsPage: React.FC = () => {
@@ -23,7 +23,7 @@ const SetCardsPage: React.FC = () => {
   const navigate = useNavigate()
   
   const [set, setSet] = useState<CardSet | null>(null)
-  usePageMeta({ title: set ? `Cartas del set ${set.name}` : 'Cartas del set', description: set ? `Todas las cartas del set ${set.name} de Marvel Champions, con estadísticas por tipo, aspecto y coste.` : undefined, canonical: !!set })
+  usePageMeta({ title: set ? `Cartas del set ${set.name}` : 'Cartas del set', description: set ? `Todas las cartas del set ${set.name} de Marvel Champions, con estadísticas por tipo, aspecto y coste.` : undefined, canonical: !!set, noindex: SERVED_FROM_FALLBACK && !set })
   const [cards, setCards] = useState<Card[]>([])
   const [isLoading, setIsLoading] = useState(false)
   
@@ -208,7 +208,11 @@ const SetCardsPage: React.FC = () => {
         <PageHeader className="mb-8">
           <PageHeaderContent>
             <PageHeaderEyebrow>Set de cartas</PageHeaderEyebrow>
-            <PageHeaderTitle>{set.name}</PageHeaderTitle>
+            <PageHeaderTitle>
+              {/* El prefijo solo lo leen buscadores y lectores de pantalla; a la vista ya lo dice la etiqueta superior */}
+              <span className="sr-only">Cartas del set </span>
+              {set.name}
+            </PageHeaderTitle>
             <PageHeaderDescription>
               <AnimatedNumber value={set.cardCount} className="font-semibold text-white" /> cartas disponibles
             </PageHeaderDescription>

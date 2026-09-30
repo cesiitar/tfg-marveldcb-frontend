@@ -111,7 +111,7 @@ const CardsPage: React.FC = () => {
       <PageHeader>
         <PageHeaderContent>
           <PageHeaderEyebrow>Catálogo</PageHeaderEyebrow>
-          <PageHeaderTitle>Cartas</PageHeaderTitle>
+          <PageHeaderTitle>{pageMeta.cards.heading}</PageHeaderTitle>
           <PageHeaderDescription>
             Explora y construye mazos con inteligencia artificial
           </PageHeaderDescription>

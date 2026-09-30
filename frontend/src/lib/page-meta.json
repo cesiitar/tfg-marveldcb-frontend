@@ -1,26 +1,32 @@
 {
   "home": {
-    "description": "Crea y optimiza mazos de Marvel Champions con inteligencia artificial: constructor de mazos, recomendaciones por villano y registro de partidas. Gratis."
+    "description": "Crea y optimiza mazos de Marvel Champions con inteligencia artificial: constructor de mazos, recomendaciones por villano y registro de partidas. Gratis.",
+    "heading": "Forja mazos que ganan partidas."
   },
   "decks": {
     "title": "Mazos públicos de Marvel Champions",
-    "description": "Explora los mazos de Marvel Champions creados por la comunidad de AIForge. Filtra por héroe y aspecto, ordena por popularidad y guarda tus favoritos."
+    "description": "Explora los mazos de Marvel Champions creados por la comunidad de AIForge. Filtra por héroe y aspecto, ordena por popularidad y guarda tus favoritos.",
+    "heading": "Mazos de Marvel Champions"
   },
   "cards": {
     "title": "Cartas de Marvel Champions por set",
-    "description": "Catálogo de cartas de Marvel Champions organizado por set y expansión: héroes, aspectos, cartas básicas y encuentros."
+    "description": "Catálogo de cartas de Marvel Champions organizado por set y expansión: héroes, aspectos, cartas básicas y encuentros.",
+    "heading": "Cartas de Marvel Champions"
   },
   "cardSearch": {
     "title": "Buscador de cartas de Marvel Champions",
-    "description": "Busca cartas de Marvel Champions por nombre, tipo, aspecto, coste y set, con filtros combinables."
+    "description": "Busca cartas de Marvel Champions por nombre, tipo, aspecto, coste y set, con filtros combinables.",
+    "heading": "Búsqueda de Cartas"
   },
   "gamesHistory": {
     "title": "Historial de partidas",
-    "description": "Historial de partidas de Marvel Champions registradas en AIForge: villanos, dificultad, héroes y resultados de victoria o derrota."
+    "description": "Historial de partidas de Marvel Champions registradas en AIForge: villanos, dificultad, héroes y resultados de victoria o derrota.",
+    "heading": "Historial de Partidas"
   },
   "faq": {
     "title": "Preguntas frecuentes",
     "description": "Respuestas sobre AIForge: cómo crear mazos de Marvel Champions, cómo funciona la recomendación con IA, reglas de construcción y registro de partidas.",
-    "reviewed": "2026-09-30"
+    "reviewed": "2026-09-30",
+    "heading": "Preguntas Frecuentes"
   }
 }

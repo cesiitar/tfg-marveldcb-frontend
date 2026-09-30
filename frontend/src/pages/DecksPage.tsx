@@ -323,7 +323,7 @@ const DecksPage: React.FC = () => {
       <PageHeader>
         <PageHeaderContent>
           <PageHeaderEyebrow>Comunidad</PageHeaderEyebrow>
-          <PageHeaderTitle>Decklists Públicos</PageHeaderTitle>
+          <PageHeaderTitle>{pageMeta.decks.heading}</PageHeaderTitle>
           <PageHeaderDescription>
             Explora los mazos públicos creados por la comunidad
           </PageHeaderDescription>

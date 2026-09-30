@@ -9,11 +9,13 @@
 // - Rutas: /, /decks, /decks/:id, /cards, /cards/set/:id, /cards/search, /faq, /games-history, /about, /privacy
 // - Además: dist/app.html (shell para rutas privadas y 404), sitemap.xml y llms.txt.
 // - Si el backend no responde, genera lo que pueda y NO rompe el build.
-// - Los títulos y descripciones deben coincidir con los de usePageMeta (src/lib/seo.ts).
+// - Los títulos y descripciones deben coincidir con los de usePageMeta (src/lib/seo.ts),
+//   y cada <h1> con el que pinta React (los de las páginas fijas salen de page-meta.json).
 import { existsSync } from 'node:fs'
 import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { renderMarkdown, plainText } from '../src/lib/markdown-lite.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -55,7 +57,6 @@ const isoDay = (iso) => {
   const d = iso ? new Date(iso) : null
   return d && !isNaN(d) ? d.toISOString().slice(0, 10) : null
 }
-const cleanDescription = (text) => (text || '').replace(/\[([^\]]+?)\]\(\/card\/\d+\)/g, '$1').trim()
 const totalCards = (deck) => (deck.cards || []).reduce((n, c) => n + (c.quantity || 1), 0)
 
 const TYPE_LABELS = {
@@ -120,10 +121,38 @@ console.log(`[prerender] datos: ${sets.length} sets, ${decks.length} mazos, ${ga
 
 // ---------------------------------------------------------------- piezas comunes
 
-const crumbs = (items) => ({
-  '@type': 'BreadcrumbList',
-  itemListElement: items.map(([name, url], i) => ({ '@type': 'ListItem', position: i + 1, name, item: SITE + url })),
-})
+// Miga visible: los mismos nombres y el mismo orden que el BreadcrumbList del JSON-LD.
+const crumbTrail = (items) =>
+  `<p>${items.map(([name, url], i) => (i === items.length - 1 ? esc(name) : `<a href="${url}">${esc(name)}</a>`)).join(' › ')}</p>`
+
+const WEBSITE = { '@id': `${SITE}/#website` }
+const GAME = { '@id': `${SITE}/#game` }
+
+// Un único @graph por página: nodo de página + miga + entidades, enlazados por @id.
+// El grafo del sitio (Organization, WebSite, WebApplication, Game) ya va en index.html.
+function pageGraph(r) {
+  const url = SITE + r.path
+  const graph = [
+    {
+      '@type': r.pageType || 'WebPage',
+      '@id': `${url}#webpage`,
+      url,
+      name: r.pageName || r.title,
+      inLanguage: 'es',
+      isPartOf: WEBSITE,
+      ...(r.crumbs ? { breadcrumb: { '@id': `${url}#breadcrumb` } } : {}),
+      ...(r.pageExtra || {}),
+    },
+  ]
+  if (r.crumbs) {
+    graph.push({
+      '@type': 'BreadcrumbList',
+      '@id': `${url}#breadcrumb`,
+      itemListElement: r.crumbs.map(([name, href], i) => ({ '@type': 'ListItem', position: i + 1, name, item: SITE + href })),
+    })
+  }
+  return { '@context': 'https://schema.org', '@graph': [...graph, ...(r.entities || [])] }
+}
 
 const NAV = [
   ['/', 'Inicio'], ['/decks', 'Mazos públicos'], ['/cards', 'Cartas por set'],
@@ -165,7 +194,10 @@ routes.push({
   path: '/',
   title: DEFAULT_TITLE,
   description: pageMeta.home.description,
-  main: `<h1>AIForge: mazos de Marvel Champions con inteligencia artificial</h1>
+  pageName: DEFAULT_TITLE,
+  pageExtra: { about: { '@id': `${SITE}/#organization` }, mainEntity: { '@id': `${SITE}/#webapp` } },
+  main: `<p>Constructor de mazos · Marvel Champions</p>
+<h1>${pageMeta.home.heading}</h1>
 <p>AIForge es una plataforma web gratuita para crear y optimizar mazos de Marvel Champions: The Card Game usando inteligencia artificial. Permite crear mazos personalizados, explorar todas las cartas disponibles, registrar tus partidas, generar mazos optimizados con IA para cada villano y compartir tus creaciones con la comunidad.</p>
 <h2>Qué puedes hacer</h2>
 <ul>
@@ -197,21 +229,17 @@ routes.push({
   path: '/decks',
   title: brand(`${pageMeta.decks.title}`),
   description: pageMeta.decks.description,
-  jsonld: [
-    {
-      '@type': 'CollectionPage',
-      name: pageMeta.decks.title,
-      url: `${SITE}/decks`,
-      isPartOf: { '@id': `${SITE}/#website` },
-      mainEntity: {
-        '@type': 'ItemList',
-        numberOfItems: decks.length,
-        itemListElement: decks.map((d, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/decks/${d.id}`, name: d.name })),
-      },
+  pageType: 'CollectionPage',
+  pageName: pageMeta.decks.title,
+  crumbs: [['Inicio', '/'], ['Mazos', '/decks']],
+  pageExtra: {
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: decks.length,
+      itemListElement: decks.map((d, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/decks/${d.id}`, name: d.name })),
     },
-    crumbs([['Inicio', '/'], ['Mazos', '/decks']]),
-  ],
-  main: `<h1>${pageMeta.decks.title}</h1>
+  },
+  main: `<h1>${pageMeta.decks.heading}</h1>
 <p>Mazos de Marvel Champions creados y compartidos por la comunidad de AIForge.${decks.length ? ` Actualmente hay ${decks.length} mazos públicos.` : ''} Todos los mazos son públicos: puedes verlos, añadirlos a favoritos y usarlos como inspiración.</p>
 ${decks.length ? `<ul>${decks.map(deckLine).join('\n')}</ul>` : ''}`,
 })
@@ -220,33 +248,39 @@ ${decks.length ? `<ul>${decks.map(deckLine).join('\n')}</ul>` : ''}`,
 for (const d of decks) {
   const byType = {}
   for (const c of d.cards || []) (byType[c.type || 'otros'] ||= []).push(c)
-  const description = cleanDescription(d.description)
+  const hasDescription = Boolean(d.description && d.description.trim())
+  const crumbs = [['Inicio', '/'], ['Mazos', '/decks'], [d.name, `/decks/${d.id}`]]
+  const created = isoDay(d.created_at)
+  const modified = isoDay(d.updated_at || d.created_at)
   const sameHero = decks.filter((o) => o.id !== d.id && o.hero_name === d.hero_name)
   routes.push({
     path: `/decks/${d.id}`,
     title: brand(`${d.name} · mazo de ${d.hero_name}`),
     description: `Mazo de Marvel Champions con ${d.hero_name}${d.creator_name ? ` creado por ${d.creator_name}` : ''}: lista de cartas, estadísticas y comentarios en AIForge.`,
-    jsonld: [
+    crumbs,
+    pageExtra: { mainEntity: { '@id': `${SITE}/decks/${d.id}#deck` } },
+    entities: [
       {
         '@type': 'CreativeWork',
+        '@id': `${SITE}/decks/${d.id}#deck`,
         name: d.name,
         url: `${SITE}/decks/${d.id}`,
         genre: 'Mazo de Marvel Champions',
-        inLanguage: 'es',
-        ...(description ? { description } : {}),
+        // Resumen en texto plano: la descripción completa (Markdown del usuario) va en el HTML.
+        ...(hasDescription ? { description: plainText(d.description) } : {}),
         ...(d.creator_name ? { author: { '@type': 'Person', name: d.creator_name } } : {}),
-        ...(isoDay(d.created_at) ? { dateCreated: isoDay(d.created_at) } : {}),
-        ...(isoDay(d.updated_at || d.created_at) ? { dateModified: isoDay(d.updated_at || d.created_at) } : {}),
+        ...(created ? { dateCreated: created } : {}),
+        ...(modified ? { dateModified: modified } : {}),
         keywords: [d.hero_name, d.aspect && cap(d.aspect), 'Marvel Champions'].filter(Boolean).join(', '),
-        about: { '@type': 'Game', name: 'Marvel Champions: The Card Game' },
-        isPartOf: { '@id': `${SITE}/#website` },
+        about: GAME,
+        mainEntityOfPage: { '@id': `${SITE}/decks/${d.id}#webpage` },
+        isPartOf: WEBSITE,
       },
-      crumbs([['Inicio', '/'], ['Mazos', '/decks'], [d.name, `/decks/${d.id}`]]),
     ],
-    main: `<p><a href="/decks">Mazos públicos</a> › ${esc(d.name)}</p>
+    main: `${crumbTrail(crumbs)}
 <h1>${esc(d.name)}</h1>
-<p>Mazo de Marvel Champions para <strong>${esc(d.hero_name)}</strong>${d.aspect ? ` con el aspecto <strong>${esc(cap(d.aspect))}</strong>` : ''}, creado por ${esc(d.creator_name || 'un usuario anónimo')}${d.created_at ? ` el ${fmtDate(d.created_at)}` : ''}. Contiene ${totalCards(d)} cartas en total.</p>
-${description ? `<h2>Descripción</h2>\n<p>${esc(description)}</p>` : ''}
+<p>Mazo de Marvel Champions para <strong>${esc(d.hero_name)}</strong>${d.aspect ? ` con el aspecto <strong>${esc(cap(d.aspect))}</strong>` : ''}, creado por ${esc(d.creator_name || 'un usuario anónimo')}${created ? ` el <time datetime="${created}">${fmtDate(d.created_at)}</time>` : ''}${modified && modified !== created ? ` y actualizado el <time datetime="${modified}">${fmtDate(d.updated_at)}</time>` : ''}. Contiene ${totalCards(d)} cartas en total.</p>
+${hasDescription ? `<h2>Descripción</h2>\n${renderMarkdown(d.description)}` : ''}
 <h2>Lista de cartas</h2>
 ${Object.entries(byType)
   .map(([type, cards]) => `<h3>${esc(TYPE_LABELS[type] || cap(type))}</h3>
@@ -262,21 +296,18 @@ routes.push({
   path: '/cards',
   title: brand(`${pageMeta.cards.title}`),
   description: pageMeta.cards.description,
-  jsonld: [
-    {
-      '@type': 'CollectionPage',
-      name: pageMeta.cards.title,
-      url: `${SITE}/cards`,
-      isPartOf: { '@id': `${SITE}/#website` },
-      mainEntity: {
-        '@type': 'ItemList',
-        numberOfItems: sets.length,
-        itemListElement: sets.map((s, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/cards/set/${s.id}`, name: s.name })),
-      },
+  pageType: 'CollectionPage',
+  pageName: pageMeta.cards.title,
+  crumbs: [['Inicio', '/'], ['Cartas', '/cards']],
+  pageExtra: {
+    about: GAME,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: sets.length,
+      itemListElement: sets.map((s, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/cards/set/${s.id}`, name: s.name })),
     },
-    crumbs([['Inicio', '/'], ['Cartas', '/cards']]),
-  ],
-  main: `<h1>${pageMeta.cards.title}</h1>
+  },
+  main: `<h1>${pageMeta.cards.heading}</h1>
 <p>Catálogo de cartas de Marvel Champions: The Card Game organizado por set y expansión${sets.length ? `: ${totalSetCards} cartas en ${sets.length} sets` : ''}. Entra en cada set para ver sus cartas con tipo, aspecto y coste.</p>
 ${sets.length ? `<ul>${sets.map((s) => `<li><a href="/cards/set/${s.id}">${esc(s.name)}</a> (${s.cardCount} cartas)</li>`).join('\n')}</ul>` : ''}
 <p>¿Buscas una carta concreta? Usa el <a href="/cards/search">buscador de cartas</a>.</p>`,
@@ -286,16 +317,25 @@ ${sets.length ? `<ul>${sets.map((s) => `<li><a href="/cards/set/${s.id}">${esc(s
 sets.forEach((s, i) => {
   const cards = setCards[i]
   if (!cards) return
+  const setCrumbs = [['Inicio', '/'], ['Cartas', '/cards'], [s.name, `/cards/set/${s.id}`]]
   routes.push({
     path: `/cards/set/${s.id}`,
     title: brand(`Cartas del set ${s.name}`),
     description: `Todas las cartas del set ${s.name} de Marvel Champions, con estadísticas por tipo, aspecto y coste.`,
-    jsonld: [
-      { '@type': 'CollectionPage', name: `Cartas del set ${s.name}`, url: `${SITE}/cards/set/${s.id}`, isPartOf: { '@id': `${SITE}/#website` } },
-      crumbs([['Inicio', '/'], ['Cartas', '/cards'], [s.name, `/cards/set/${s.id}`]]),
-    ],
-    main: `<p><a href="/cards">Cartas por set</a> › ${esc(s.name)}</p>
-<h1>${esc(s.name)}</h1>
+    pageType: 'CollectionPage',
+    pageName: `Cartas del set ${s.name}`,
+    crumbs: setCrumbs,
+    pageExtra: {
+      about: GAME,
+      mainEntity: {
+        '@type': 'ItemList',
+        name: `Cartas del set ${s.name}`,
+        numberOfItems: cards.length,
+        itemListElement: cards.map((c, n) => ({ '@type': 'ListItem', position: n + 1, name: c.name })),
+      },
+    },
+    main: `${crumbTrail(setCrumbs)}
+<h1>Cartas del set ${esc(s.name)}</h1>
 <p>El set <strong>${esc(s.name)}</strong> de Marvel Champions: The Card Game incluye ${cards.length} cartas. Listado completo con tipo, aspecto y coste.</p>
 <table>
   <thead><tr><th scope="col">Carta</th><th scope="col">Tipo</th><th scope="col">Aspecto</th><th scope="col">Coste</th></tr></thead>
@@ -311,8 +351,9 @@ routes.push({
   path: '/cards/search',
   title: brand(`${pageMeta.cardSearch.title}`),
   description: pageMeta.cardSearch.description,
-  jsonld: [crumbs([['Inicio', '/'], ['Cartas', '/cards'], ['Buscador', '/cards/search']])],
-  main: `<h1>${pageMeta.cardSearch.title}</h1>
+  pageName: pageMeta.cardSearch.title,
+  crumbs: [['Inicio', '/'], ['Cartas', '/cards'], ['Buscador', '/cards/search']],
+  main: `<h1>${pageMeta.cardSearch.heading}</h1>
 <p>Busca cualquier carta de Marvel Champions: The Card Game${totalSetCards ? ` entre las ${totalSetCards} del catálogo` : ''} combinando filtros. Los resultados muestran cada carta con su tipo, aspecto, coste y set.</p>
 <h2>Filtros disponibles</h2>
 <ul>
@@ -333,8 +374,9 @@ routes.push({
   path: '/games-history',
   title: brand(`${pageMeta.gamesHistory.title}`),
   description: pageMeta.gamesHistory.description,
-  jsonld: [crumbs([['Inicio', '/'], ['Historial de partidas', '/games-history']])],
-  main: `<h1>Historial de partidas de Marvel Champions</h1>
+  pageName: pageMeta.gamesHistory.title,
+  crumbs: [['Inicio', '/'], ['Historial de partidas', '/games-history']],
+  main: `<h1>${pageMeta.gamesHistory.heading}</h1>
 <p>Partidas registradas por los jugadores de AIForge.${games.length ? ` En total hay ${games.length} partidas, con ${wins} victorias (${Math.round((wins / games.length) * 100)} %).` : ''} Estos resultados alimentan la recomendación de mazos con inteligencia artificial.</p>
 ${recentGames.length ? `<h2>Últimas partidas</h2>
 <table>
@@ -350,14 +392,14 @@ routes.push({
   path: '/faq',
   title: brand(`${pageMeta.faq.title}`),
   description: pageMeta.faq.description,
-  jsonld: [
-    {
-      '@type': 'FAQPage',
-      mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })),
-    },
-    crumbs([['Inicio', '/'], ['Preguntas frecuentes', '/faq']]),
-  ],
-  main: `<h1>Preguntas frecuentes sobre AIForge</h1>
+  pageType: 'FAQPage',
+  pageName: pageMeta.faq.title,
+  crumbs: [['Inicio', '/'], ['Preguntas frecuentes', '/faq']],
+  pageExtra: {
+    dateModified: pageMeta.faq.reviewed,
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })),
+  },
+  main: `<h1>${pageMeta.faq.heading}</h1>
 ${faqs.map((f) => `<h2>${esc(f.question)}</h2>\n<p>${esc(f.answer)}</p>`).join('\n')}
 <p>Última revisión: <time datetime="${pageMeta.faq.reviewed}">${fmtDate(pageMeta.faq.reviewed)}</time>. Más detalles sobre el modelo de IA en <a href="/about">Sobre AIForge</a>.</p>`,
 })
@@ -368,18 +410,13 @@ for (const [key, pg] of Object.entries(infoPages)) {
     path: pg.path,
     title: brand(`${pg.title}`),
     description: pg.description,
-    jsonld: [
-      {
-        '@type': key === 'about' ? 'AboutPage' : 'WebPage',
-        name: pg.heading,
-        url: SITE + pg.path,
-        dateModified: pg.updated,
-        inLanguage: 'es',
-        isPartOf: { '@id': `${SITE}/#website` },
-        ...(key === 'about' ? { about: { '@id': `${SITE}/#organization` } } : {}),
-      },
-      crumbs([['Inicio', '/'], [pg.heading, pg.path]]),
-    ],
+    pageType: key === 'about' ? 'AboutPage' : 'WebPage',
+    pageName: pg.heading,
+    crumbs: [['Inicio', '/'], [pg.heading, pg.path]],
+    pageExtra: {
+      dateModified: pg.updated,
+      ...(key === 'about' ? { about: { '@id': `${SITE}/#organization` }, author: { '@id': `${SITE}/#founder` } } : {}),
+    },
     main: `<h1>${esc(pg.heading)}</h1>
 <p>${esc(pg.lead)}</p>
 ${pg.sections
@@ -404,6 +441,13 @@ if (!existsSync(SHELL)) await copyFile(path.join(DIST, 'index.html'), SHELL)
 // es el mismo shell, y React muestra la página "no encontrada" con noindex.
 await copyFile(SHELL, path.join(DIST, '404.html'))
 const template = await readFile(SHELL, 'utf8')
+// Shell para /decks/:id y /cards/set/:id cuando no hay página prerenderizada (contenido
+// creado después del build, o un id que no existe). Lleva noindex; React lo quita solo
+// cuando el mazo o el set carga de verdad (SERVED_FROM_FALLBACK en src/lib/seo.ts).
+await writeFile(
+  path.join(DIST, 'app-dynamic.html'),
+  template.replace('<title>', '<meta name="robots" content="noindex" data-fallback />\n    <title>')
+)
 if (!template.includes('<div id="root"></div>')) throw new Error('[prerender] el index.html de Vite no tiene <div id="root"></div>')
 
 const setMeta = (html, attr, key, value) =>
@@ -418,9 +462,7 @@ function renderPage(r) {
   const head = [
     `<link rel="canonical" href="${url}" />`,
     `<meta property="og:url" content="${url}" />`,
-    ...(r.jsonld || []).map(
-      (j) => `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', ...j }).replace(/</g, '\\u003c')}</script>`
-    ),
+    `<script type="application/ld+json">${JSON.stringify(pageGraph(r)).replace(/</g, '\\u003c')}</script>`,
   ]
   html = html.replace(/\s*<\/head>/, `\n    ${head.join('\n    ')}\n  </head>`)
   html = html.replace(/\s*<noscript>[\s\S]*?<\/noscript>/, '')

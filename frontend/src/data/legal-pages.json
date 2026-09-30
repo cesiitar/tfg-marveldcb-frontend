@@ -4,7 +4,7 @@
     "eyebrow": "Proyecto",
     "heading": "Sobre AIForge",
     "lead": "Qué es AIForge, cómo funciona su recomendación con inteligencia artificial y quién está detrás.",
-    "title": "Sobre AIForge",
+    "title": "Sobre AIForge: quién lo hace y cómo funciona su IA",
     "description": "Qué es AIForge, cómo su modelo de machine learning (SVM) recomienda mazos de Marvel Champions a partir de partidas reales y quién está detrás.",
     "updated": "2026-09-30",
     "sections": [
@@ -12,13 +12,13 @@
         "title": "Qué es AIForge",
         "paragraphs": [
           "AIForge es una plataforma web gratuita para crear, compartir y optimizar mazos de **Marvel Champions: The Card Game** usando inteligencia artificial. Permite construir mazos carta a carta o importarlos desde MarvelCDB, explorar el catálogo completo de cartas, registrar partidas y pedir a la IA un mazo pensado para un villano y una dificultad concretos.",
-          "Nació como Trabajo de Fin de Grado (TFG) y sigue en marcha como proyecto personal, sin publicidad ni suscripciones."
+          "AIForge nació como Trabajo de Fin de Grado (TFG) y sigue en marcha como proyecto personal, sin publicidad ni suscripciones."
         ]
       },
       {
         "title": "Cómo funciona la recomendación con IA",
         "paragraphs": [
-          "El núcleo de AIForge es un modelo de **máquina de vectores de soporte (SVM)** de scikit-learn que estima la probabilidad de victoria de un mazo contra un villano. Usa 9 características generales:"
+          "El núcleo de AIForge es un modelo de **máquina de vectores de soporte (SVM)** de [scikit-learn](https://scikit-learn.org/stable/modules/svm.html) que estima la probabilidad de victoria de un mazo contra un villano. Usa 9 características generales:"
         ],
         "items": [
           "Héroe, aspecto, villano y dificultad de la partida.",

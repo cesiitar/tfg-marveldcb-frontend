@@ -42,7 +42,7 @@
           },
           "email": "aiforge.soporte@gmail.com",
           "description": "Plataforma gratuita para crear mazos de Marvel Champions con inteligencia artificial. Trabajo de Fin de Grado, proyecto fan sin ánimo de lucro.",
-          "founder": { "@type": "Person", "name": "César González", "alternateName": "cesiitar", "url": "https://github.com/cesiitar", "sameAs": ["https://github.com/cesiitar"] },
+          "founder": { "@type": "Person", "@id": "https://aiforgedecks.com/#founder", "name": "César González", "alternateName": "cesiitar", "url": "https://github.com/cesiitar", "sameAs": ["https://github.com/cesiitar"] },
           "sameAs": ["https://github.com/cesiitar/tfg-marveldcb-frontend", "https://github.com/cesiitar/tfg-marveldcb-backend"],
           "contactPoint": {
             "@type": "ContactPoint",
@@ -66,7 +66,7 @@
           "name": "AIForge",
           "url": "https://aiforgedecks.com/",
           "description": "Crea mazos de Marvel Champions, registra tus partidas y recibe recomendaciones generadas con inteligencia artificial.",
-          "applicationCategory": "GameApplication",
+          "applicationCategory": "UtilitiesApplication",
           "operatingSystem": "Web",
           "browserRequirements": "Requiere JavaScript",
           "inLanguage": "es",
@@ -78,9 +78,15 @@
             "Registro y análisis de partidas",
             "Mazos públicos de la comunidad y favoritos"
           ],
-          "about": { "@type": "Game", "name": "Marvel Champions: The Card Game" },
+          "about": { "@id": "https://aiforgedecks.com/#game" },
           "isPartOf": { "@id": "https://aiforgedecks.com/#website" },
           "publisher": { "@id": "https://aiforgedecks.com/#organization" }
+        },
+        {
+          "@type": "Game",
+          "@id": "https://aiforgedecks.com/#game",
+          "name": "Marvel Champions: The Card Game",
+          "sameAs": ["https://en.wikipedia.org/wiki/Marvel_Champions:_The_Card_Game"]
         }
       ]
     }

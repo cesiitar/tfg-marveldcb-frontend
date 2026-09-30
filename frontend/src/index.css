@@ -185,6 +185,34 @@
     @apply bg-ink-900 text-white ring-ink-900 hover:bg-ink-900 hover:text-white;
   }
 
+  /* Descripción de un mazo (Markdown de usuario ya convertido a HTML) */
+  .deck-prose {
+    @apply text-ink-700 leading-relaxed break-words;
+  }
+  .deck-prose > * + * {
+    @apply mt-3;
+  }
+  .deck-prose h3 {
+    @apply text-base font-semibold text-ink-900 mt-5;
+  }
+  .deck-prose h4,
+  .deck-prose h5,
+  .deck-prose h6 {
+    @apply text-sm font-semibold text-ink-800 mt-4;
+  }
+  .deck-prose ul {
+    @apply list-disc pl-5 space-y-1 marker:text-brand-600;
+  }
+  .deck-prose ol {
+    @apply list-decimal pl-5 space-y-1;
+  }
+  .deck-prose strong {
+    @apply font-semibold text-ink-900;
+  }
+  .deck-prose a {
+    @apply text-brand-700 underline underline-offset-2 hover:text-brand-800;
+  }
+
   /* Tarjeta de mazo/set común a todas las páginas */
   .deck-card {
     @apply bg-white rounded-xl border border-ink-900/[0.08] overflow-hidden shadow-sm;

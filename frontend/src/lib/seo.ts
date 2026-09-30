@@ -12,6 +12,16 @@ const DEFAULT_TITLE = 'AIForge: mazos de Marvel Champions con IA'
 const DEFAULT_DESCRIPTION =
   'AIForge: crea, comparte y analiza mazos de Marvel Champions con ayuda de inteligencia artificial.'
 
+/**
+ * true si esta carga vino del shell de reserva de /decks/:id o /cards/set/:id
+ * (dist/app-dynamic.html, que trae <meta name="robots" content="noindex" data-fallback>):
+ * la URL no tiene página prerenderizada, así que o es contenido nuevo o no existe.
+ * Esas páginas mantienen el noindex hasta que el dato carga de verdad.
+ * Se evalúa una sola vez al arrancar, antes de que ningún efecto toque el <head>.
+ */
+export const SERVED_FROM_FALLBACK =
+  typeof document !== 'undefined' && document.head.querySelector('meta[name="robots"][data-fallback]') !== null
+
 export interface PageMeta {
   /** Título de la página, sin la marca (se añade " | AIForge"). Omitir en la home. */
   title?: string

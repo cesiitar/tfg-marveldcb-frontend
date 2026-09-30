@@ -8,14 +8,15 @@ import { getClassColor } from '../utils/classColors'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { ArrowLeftIcon, CardsIcon, ChartBarIcon, ChatCircleDotsIcon, FileTextIcon, HeartIcon, PaperPlaneTiltIcon, PencilSimpleIcon, TrashIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
-import { usePageMeta } from '../lib/seo'
+import { usePageMeta, SERVED_FROM_FALLBACK } from '../lib/seo'
+import { renderMarkdown } from '../lib/markdown-lite'
 
 const DeckDetailPage: React.FC = () => {
   const { id } = useParams()
   const { user, isAuthenticated } = useAuth0()
   const { showToast, ToastContainer } = useToast()
   const [deck, setDeck] = useState<Deck | null>(null)
-  usePageMeta({ title: deck ? `${deck.name} · mazo de ${deck.hero_name}` : 'Mazo', description: deck ? `Mazo de Marvel Champions con ${deck.hero_name}${deck.creator_name ? ` creado por ${deck.creator_name}` : ''}: lista de cartas, estadísticas y comentarios en AIForge.` : undefined, canonical: !!deck })
+  usePageMeta({ title: deck ? `${deck.name} · mazo de ${deck.hero_name}` : 'Mazo', description: deck ? `Mazo de Marvel Champions con ${deck.hero_name}${deck.creator_name ? ` creado por ${deck.creator_name}` : ''}: lista de cartas, estadísticas y comentarios en AIForge.` : undefined, canonical: !!deck, noindex: SERVED_FROM_FALLBACK && !deck })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
@@ -30,13 +31,6 @@ const DeckDetailPage: React.FC = () => {
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null)
   const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(false)
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null)
-
-  // Limpia enlaces markdown tipo [texto](/card/123) y recorta espacios
-  const formatDescription = (text?: string | null) => {
-    if (!text) return 'Sin descripción'
-    const cleaned = text.replace(/\[([^\]]+?)\]\(\/card\/\d+\)/g, '$1')
-    return cleaned.trim()
-  }
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -260,7 +254,7 @@ const DeckDetailPage: React.FC = () => {
           <p className="text-ink-500 mb-6">{error || 'Mazo no encontrado'}</p>
           <Link to="/decks" className="btn btn-primary">
             <ArrowLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
-            Volver a Decklists
+            Volver a Mazos
           </Link>
         </div>
       </div>
@@ -328,7 +322,7 @@ const DeckDetailPage: React.FC = () => {
         <div className="relative px-6 sm:px-10 pt-7 pb-9 md:pt-8 md:pb-11">
           <Link to="/decks" className="inline-flex items-center gap-2 text-sm font-semibold text-ink-300 hover:text-white transition-colors">
             <ArrowLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
-            Decklists
+            Mazos
           </Link>
 
           <div className="mt-6 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
@@ -398,9 +392,12 @@ const DeckDetailPage: React.FC = () => {
               <FileTextIcon className="w-5 h-5 text-ink-400" weight="duotone" aria-hidden="true" />
               Descripción
             </h2>
-            <p className={`mt-3 leading-relaxed whitespace-pre-line ${deck.description ? 'text-ink-700' : 'text-ink-400 italic'}`}>
-              {formatDescription(deck.description)}
-            </p>
+            {/* Markdown del usuario convertido a HTML seguro (mismo conversor que el prerender) */}
+            {deck.description?.trim() ? (
+              <div className="deck-prose mt-3" dangerouslySetInnerHTML={{ __html: renderMarkdown(deck.description) }} />
+            ) : (
+              <p className="mt-3 leading-relaxed text-ink-400 italic">Sin descripción</p>
+            )}
           </section>
 
           <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm p-6">

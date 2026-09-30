@@ -25,7 +25,7 @@ const FAQPage: React.FC = () => {
       <PageHeader>
         <PageHeaderContent>
           <PageHeaderEyebrow>Ayuda</PageHeaderEyebrow>
-          <PageHeaderTitle>Preguntas Frecuentes</PageHeaderTitle>
+          <PageHeaderTitle>{pageMeta.faq.heading}</PageHeaderTitle>
           <PageHeaderDescription>
             Encuentra respuestas a las preguntas más comunes sobre AIForge
           </PageHeaderDescription>

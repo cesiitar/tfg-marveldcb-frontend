@@ -148,7 +148,7 @@ const CardSearchPage: React.FC = () => {
       <PageHeader>
         <PageHeaderContent>
           <PageHeaderEyebrow>Catálogo</PageHeaderEyebrow>
-          <PageHeaderTitle>Búsqueda de Cartas</PageHeaderTitle>
+          <PageHeaderTitle>{pageMeta.cardSearch.heading}</PageHeaderTitle>
           <PageHeaderDescription>
             Encuentra las cartas perfectas para tu mazo
           </PageHeaderDescription>
