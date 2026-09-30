@@ -93,7 +93,21 @@
       {
         "title": "Almacenamiento en tu navegador",
         "paragraphs": [
-          "AIForge usa el almacenamiento local del navegador (localStorage) para mantener tu sesión iniciada (lo gestiona Auth0) y para recordar tus filtros y el último mazo que viste. No se usan cookies publicitarias ni herramientas de analítica. Si esto cambia, se actualizará esta página."
+          "AIForge usa el almacenamiento local del navegador (localStorage) para mantener tu sesión iniciada (lo gestiona Auth0), para recordar tus filtros y el último mazo que viste, y para guardar tu elección sobre las cookies. No se usan cookies publicitarias."
+        ]
+      },
+      {
+        "title": "Cookies y analítica",
+        "paragraphs": [
+          "AIForge usa **Google Analytics** para saber cuántas visitas recibe, de dónde llegan y qué páginas se usan más. Solo se activa si aceptas en el aviso de cookies: hasta entonces no se carga ni guarda nada. Si lo rechazas, la web funciona exactamente igual."
+        ],
+        "items": [
+          "**Qué se recoge:** páginas visitadas, tiempo de uso, tipo de dispositivo y navegador, país o ciudad aproximados y la página desde la que llegas. No se envían a Google tu nombre, tu email ni tu contenido.",
+          "**Cookies que se usan:** _ga y _ga_ZMYXP44B50, de Google Analytics, con una duración de hasta 2 años.",
+          "**Cómo cambiar de opinión:** con el enlace «Preferencias de cookies» del pie de página puedes aceptar o rechazar en cualquier momento. Al rechazar se borran las cookies de Analytics."
+        ],
+        "after": [
+          "Más información en la [política de privacidad de Google](https://policies.google.com/privacy)."
         ]
       },
       {
@@ -101,7 +115,8 @@
         "items": [
           "**Auth0** (Okta): inicio de sesión y gestión de la cuenta.",
           "**Vercel**: alojamiento de la web.",
-          "**Render**: alojamiento del servidor y de la base de datos."
+          "**Render**: alojamiento del servidor y de la base de datos.",
+          "**Google Analytics** (Google): estadísticas de uso, solo si lo aceptas."
         ]
       },
       {

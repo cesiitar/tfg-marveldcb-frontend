@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { OPEN_CONSENT_EVENT } from '../lib/analytics'
 
 const Footer: React.FC = () => {
   return (
@@ -42,6 +43,15 @@ const Footer: React.FC = () => {
             <ul className="space-y-2.5">
               <li><Link to="/about" className="hover:text-white transition-colors">Sobre AIForge</Link></li>
               <li><Link to="/privacy" className="hover:text-white transition-colors">Privacidad</Link></li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new Event(OPEN_CONSENT_EVENT))}
+                  className="hover:text-white transition-colors"
+                >
+                  Preferencias de cookies
+                </button>
+              </li>
               <li>
                 <a href="mailto:aiforge.soporte@gmail.com" className="hover:text-white transition-colors">
                   Soporte
