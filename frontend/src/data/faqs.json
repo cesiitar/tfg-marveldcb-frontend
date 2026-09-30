@@ -17,7 +17,7 @@
   },
   {
     "question": "¿Cuántas cartas debe tener un mazo?",
-    "answer": "Un mazo válido debe tener entre 40 y 50 cartas (sin contar las cartas del héroe, que se añaden automáticamente). El sistema te avisará si tu mazo está fuera de estos límites."
+    "answer": "Un mazo válido debe tener entre 40 y 50 cartas en total, incluidas las 15 cartas propias del héroe, que se añaden automáticamente. Es la regla de construcción de mazos de la Referencia de reglas oficial de Marvel Champions: The Card Game (Fantasy Flight Games). El sistema te avisará si tu mazo está fuera de estos límites."
   },
   {
     "question": "¿Puedo compartir mis mazos con otros usuarios?",

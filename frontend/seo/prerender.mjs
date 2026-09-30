@@ -42,6 +42,9 @@ const inline = (text) =>
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
 
+// Igual que usePageMeta: si el título con la marca pasa de 60 caracteres, se omite la marca.
+const brand = (title) => (`${title} | ${SITE_NAME}`.length > 60 ? title : `${title} | ${SITE_NAME}`)
+
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '')
 const fmtDate = (iso) => {
   if (!iso) return ''
@@ -192,7 +195,7 @@ ${decks.length ? `<h2>Últimos mazos de la comunidad</h2>
 // Mazos
 routes.push({
   path: '/decks',
-  title: `${pageMeta.decks.title} | ${SITE_NAME}`,
+  title: brand(`${pageMeta.decks.title}`),
   description: pageMeta.decks.description,
   jsonld: [
     {
@@ -221,7 +224,7 @@ for (const d of decks) {
   const sameHero = decks.filter((o) => o.id !== d.id && o.hero_name === d.hero_name)
   routes.push({
     path: `/decks/${d.id}`,
-    title: `${d.name} · mazo de ${d.hero_name} | ${SITE_NAME}`,
+    title: brand(`${d.name} · mazo de ${d.hero_name}`),
     description: `Mazo de Marvel Champions con ${d.hero_name}${d.creator_name ? ` creado por ${d.creator_name}` : ''}: lista de cartas, estadísticas y comentarios en AIForge.`,
     jsonld: [
       {
@@ -257,7 +260,7 @@ ${sameHero.length ? `<h2>Más mazos de ${esc(d.hero_name)}</h2>\n<ul>${sameHero.
 // Cartas por set
 routes.push({
   path: '/cards',
-  title: `${pageMeta.cards.title} | ${SITE_NAME}`,
+  title: brand(`${pageMeta.cards.title}`),
   description: pageMeta.cards.description,
   jsonld: [
     {
@@ -285,7 +288,7 @@ sets.forEach((s, i) => {
   if (!cards) return
   routes.push({
     path: `/cards/set/${s.id}`,
-    title: `Cartas del set ${s.name} | ${SITE_NAME}`,
+    title: brand(`Cartas del set ${s.name}`),
     description: `Todas las cartas del set ${s.name} de Marvel Champions, con estadísticas por tipo, aspecto y coste.`,
     jsonld: [
       { '@type': 'CollectionPage', name: `Cartas del set ${s.name}`, url: `${SITE}/cards/set/${s.id}`, isPartOf: { '@id': `${SITE}/#website` } },
@@ -306,7 +309,7 @@ ${cards.map((c) => `    <tr><td>${esc(c.name)}</td><td>${esc(cap((c.type || '').
 // Buscador de cartas
 routes.push({
   path: '/cards/search',
-  title: `${pageMeta.cardSearch.title} | ${SITE_NAME}`,
+  title: brand(`${pageMeta.cardSearch.title}`),
   description: pageMeta.cardSearch.description,
   jsonld: [crumbs([['Inicio', '/'], ['Cartas', '/cards'], ['Buscador', '/cards/search']])],
   main: `<h1>${pageMeta.cardSearch.title}</h1>
@@ -328,7 +331,7 @@ ${sets.length ? `<h2>Explorar por set</h2>
 const recentGames = games.slice(0, 50)
 routes.push({
   path: '/games-history',
-  title: `${pageMeta.gamesHistory.title} | ${SITE_NAME}`,
+  title: brand(`${pageMeta.gamesHistory.title}`),
   description: pageMeta.gamesHistory.description,
   jsonld: [crumbs([['Inicio', '/'], ['Historial de partidas', '/games-history']])],
   main: `<h1>Historial de partidas de Marvel Champions</h1>
@@ -345,7 +348,7 @@ ${recentGames.map((g) => `    <tr><td>${fmtDate(g.played_at)}</td><td>${g.deck_i
 // FAQ
 routes.push({
   path: '/faq',
-  title: `${pageMeta.faq.title} | ${SITE_NAME}`,
+  title: brand(`${pageMeta.faq.title}`),
   description: pageMeta.faq.description,
   jsonld: [
     {
@@ -363,7 +366,7 @@ ${faqs.map((f) => `<h2>${esc(f.question)}</h2>\n<p>${esc(f.answer)}</p>`).join('
 for (const [key, pg] of Object.entries(infoPages)) {
   routes.push({
     path: pg.path,
-    title: `${pg.title} | ${SITE_NAME}`,
+    title: brand(`${pg.title}`),
     description: pg.description,
     jsonld: [
       {
@@ -455,7 +458,7 @@ const llms = `# AIForge
 
 > AIForge es una plataforma web gratuita para crear y optimizar mazos de Marvel Champions: The Card Game con inteligencia artificial: constructor de mazos, recomendaciones de mazo para cada villano, registro de partidas y mazos públicos de la comunidad. Web en español.
 
-- Los mazos válidos tienen entre 40 y 50 cartas, sin contar las cartas del héroe.
+- Los mazos válidos tienen entre 40 y 50 cartas en total, incluidas las 15 cartas propias del héroe.
 - La recomendación con IA elige héroe, aspecto y cartas para un villano y dificultad concretos, a partir de las partidas registradas.
 - Proyecto de fin de grado, sin ánimo de lucro. Contacto: aiforge.soporte@gmail.com
 

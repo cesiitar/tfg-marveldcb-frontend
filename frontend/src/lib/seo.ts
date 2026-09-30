@@ -36,7 +36,9 @@ export function usePageMeta({ title, description, noindex = false, canonical = t
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const fullTitle = title ? `${title} | ${SITE_NAME}` : DEFAULT_TITLE
+    // Los buscadores cortan el título hacia los 60 caracteres: si no cabe, se omite la marca.
+    const branded = `${title} | ${SITE_NAME}`
+    const fullTitle = title ? (branded.length > 60 ? title : branded) : DEFAULT_TITLE
     const desc = description || DEFAULT_DESCRIPTION
     document.title = fullTitle
     upsertMeta('meta[name="description"]', { name: 'description', content: desc })

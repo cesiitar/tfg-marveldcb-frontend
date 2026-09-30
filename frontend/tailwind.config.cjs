@@ -56,9 +56,9 @@ module.exports = {
         paper: '#F6F4EF',
       },
       fontFamily: {
-        sans: ['Geist', 'system-ui', 'sans-serif'],
-        display: ['Archivo', 'Geist', 'system-ui', 'sans-serif'],
-        mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
+        sans: ['"Geist Variable"', 'Geist', 'system-ui', 'sans-serif'],
+        display: ['"Archivo Variable"', 'Archivo', '"Geist Variable"', 'system-ui', 'sans-serif'],
+        mono: ['"Geist Mono Variable"', '"Geist Mono"', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         lg: '0.625rem',
