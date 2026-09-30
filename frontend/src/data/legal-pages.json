@@ -39,7 +39,7 @@
       {
         "title": "Quién está detrás",
         "paragraphs": [
-          "AIForge lo ha diseñado y programado **César González** ([cesiitar](https://github.com/cesiitar) en GitHub) como Trabajo de Fin de Grado. El código es público para consulta: [frontend](https://github.com/cesiitar/tfg-marveldcb-frontend) (React y TypeScript) y [backend](https://github.com/cesiitar/tfg-marveldcb-backend) (FastAPI, scikit-learn y SQLite).",
+          "AIForge lo ha diseñado y programado **César González** ([GitHub](https://github.com/cesiitar), [LinkedIn](https://www.linkedin.com/in/cesar-gonzalez-san-mart%C3%ADn-ab4370172/)) como Trabajo de Fin de Grado del Doble Grado en Ingeniería Informática y Administración de Empresas de la Universidad Rey Juan Carlos (URJC). El código es público para consulta: [frontend](https://github.com/cesiitar/tfg-marveldcb-frontend) (React y TypeScript) y [backend](https://github.com/cesiitar/tfg-marveldcb-backend) (FastAPI, scikit-learn y SQLite).",
           "Para dudas, errores o sugerencias: aiforge.soporte@gmail.com"
         ]
       },
