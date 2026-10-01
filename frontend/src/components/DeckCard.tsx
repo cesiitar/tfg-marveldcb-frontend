@@ -5,7 +5,7 @@
 // la forma y la tipografía. Solo presentación; las acciones llegan desde cada página.
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { CardsThreeIcon, CrownSimpleIcon, HeartIcon, ScalesIcon, ShieldIcon, StarFourIcon, SwordIcon, type Icon } from '@phosphor-icons/react'
+import { ArrowFatLinesUpIcon, CardsIcon, CardsThreeIcon, CrownSimpleIcon, DiamondIcon, HandshakeIcon, HeartIcon, LightningIcon, ScalesIcon, ShieldIcon, StarFourIcon, SwordIcon, TargetIcon, UsersIcon, type Icon } from '@phosphor-icons/react'
 import type { Deck } from '../types/card'
 import { getClassColor } from '../utils/classColors'
 import { TiltCard } from './motion/tilt-card'
@@ -43,17 +43,27 @@ const aspectIcons: Record<string, Icon> = {
 
 const totalCards = (deck: Deck) => (deck.cards || []).reduce((n, c) => n + (Number(c.quantity) || 1), 0)
 
-/** Reparto de cartas por aspecto (clase), para la barra de composición. */
-function aspectShare(deck: Deck) {
-  const total = totalCards(deck)
-  const byClass = (deck.cards || []).reduce<Record<string, number>>((acc, c) => {
-    const clase = (c as { clase?: string }).clase || 'basic'
-    acc[clase] = (acc[clase] || 0) + (Number(c.quantity) || 1)
+// Tipos de carta de jugador: icono (el mismo que en GameCard) y nombre en plural
+const cardTypes: Record<string, { icon: Icon; label: string }> = {
+  ally: { icon: UsersIcon, label: 'Aliados' },
+  event: { icon: LightningIcon, label: 'Eventos' },
+  upgrade: { icon: ArrowFatLinesUpIcon, label: 'Mejoras' },
+  support: { icon: HandshakeIcon, label: 'Apoyos' },
+  resource: { icon: DiamondIcon, label: 'Recursos' },
+  player_side_scheme: { icon: TargetIcon, label: 'Planes' },
+}
+
+/** Las tres categorías de carta con más copias en el mazo. */
+function topCardTypes(deck: Deck) {
+  const byType = (deck.cards || []).reduce<Record<string, number>>((acc, c) => {
+    const type = ((c as { type?: string }).type || '').toLowerCase()
+    if (type) acc[type] = (acc[type] || 0) + (Number(c.quantity) || 1)
     return acc
   }, {})
-  return Object.entries(byClass)
-    .map(([clase, n]) => ({ clase, n, pct: total ? (n / total) * 100 : 0 }))
+  return Object.entries(byType)
+    .map(([type, n]) => ({ type, n, ...(cardTypes[type] || { icon: CardsIcon, label: type.replace(/_/g, ' ') }) }))
     .sort((a, b) => b.n - a.n)
+    .slice(0, 3)
 }
 
 const DeckCard: React.FC<DeckCardProps> = ({ deck, linkable = true, onNavigate, highlighted, favorite, actions, headingLevel = 'h2', id }) => {
@@ -61,7 +71,7 @@ const DeckCard: React.FC<DeckCardProps> = ({ deck, linkable = true, onNavigate, 
   const aspect = (deck.aspect || '').toLowerCase()
   const frame = aspect ? getClassColor(aspect) : 'bg-ink-700'
   const AspectIcon = aspectIcons[aspect] || CardsThreeIcon
-  const share = aspectShare(deck)
+  const types = topCardTypes(deck)
   const cards = totalCards(deck)
   const hero = deck.hero_name || 'Héroe desconocido'
 
@@ -174,16 +184,20 @@ const DeckCard: React.FC<DeckCardProps> = ({ deck, linkable = true, onNavigate, 
               )}
             </Heading>
 
-            {/* Composición por aspecto */}
-            {share.length > 0 && (
-              <div className="mt-3">
-                <div className="flex h-2 w-full overflow-hidden rounded-full bg-ink-100" aria-hidden="true">
-                  {share.map(({ clase, pct }) => (
-                    <div key={clase} className={`h-full ${getClassColor(clase)}`} style={{ width: `${pct}%` }} />
-                  ))}
-                </div>
-                <p className="sr-only">Composición: {share.map((s) => `${s.n} ${s.clase}`).join(', ')}</p>
-              </div>
+            {/* Lo que lleva el mazo: las tres categorías de carta con más copias */}
+            {types.length > 0 && (
+              <dl className="mt-3 grid grid-cols-3 divide-x divide-ink-100 rounded-lg bg-ink-50 ring-1 ring-inset ring-ink-900/[0.05]">
+                {types.map(({ type, n, icon: TypeIcon, label }) => (
+                  // dt antes que dd en el DOM; flex-col-reverse deja el número arriba a la vista
+                  <div key={type} className="flex flex-col-reverse items-center px-1 py-1.5">
+                    <dt className="mt-1 truncate max-w-full font-mono text-[9px] uppercase tracking-[0.12em] text-ink-500">{label}</dt>
+                    <dd className="flex items-center gap-1 font-display text-base font-extrabold leading-none text-ink-900 tabular-nums">
+                      <TypeIcon className="w-3.5 h-3.5 text-ink-400" weight="duotone" aria-hidden="true" />
+                      {n}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             )}
 
             <div className="mt-auto flex items-center justify-between gap-3 pt-3 text-xs text-ink-500">
