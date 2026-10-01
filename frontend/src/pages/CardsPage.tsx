@@ -25,13 +25,15 @@ const CardsPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [syncedAt, setSyncedAt] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchSets = async () => {
       try {
         setLoading(true)
         setError(null)
-        const setsData = await apiService.getSets()
+        const { sets: setsData, catalogSyncedAt } = await apiService.getSetsWithSyncDate()
+        setSyncedAt(catalogSyncedAt)
         setSets(setsData)
         setFilteredSets(setsData)
       } catch (err) {
@@ -126,6 +128,16 @@ const CardsPage: React.FC = () => {
               <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">Cartas</span>
             </div>
           </div>
+          {syncedAt && (
+            <p className="mt-4 text-sm text-ink-400">
+              Datos de{' '}
+              <a href="https://marvelcdb.com" target="_blank" rel="noopener noreferrer" className="text-ink-200 underline decoration-white/30 underline-offset-4 hover:text-white">
+                MarvelCDB
+              </a>
+              , actualizados el{' '}
+              <time dateTime={syncedAt}>{new Date(syncedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</time>
+            </p>
+          )}
         </PageHeaderContent>
         <PageHeaderActions>
           <Link to="/cards/search" className={pageHeaderButton.primary}>

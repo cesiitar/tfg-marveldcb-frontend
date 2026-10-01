@@ -83,6 +83,18 @@ export function renderMarkdown(text, { baseHeading = 3 } = {}) {
   return out.join('\n')
 }
 
+/** Quita la nota "[Importado de MarvelCDB]" que la importación añade al final de la descripción. */
+export const IMPORT_NOTE = /\s*\[Importado de MarvelCDB\]\s*$/
+
+export function stripImportNote(text) {
+  return String(text || '').replace(IMPORT_NOTE, '')
+}
+
+/** true si el mazo se importó de MarvelCDB (por el enlace guardado o por la nota antigua). */
+export function isImportedDeck(deck) {
+  return Boolean(deck && (deck.source_url || IMPORT_NOTE.test(deck.description || '')))
+}
+
 /** Resumen en texto plano (sin Markdown ni HTML), recortado por palabra. */
 export function plainText(text, max = 300) {
   const t = stripSource(text)

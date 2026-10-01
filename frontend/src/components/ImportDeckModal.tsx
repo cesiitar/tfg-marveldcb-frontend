@@ -72,7 +72,9 @@ const ImportDeckModal: React.FC<ImportDeckModalProps> = ({
       // Crear un objeto Deck para preview (sin ID)
       const preview: Deck = {
         ...convertedResult.deck,
-        id: undefined
+        id: undefined,
+        // Atribución: enlace al mazo original (el backend solo acepta URLs de MarvelCDB)
+        source_url: `https://marvelcdb.com/decklist/view/${deckId}`,
       }
       
       setPreviewDeck(preview)

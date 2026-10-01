@@ -16,7 +16,7 @@ import { existsSync } from 'node:fs'
 import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { renderMarkdown, plainText } from '../src/lib/markdown-lite.js'
+import { renderMarkdown, plainText, stripImportNote, isImportedDeck } from '../src/lib/markdown-lite.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
@@ -109,7 +109,10 @@ async function mapLimit(items, limit, fn) {
 // ---------------------------------------------------------------- datos
 
 console.log(`[prerender] API: ${API}`)
-const sets = await safe('sets', async () => (await fetchJson(`${API}/sets`)).sets || [], [])
+const setsResponse = await safe('sets', () => fetchJson(`${API}/sets`), {})
+const sets = setsResponse.sets || []
+const catalogSyncedAt = isoDay(setsResponse.catalog_synced_at)
+const modelStats = await safe('cifras del modelo', () => fetchJson(`${API}/model/stats`), { available: false })
 const decks = await safe('mazos', async () => {
   const j = await fetchJson(`${API}/decks`)
   return (j.decks || j).filter((d) => d && d.id != null)
@@ -184,6 +187,18 @@ const setLink = (name) => {
 const deckLine = (d) =>
   `<li><a href="/decks/${d.id}">${esc(d.name)}</a> — ${esc(d.hero_name || 'Héroe desconocido')}${d.aspect ? ` · ${esc(cap(d.aspect))}` : ''} · ${totalCards(d)} cartas · por ${esc(d.creator_name || 'Anónimo')}${d.created_at ? ` · ${fmtDate(d.created_at)}` : ''}</li>`
 
+const modelStatsHtml = () => {
+  if (!modelStats.available) return ''
+  const pct = (n) => `${Math.round((n || 0) * 100)} %`
+  return `<h3>El modelo en cifras</h3>
+<ul>
+  <li><strong>Partidas de entrenamiento:</strong> ${modelStats.games}</li>
+  <li><strong>Acierto en prueba:</strong> ${pct(modelStats.accuracy_test)}</li>
+  <li><strong>Héroes:</strong> ${modelStats.heroes} · <strong>Villanos:</strong> ${modelStats.villains}</li>
+</ul>
+<p>${modelStats.trained_at ? `Último entrenamiento: <time datetime="${isoDay(modelStats.trained_at)}">${fmtDate(modelStats.trained_at)}</time>. ` : ''}El acierto se mide sobre ${modelStats.n_test} partidas que el modelo no vio al entrenar (${modelStats.n_train} se usaron para entrenarlo). Con una muestra de este tamaño la cifra es orientativa y cambia cada vez que se registran partidas nuevas.</p>`
+}
+
 // ---------------------------------------------------------------- rutas
 
 const routes = []
@@ -249,7 +264,9 @@ ${decks.length ? `<ul>${decks.map(deckLine).join('\n')}</ul>` : ''}`,
 for (const d of decks) {
   const byType = {}
   for (const c of d.cards || []) (byType[c.type || 'otros'] ||= []).push(c)
-  const hasDescription = Boolean(d.description && d.description.trim())
+  const deckDescription = stripImportNote(d.description).trim()
+  const hasDescription = Boolean(deckDescription)
+  const imported = isImportedDeck(d)
   const crumbs = [['Inicio', '/'], ['Mazos', '/decks'], [d.name, `/decks/${d.id}`]]
   const created = isoDay(d.created_at)
   const modified = isoDay(d.updated_at || d.created_at)
@@ -274,7 +291,8 @@ for (const d of decks) {
         url: `${SITE}/decks/${d.id}`,
         genre: 'Mazo de Marvel Champions',
         // Resumen en texto plano: la descripción completa (Markdown del usuario) va en el HTML.
-        ...(hasDescription ? { description: plainText(d.description) } : {}),
+        ...(hasDescription ? { description: plainText(deckDescription) } : {}),
+        ...(d.source_url ? { isBasedOn: d.source_url } : {}),
         ...(d.creator_name ? { author: { '@type': 'Person', name: d.creator_name } } : {}),
         ...(created ? { dateCreated: created } : {}),
         ...(modified ? { dateModified: modified } : {}),
@@ -287,7 +305,8 @@ for (const d of decks) {
     main: `${crumbTrail(crumbs)}
 <h1>${esc(d.name)}</h1>
 <p>Mazo de Marvel Champions para <strong>${esc(d.hero_name)}</strong>${d.aspect ? ` con el aspecto <strong>${esc(cap(d.aspect))}</strong>` : ''}, creado por ${esc(d.creator_name || 'un usuario anónimo')}${created ? ` el <time datetime="${created}">${fmtDate(d.created_at)}</time>` : ''}${modified && modified !== created ? ` y actualizado el <time datetime="${modified}">${fmtDate(d.updated_at)}</time>` : ''}. Contiene ${totalCards(d)} cartas en total.</p>
-${hasDescription ? `<h2>Descripción</h2>\n${renderMarkdown(d.description)}` : ''}
+${imported ? `<p>Importado de MarvelCDB${d.source_url ? ` (<a href="${esc(d.source_url)}">ver el mazo original</a>)` : ''}.</p>` : ''}
+${hasDescription ? `<h2>Descripción</h2>\n${renderMarkdown(deckDescription)}` : ''}
 <h2>Lista de cartas</h2>
 ${Object.entries(byType)
   .map(([type, cards]) => `<h3>${esc(TYPE_LABELS[type] || cap(type))}</h3>
@@ -308,6 +327,7 @@ routes.push({
   crumbs: [['Inicio', '/'], ['Cartas', '/cards']],
   pageExtra: {
     about: GAME,
+    ...(catalogSyncedAt ? { dateModified: catalogSyncedAt } : {}),
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: sets.length,
@@ -316,6 +336,7 @@ routes.push({
   },
   main: `<h1>${pageMeta.cards.heading}</h1>
 <p>Catálogo de cartas de Marvel Champions: The Card Game organizado por set y expansión${sets.length ? `: ${totalSetCards} cartas en ${sets.length} sets` : ''}. Entra en cada set para ver sus cartas con tipo, aspecto y coste.</p>
+${catalogSyncedAt ? `<p>Datos de <a href="https://marvelcdb.com">MarvelCDB</a>, actualizados el <time datetime="${catalogSyncedAt}">${fmtDate(catalogSyncedAt)}</time>.</p>` : ''}
 ${sets.length ? `<ul>${sets.map((s) => `<li><a href="/cards/set/${s.id}">${esc(s.name)}</a> (${s.cardCount} cartas)</li>`).join('\n')}</ul>` : ''}
 <p>¿Buscas una carta concreta? Usa el <a href="/cards/search">buscador de cartas</a>.</p>`,
 })
@@ -432,6 +453,7 @@ ${pg.sections
     ...(sec.paragraphs || []).map((t) => `<p>${inline(t)}</p>`),
     sec.items ? `<ul>${sec.items.map((t) => `<li>${inline(t)}</li>`).join('')}</ul>` : '',
     ...(sec.after || []).map((t) => `<p>${inline(t)}</p>`),
+    sec.insert === 'model-stats' ? modelStatsHtml() : '',
   ].join('\n'))
   .join('\n')}
 <p>Última actualización: <time datetime="${pg.updated}">${fmtDate(pg.updated)}</time></p>`,
@@ -533,7 +555,8 @@ const llms = `# AIForge
 
 - Los mazos válidos tienen entre 40 y 50 cartas en total, incluidas las 15 cartas propias del héroe.
 - La recomendación con IA elige héroe, aspecto y cartas para un villano y dificultad concretos, a partir de las partidas registradas.
-- Proyecto de fin de grado, sin ánimo de lucro. Contacto: aiforge.soporte@gmail.com
+${modelStats.available ? `- El modelo (SVM) se entrena con ${modelStats.games} partidas registradas y acierta el resultado en el ${Math.round(modelStats.accuracy_test * 100)} % de ${modelStats.n_test} partidas de prueba (muestra pequeña: cifra orientativa).
+` : ''}- Proyecto de fin de grado, sin ánimo de lucro. Contacto: aiforge.soporte@gmail.com
 
 ## Secciones
 

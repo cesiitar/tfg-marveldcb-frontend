@@ -11,6 +11,7 @@ import {
 } from '../components/ui/page-header'
 import { usePageMeta } from '../lib/seo'
 import pages from '../data/legal-pages.json'
+import ModelStats from '../components/ModelStats'
 
 type PageKey = keyof typeof pages
 
@@ -19,6 +20,8 @@ interface Section {
   paragraphs?: string[]
   items?: string[]
   after?: string[]
+  /** Bloque dinámico que se inserta al final de la sección (p. ej. las cifras del modelo). */
+  insert?: string
 }
 
 /** Admite **negrita** y [enlaces](https://…) dentro de los textos del JSON. */
@@ -82,6 +85,7 @@ const InfoPage: React.FC<{ page: PageKey }> = ({ page }) => {
                   <Inline text={p} />
                 </p>
               ))}
+              {section.insert === 'model-stats' && <ModelStats />}
             </section>
           ))}
           <p className="mt-8 pt-6 border-t border-gray-200 font-mono text-xs uppercase tracking-[0.14em] text-ink-400">

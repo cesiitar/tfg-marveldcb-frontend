@@ -46,6 +46,7 @@ export interface Deck {
   created_at?: string
   updated_at?: string
   favorite_count?: number  // Número de usuarios que han marcado este mazo como favorito
+  source_url?: string | null  // Enlace al mazo original si se importó de MarvelCDB
   win_probability?: number  // Probabilidad de victoria (0-1) para mazos generados por IA
   hero_unresolved?: boolean  // true si el héroe no pudo resolverse contra la BD (no participa en recomendaciones IA)
 }

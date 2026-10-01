@@ -2,6 +2,19 @@ import { Card, CardSet, Hero, Deck, DeckComment } from '../types/card'
 
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'https://marveldcb-backend.onrender.com/api'
 
+export interface ModelStats {
+  available: boolean
+  games?: number
+  wins?: number
+  n_train?: number
+  n_test?: number
+  accuracy_train?: number
+  accuracy_test?: number
+  heroes?: number
+  villains?: number
+  trained_at?: string
+}
+
 class ApiService {
 
   async getSets(): Promise<CardSet[]> {
@@ -16,6 +29,23 @@ class ApiService {
       console.error('Error fetching sets:', error)
       throw error
     }
+  }
+
+  /** Sets más la fecha de la última sincronización del catálogo con MarvelCDB. */
+  async getSetsWithSyncDate(): Promise<{ sets: CardSet[]; catalogSyncedAt: string | null }> {
+    const response = await fetch(`${API_BASE_URL}/sets`)
+    if (!response.ok) {
+      throw new Error('Error al obtener los sets')
+    }
+    const data = await response.json()
+    return { sets: data.sets, catalogSyncedAt: data.catalog_synced_at ?? null }
+  }
+
+  /** Cifras públicas del último entrenamiento del modelo de recomendación. */
+  async getModelStats(): Promise<ModelStats> {
+    const response = await fetch(`${API_BASE_URL}/model/stats`)
+    if (!response.ok) return { available: false }
+    return response.json()
   }
 
   async getCardsBySet(

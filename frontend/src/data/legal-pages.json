@@ -17,6 +17,7 @@
       },
       {
         "title": "Cómo funciona la recomendación con IA",
+        "insert": "model-stats",
         "paragraphs": [
           "El núcleo de AIForge es un modelo de **máquina de vectores de soporte (SVM)** de [scikit-learn](https://scikit-learn.org/stable/modules/svm.html) que estima la probabilidad de victoria de un mazo contra un villano. Usa 9 características generales:"
         ],

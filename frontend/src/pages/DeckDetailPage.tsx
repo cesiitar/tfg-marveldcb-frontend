@@ -7,9 +7,9 @@ import { translateCardType } from '../utils/typeTranslations'
 import { getClassColor } from '../utils/classColors'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
-import { ArrowLeftIcon, CalendarBlankIcon, CardsIcon, ChartBarIcon, ChatCircleDotsIcon, FileTextIcon, HeartIcon, PaperPlaneTiltIcon, PencilSimpleIcon, TrashIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
+import { ArrowLeftIcon, ArrowSquareOutIcon, CalendarBlankIcon, CardsIcon, DownloadSimpleIcon, ChartBarIcon, ChatCircleDotsIcon, FileTextIcon, HeartIcon, PaperPlaneTiltIcon, PencilSimpleIcon, TrashIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
 import { usePageMeta, SERVED_FROM_FALLBACK } from '../lib/seo'
-import { renderMarkdown } from '../lib/markdown-lite'
+import { renderMarkdown, stripImportNote, isImportedDeck } from '../lib/markdown-lite'
 
 const DeckDetailPage: React.FC = () => {
   const { id } = useParams()
@@ -314,7 +314,9 @@ const DeckDetailPage: React.FC = () => {
     (name || '?').split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('')
 
   // Descripción larga: se muestra plegada para que no descompense la página
-  const description = deck.description?.trim() || ''
+  // La nota "[Importado de MarvelCDB]" se muestra en la cabecera, no dentro del texto
+  const description = stripImportNote(deck.description).trim()
+  const imported = isImportedDeck(deck)
   const longDescription = description.length > 900
   const spinner = (size = 'w-4 h-4') => (
     <svg className={`${size} animate-spin`} fill="none" viewBox="0 0 24 24" aria-hidden="true">
@@ -362,6 +364,25 @@ const DeckDetailPage: React.FC = () => {
                     <time dateTime={deck.created_at} className="tabular-nums">{new Date(deck.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</time>
                   </span>
                 )}
+                {imported &&
+                  (deck.source_url ? (
+                    <a
+                      href={deck.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-white underline decoration-white/30 underline-offset-4 hover:decoration-white"
+                      title="Ver el mazo original en MarvelCDB"
+                    >
+                      <DownloadSimpleIcon className="w-4 h-4 text-ink-400" weight="duotone" aria-hidden="true" />
+                      Importado de MarvelCDB
+                      <ArrowSquareOutIcon className="w-3.5 h-3.5" weight="bold" aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5">
+                      <DownloadSimpleIcon className="w-4 h-4 text-ink-400" weight="duotone" aria-hidden="true" />
+                      Importado de MarvelCDB
+                    </span>
+                  ))}
                 {typeof deck.favorite_count === 'number' && (
                   <span className="inline-flex items-center gap-1.5 tabular-nums">
                     <HeartIcon className="w-4 h-4 text-brand-400" weight="fill" aria-hidden="true" />
@@ -467,7 +488,7 @@ const DeckDetailPage: React.FC = () => {
                   id="deck-description"
                   className={`deck-prose ${longDescription && !descriptionOpen ? 'max-h-80 overflow-hidden' : ''}`}
                   // Markdown del usuario convertido a HTML seguro (mismo conversor que el prerender)
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(deck.description) }}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(description) }}
                 />
                 {longDescription && !descriptionOpen && (
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent" aria-hidden="true" />
