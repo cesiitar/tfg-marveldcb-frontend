@@ -7,7 +7,7 @@ import { translateCardType } from '../utils/typeTranslations'
 import { getClassColor } from '../utils/classColors'
 import { useToast } from '../components/Toast'
 import ConfirmDialog from '../components/ConfirmDialog'
-import { ArrowLeftIcon, CardsIcon, ChartBarIcon, ChatCircleDotsIcon, FileTextIcon, HeartIcon, PaperPlaneTiltIcon, PencilSimpleIcon, TrashIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
+import { ArrowLeftIcon, CalendarBlankIcon, CardsIcon, ChartBarIcon, ChatCircleDotsIcon, FileTextIcon, HeartIcon, PaperPlaneTiltIcon, PencilSimpleIcon, TrashIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
 import { usePageMeta, SERVED_FROM_FALLBACK } from '../lib/seo'
 import { renderMarkdown } from '../lib/markdown-lite'
 
@@ -31,6 +31,7 @@ const DeckDetailPage: React.FC = () => {
   const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null)
   const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(false)
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null)
+  const [descriptionOpen, setDescriptionOpen] = useState(false)
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -312,20 +313,30 @@ const DeckDetailPage: React.FC = () => {
   const initials = (name?: string) =>
     (name || '?').split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('')
 
+  // Descripción larga: se muestra plegada para que no descompense la página
+  const description = deck.description?.trim() || ''
+  const longDescription = description.length > 900
+  const spinner = (size = 'w-4 h-4') => (
+    <svg className={`${size} animate-spin`} fill="none" viewBox="0 0 24 24" aria-hidden="true">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  )
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 lg:space-y-8">
       {/* Cabecera del mazo */}
       <section className="animate-rise-in relative overflow-hidden rounded-2xl bg-ink-900 halftone text-white shadow-xl">
         <div className={`absolute inset-y-0 left-0 w-1.5 ${aspectColor}`} aria-hidden="true" />
         <div className={`absolute -top-40 -right-28 w-[480px] h-[480px] rounded-full opacity-30 blur-3xl pointer-events-none ${aspectColor}`} aria-hidden="true" />
 
-        <div className="relative px-6 sm:px-10 pt-7 pb-9 md:pt-8 md:pb-11">
+        <div className="relative px-6 sm:px-10 pt-7">
           <Link to="/decks" className="inline-flex items-center gap-2 text-sm font-semibold text-ink-300 hover:text-white transition-colors">
             <ArrowLeftIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
             Mazos
           </Link>
 
-          <div className="mt-6 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          <div className="mt-6 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="max-w-3xl min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 <span className="inline-flex items-center gap-2 rounded-md bg-white/10 px-2.5 py-1 text-sm font-semibold ring-1 ring-inset ring-white/15">
@@ -340,79 +351,310 @@ const DeckDetailPage: React.FC = () => {
                 )}
               </div>
               <h1 className="text-4xl md:text-5xl text-white break-words">{deck.name}</h1>
-              <p className="mt-3 text-ink-300">
-                Creado por <span className="font-semibold text-white">{deck.creator_name || 'Anónimo'}</span>
+              <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-ink-300">
+                <span className="inline-flex items-center gap-1.5">
+                  <UserIcon className="w-4 h-4 text-ink-400" weight="duotone" aria-hidden="true" />
+                  Creado por <span className="font-semibold text-white">{deck.creator_name || 'Anónimo'}</span>
+                </span>
                 {deck.created_at && (
-                  <>
-                    {' el '}
+                  <span className="inline-flex items-center gap-1.5">
+                    <CalendarBlankIcon className="w-4 h-4 text-ink-400" weight="duotone" aria-hidden="true" />
                     <time dateTime={deck.created_at} className="tabular-nums">{new Date(deck.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</time>
-                  </>
+                  </span>
+                )}
+                {typeof deck.favorite_count === 'number' && (
+                  <span className="inline-flex items-center gap-1.5 tabular-nums">
+                    <HeartIcon className="w-4 h-4 text-brand-400" weight="fill" aria-hidden="true" />
+                    {deck.favorite_count} {deck.favorite_count === 1 ? 'favorito' : 'favoritos'}
+                  </span>
                 )}
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-end gap-5 flex-shrink-0">
-              <div className="min-w-[10rem]">
-                <p className="font-display text-4xl font-extrabold leading-none tabular-nums">
-                  {totalCards}<span className="text-ink-400 text-2xl">/50</span>
-                </p>
-                <p className="mt-1 text-sm text-ink-400">cartas en el mazo</p>
-                <div className="mt-3 h-1.5 w-full rounded-full bg-white/10 overflow-hidden" aria-hidden="true">
-                  <div className={`h-full rounded-full ${aspectColor}`} style={{ width: `${Math.min(100, (totalCards / 50) * 100)}%` }} />
-                </div>
-              </div>
-              {isAuthenticated && (
-                <button
-                  onClick={handleToggleFavorite}
-                  disabled={loadingFavorite}
-                  aria-pressed={isFavorite}
-                  className={`btn btn-lg ${isFavorite ? 'bg-white text-brand-700 hover:bg-ink-100' : 'bg-white/10 text-white ring-1 ring-inset ring-white/20 hover:bg-white/15'}`}
-                >
-                  {loadingFavorite ? (
-                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <HeartIcon className="w-5 h-5" weight={isFavorite ? 'fill' : 'regular'} aria-hidden="true" />
-                  )}
-                  {isFavorite ? 'En favoritos' : 'Añadir a favoritos'}
-                </button>
-              )}
+            {isAuthenticated && (
+              <button
+                onClick={handleToggleFavorite}
+                disabled={loadingFavorite}
+                aria-pressed={isFavorite}
+                className={`btn btn-lg flex-shrink-0 self-start lg:self-auto ${isFavorite ? 'bg-white text-brand-700 hover:bg-ink-100' : 'bg-white/10 text-white ring-1 ring-inset ring-white/20 hover:bg-white/15'}`}
+              >
+                {loadingFavorite ? spinner('w-5 h-5') : <HeartIcon className="w-5 h-5" weight={isFavorite ? 'fill' : 'regular'} aria-hidden="true" />}
+                {isFavorite ? 'En favoritos' : 'Añadir a favoritos'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Franja de cifras: el mazo de un vistazo */}
+        <div className="relative mt-8 border-t border-white/10 bg-black/20">
+          <dl className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 lg:divide-x divide-white/10">
+            <div className="px-6 sm:px-10 py-4 lg:py-5">
+              <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-400">Cartas</dt>
+              <dd className="mt-1 font-display text-3xl font-extrabold leading-none tabular-nums">
+                {totalCards}<span className="text-lg text-ink-400">/50</span>
+              </dd>
             </div>
+            {typeStats.slice(0, 4).map(({ type, count }, i) => (
+              // En pantallas pequeñas caben 4 cifras: la quinta solo aparece en escritorio
+              <div key={type} className={`px-6 sm:px-8 lg:px-6 py-4 lg:py-5 ${i === 3 ? 'hidden lg:block' : ''}`}>
+                <dt className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-400">{translateCardType(type)}</dt>
+                <dd className="mt-1 font-display text-3xl font-extrabold leading-none tabular-nums">{count}</dd>
+              </div>
+            ))}
+          </dl>
+          {/* Composición por aspecto en una línea */}
+          <div className="flex h-1.5 w-full" role="img" aria-label={`Aspectos: ${aspectStats.map((a) => `${a.clase} ${a.percentage}%`).join(', ')}`}>
+            {aspectStats.map(({ clase, percentage }) => (
+              <div key={clase} className={`h-full ${getClassColor(clase)}`} style={{ width: `${percentage}%` }} />
+            ))}
           </div>
         </div>
       </section>
 
       <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        {/* Columna izquierda: descripción y composición */}
-        <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-20">
-          <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm p-6">
+        {/* Columna principal: lista de cartas, descripción y comentarios */}
+        <div className="lg:col-span-8 space-y-6 min-w-0">
+          <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm">
+            <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-ink-100">
+              <h2 className="flex items-center gap-2 text-xl text-ink-900">
+                <CardsIcon className="w-5 h-5 text-ink-400" weight="duotone" aria-hidden="true" />
+                Lista de cartas
+              </h2>
+              <span className="rounded-full bg-ink-100 px-2.5 py-0.5 text-sm font-semibold text-ink-700 tabular-nums">{totalCards}</span>
+            </div>
+
+            <div className="p-5 sm:p-6 sm:columns-2 sm:gap-8">
+              {sortedTypes.map((type) => {
+                const cards = cardsByType[type]
+                const typeTotal = cards.reduce((sum: number, c: any) => sum + (c.quantity || 0), 0)
+                return (
+                  <div key={type} className="break-inside-avoid mb-6 last:mb-0">
+                    <h3 className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-500">{translateCardType(type)}</span>
+                      <span className="text-xs font-semibold text-ink-400 tabular-nums">{typeTotal}</span>
+                    </h3>
+                    <ul className="rounded-xl ring-1 ring-ink-900/[0.06] divide-y divide-ink-100 overflow-hidden">
+                      {cards.map((card: any, idx: number) => (
+                        <li
+                          key={`${card.name}-${idx}`}
+                          className="relative flex items-center gap-3 pl-4 pr-3 py-2 bg-white hover:bg-ink-50 transition-colors"
+                          title={`${card.name} · ${card.set}`}
+                        >
+                          <span className={`absolute inset-y-0 left-0 w-1 ${getClassColor(card.clase)}`} aria-hidden="true" />
+                          <span className="inline-flex h-6 min-w-[1.75rem] items-center justify-center rounded-md bg-ink-100 px-1.5 font-mono text-xs font-semibold text-ink-700 tabular-nums">
+                            {card.quantity}×
+                          </span>
+                          <span className="flex-1 min-w-0 truncate text-sm font-medium text-ink-800">{card.name}</span>
+                          <span className="hidden sm:inline text-[11px] font-medium capitalize text-ink-400">{card.clase}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+
+          {/* Descripción del creador */}
+          <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm p-5 sm:p-6">
             <h2 className="flex items-center gap-2 text-lg text-ink-900">
               <FileTextIcon className="w-5 h-5 text-ink-400" weight="duotone" aria-hidden="true" />
               Descripción
             </h2>
-            {/* Markdown del usuario convertido a HTML seguro (mismo conversor que el prerender) */}
-            {deck.description?.trim() ? (
-              <div className="deck-prose mt-3" dangerouslySetInnerHTML={{ __html: renderMarkdown(deck.description) }} />
+            {description ? (
+              <div className="relative mt-3">
+                <div
+                  id="deck-description"
+                  className={`deck-prose ${longDescription && !descriptionOpen ? 'max-h-80 overflow-hidden' : ''}`}
+                  // Markdown del usuario convertido a HTML seguro (mismo conversor que el prerender)
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(deck.description) }}
+                />
+                {longDescription && !descriptionOpen && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent" aria-hidden="true" />
+                )}
+                {longDescription && (
+                  <button
+                    type="button"
+                    onClick={() => setDescriptionOpen((open) => !open)}
+                    aria-expanded={descriptionOpen}
+                    aria-controls="deck-description"
+                    className="relative mt-3 text-sm font-semibold text-brand-700 hover:text-brand-800"
+                  >
+                    {descriptionOpen ? 'Mostrar menos' : 'Leer descripción completa'}
+                  </button>
+                )}
+              </div>
             ) : (
-              <p className="mt-3 leading-relaxed text-ink-400 italic">Sin descripción</p>
+              <p className="mt-3 text-sm text-ink-400 italic">El creador no ha añadido descripción.</p>
             )}
           </section>
 
-          <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm p-6">
+          {/* Comentarios */}
+          <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm p-5 sm:p-6">
+            <h2 className="flex items-center gap-2 text-lg text-ink-900">
+              <ChatCircleDotsIcon className="w-5 h-5 text-ink-400" weight="duotone" aria-hidden="true" />
+              Comentarios
+              <span className="rounded-full bg-ink-100 px-2 py-0.5 text-xs font-semibold text-ink-600 tabular-nums">{comments.length}</span>
+            </h2>
+
+            {/* Formulario para añadir comentario (solo si está autenticado) */}
+            {isAuthenticated ? (
+              <div className="mt-4 flex gap-3">
+                <span className="w-8 h-8 flex-shrink-0 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold" aria-hidden="true">
+                  {initials(user?.name)}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <label htmlFor="new-comment" className="sr-only">Escribe un comentario</label>
+                  <textarea
+                    id="new-comment"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="¿Qué opinas de este mazo?"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-ink-200 resize-none text-sm text-ink-900 placeholder:text-ink-400"
+                    rows={2}
+                    disabled={savingComment}
+                    maxLength={1000}
+                  />
+                  <div className="mt-2 flex items-center justify-end gap-3">
+                    {newComment.length > 0 && (
+                      <span className={`text-xs tabular-nums ${newComment.length > 900 ? 'text-red-600' : 'text-ink-400'}`}>
+                        {newComment.length}/1000
+                      </span>
+                    )}
+                    <button
+                      onClick={handleSubmitComment}
+                      disabled={savingComment || !newComment.trim() || newComment.length > 1000}
+                      className="btn btn-primary btn-sm"
+                    >
+                      {savingComment ? (
+                        <>
+                          {spinner()}
+                          Publicando...
+                        </>
+                      ) : (
+                        <>
+                          <PaperPlaneTiltIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
+                          Publicar
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-ink-500">Inicia sesión para comentar este mazo.</p>
+            )}
+
+            {/* Lista de comentarios */}
+            {loadingComments ? (
+              <div className="flex items-center gap-2 py-6 text-sm text-ink-500">
+                {spinner()}
+                Cargando comentarios...
+              </div>
+            ) : comments.length === 0 ? (
+              <p className="mt-4 text-sm text-ink-400">Todavía no hay comentarios. Abre la conversación.</p>
+            ) : (
+              <ul className="mt-5 space-y-4">
+                {comments.map((comment) => {
+                  const isEditing = editingCommentId === comment.id
+                  const isOwn = isOwnComment(comment)
+                  const isDeleting = deletingCommentId === comment.id
+
+                  return (
+                    <li key={comment.id} className="group flex gap-3">
+                      <span className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${isOwn ? 'bg-brand-600 text-white' : 'bg-ink-900 text-white'}`} aria-hidden="true">
+                        {initials(comment.author_name)}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="min-w-0 text-sm">
+                            <span className="font-semibold text-ink-900">{comment.author_name || 'Usuario anónimo'}</span>
+                            {isOwn && <span className="ml-1.5 rounded bg-brand-50 px-1.5 py-0.5 text-[11px] font-semibold text-brand-700">Tú</span>}
+                            <span className="ml-2 text-xs text-ink-400 tabular-nums">
+                              {new Date(comment.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              {comment.updated_at && comment.updated_at !== comment.created_at && ' · editado'}
+                            </span>
+                          </p>
+                          {isOwn && !isEditing && (
+                            <div className="flex items-center gap-0.5 flex-shrink-0">
+                              <button
+                                onClick={() => handleStartEdit(comment)}
+                                disabled={isDeleting}
+                                className="btn btn-ghost btn-sm !p-1.5"
+                                aria-label="Editar comentario"
+                                title="Editar comentario"
+                              >
+                                <PencilSimpleIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                disabled={isDeleting}
+                                className="btn btn-ghost btn-sm !p-1.5 hover:!text-red-600 hover:!bg-red-50"
+                                aria-label="Eliminar comentario"
+                                title="Eliminar comentario"
+                              >
+                                {isDeleting ? spinner() : <TrashIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {isEditing ? (
+                          <div className="mt-2">
+                            <textarea
+                              value={editingText}
+                              onChange={(e) => setEditingText(e.target.value)}
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-ink-200 resize-none text-sm text-ink-900"
+                              rows={2}
+                              disabled={updatingComment}
+                              maxLength={1000}
+                              aria-label="Editar comentario"
+                            />
+                            <div className="mt-2 flex items-center justify-end gap-2">
+                              <span className={`mr-auto text-xs tabular-nums ${editingText.length > 900 ? 'text-red-600' : 'text-ink-400'}`}>
+                                {editingText.length}/1000
+                              </span>
+                              <button onClick={handleCancelEdit} disabled={updatingComment} className="btn btn-ghost btn-sm">
+                                Cancelar
+                              </button>
+                              <button
+                                onClick={() => handleSaveEdit(comment.id)}
+                                disabled={updatingComment || !editingText.trim() || editingText.length > 1000}
+                                className="btn btn-primary btn-sm"
+                              >
+                                {updatingComment ? 'Guardando...' : 'Guardar'}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="mt-0.5 text-sm text-ink-700 leading-relaxed whitespace-pre-line break-words">
+                            {comment.comment_text}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        {/* Columna lateral: composición */}
+        <aside className="lg:col-span-4 lg:sticky lg:top-20">
+          <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm p-5 sm:p-6">
             <h2 className="flex items-center gap-2 text-lg text-ink-900">
               <ChartBarIcon className="w-5 h-5 text-ink-400" weight="duotone" aria-hidden="true" />
               Composición
             </h2>
 
-            {/* Barra segmentada por aspecto */}
-            <div className="mt-4 flex h-3 w-full overflow-hidden rounded-full bg-ink-100" role="img" aria-label="Distribución de cartas por aspecto">
+            <h3 className="mt-5 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-500">Por aspecto</h3>
+            <div className="mt-2.5 flex h-2.5 w-full overflow-hidden rounded-full bg-ink-100" role="img" aria-label="Distribución de cartas por aspecto">
               {aspectStats.map(({ clase, percentage }) => (
-                <div key={clase} className={`h-full ${getClassColor(clase)} first:rounded-l-full last:rounded-r-full`} style={{ width: `${percentage}%` }} />
+                <div key={clase} className={`h-full ${getClassColor(clase)}`} style={{ width: `${percentage}%` }} />
               ))}
             </div>
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-3 space-y-1.5">
               {aspectStats.map(({ clase, count, percentage }) => (
                 <li key={clase} className="flex items-center gap-3 text-sm">
                   <span className={`w-2.5 h-2.5 rotate-45 flex-shrink-0 ${getClassColor(clase)}`} aria-hidden="true" />
@@ -423,232 +665,23 @@ const DeckDetailPage: React.FC = () => {
               ))}
             </ul>
 
-            <div className="mt-6 pt-5 border-t border-ink-100">
-              <h3 className="text-sm font-semibold text-ink-500">Tipos de carta</h3>
-              <ul className="mt-3 space-y-3">
-                {typeStats.map(({ type, count, percentage }) => (
-                  <li key={type}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-ink-700">{translateCardType(type)}</span>
-                      <span className="font-semibold text-ink-900 tabular-nums">{count}</span>
-                    </div>
-                    <div className="mt-1.5 h-1.5 rounded-full bg-ink-100 overflow-hidden" aria-hidden="true">
-                      <div className="h-full rounded-full bg-ink-800" style={{ width: `${percentage}%` }} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        </aside>
-
-        {/* Columna derecha: lista de cartas */}
-        <section className="lg:col-span-8 bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm">
-          <div className="flex items-center justify-between px-6 py-5 border-b border-ink-100">
-            <h2 className="flex items-center gap-2 text-xl text-ink-900">
-              <CardsIcon className="w-5 h-5 text-ink-400" weight="duotone" aria-hidden="true" />
-              Lista de cartas
-            </h2>
-            <span className="text-sm font-medium text-ink-500 tabular-nums">{totalCards} cartas</span>
-          </div>
-
-          <div className="p-6 sm:columns-2 sm:gap-10">
-            {sortedTypes.map((type) => {
-              const cards = cardsByType[type]
-              const typeTotal = cards.reduce((sum: number, c: any) => sum + (c.quantity || 0), 0)
-              return (
-                <div key={type} className="break-inside-avoid mb-6 last:mb-0">
-                  <h3 className="flex items-baseline justify-between border-b border-ink-100 pb-2 mb-2">
-                    <span className="text-base text-ink-900">{translateCardType(type)}</span>
-                    <span className="text-xs font-semibold text-ink-400 tabular-nums">{typeTotal}</span>
-                  </h3>
-                  <ul>
-                    {cards.map((card: any, idx: number) => (
-                      <li
-                        key={`${card.name}-${idx}`}
-                        className="group flex items-center gap-3 rounded-md px-2 py-1.5 -mx-2 hover:bg-ink-50 transition-colors"
-                        title={`Set: ${card.set}`}
-                      >
-                        <span className="w-6 text-right text-sm font-semibold text-ink-400 tabular-nums">{card.quantity}×</span>
-                        <span className={`w-1 self-stretch rounded-full flex-shrink-0 ${getClassColor(card.clase)}`} aria-hidden="true" />
-                        <span className="flex-1 min-w-0 truncate text-sm font-medium text-ink-800 group-hover:text-ink-950">{card.name}</span>
-                        <span className="text-[11px] font-medium capitalize text-ink-400">{card.clase}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )
-            })}
-          </div>
-        </section>
-      </div>
-
-      {/* Comentarios */}
-      <section className="bg-white rounded-2xl ring-1 ring-ink-900/[0.06] shadow-sm p-6 md:p-8">
-        <h2 className="flex items-center gap-2 text-xl text-ink-900">
-          <ChatCircleDotsIcon className="w-5 h-5 text-ink-400" weight="duotone" aria-hidden="true" />
-          Comentarios
-          <span className="ml-1 text-base font-semibold text-ink-400 tabular-nums">{comments.length}</span>
-        </h2>
-
-        {/* Formulario para añadir comentario (solo si está autenticado) */}
-        {isAuthenticated ? (
-          <div className="mt-5">
-            <label htmlFor="new-comment" className="sr-only">Escribe un comentario</label>
-            <textarea
-              id="new-comment"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="¿Qué opinas de este mazo?"
-              className="w-full px-4 py-3 rounded-xl border border-ink-200 resize-none text-ink-900 placeholder:text-ink-400"
-              rows={3}
-              disabled={savingComment}
-              maxLength={1000}
-            />
-            <div className="mt-2 flex items-center justify-between gap-4">
-              <span className={`text-xs tabular-nums ${newComment.length > 900 ? 'text-red-600' : 'text-ink-400'}`}>
-                {newComment.length}/1000
-              </span>
-              <button
-                onClick={handleSubmitComment}
-                disabled={savingComment || !newComment.trim() || newComment.length > 1000}
-                className="btn btn-primary"
-              >
-                {savingComment ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Publicando...
-                  </>
-                ) : (
-                  <>
-                    <PaperPlaneTiltIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
-                    Publicar comentario
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <p className="mt-5 rounded-xl bg-ink-50 px-4 py-3 text-sm text-ink-500">
-            Inicia sesión para comentar este mazo.
-          </p>
-        )}
-
-        {/* Lista de comentarios */}
-        {loadingComments ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-ink-200 border-t-brand-600 mx-auto mb-2"></div>
-            <p className="text-ink-500 text-sm">Cargando comentarios...</p>
-          </div>
-        ) : comments.length === 0 ? (
-          <p className="mt-8 text-center text-sm text-ink-400">Todavía no hay comentarios. Abre la conversación.</p>
-        ) : (
-          <ul className="mt-8 divide-y divide-ink-100">
-            {comments.map((comment) => {
-              const isEditing = editingCommentId === comment.id
-              const isOwn = isOwnComment(comment)
-              const isDeleting = deletingCommentId === comment.id
-
-              return (
-                <li key={comment.id} className="flex gap-4 py-5 first:pt-0 last:pb-0">
-                  <span className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center text-sm font-bold ${isOwn ? 'bg-brand-600 text-white' : 'bg-ink-900 text-white'}`} aria-hidden="true">
-                    {initials(comment.author_name)}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-ink-900">
-                          {comment.author_name || 'Usuario anónimo'}
-                          {isOwn && <span className="ml-2 align-middle rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-semibold text-brand-700">Tú</span>}
-                        </p>
-                        <p className="text-xs text-ink-400 tabular-nums">
-                          {new Date(comment.created_at).toLocaleDateString('es-ES', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                          {comment.updated_at && comment.updated_at !== comment.created_at && (
-                            <span className="ml-1">(editado)</span>
-                          )}
-                        </p>
-                      </div>
-                      {isOwn && !isEditing && (
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <button
-                            onClick={() => handleStartEdit(comment)}
-                            disabled={isDeleting}
-                            className="btn btn-ghost btn-sm !p-2"
-                            aria-label="Editar comentario"
-                            title="Editar comentario"
-                          >
-                            <PencilSimpleIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteComment(comment.id)}
-                            disabled={isDeleting}
-                            className="btn btn-ghost btn-sm !p-2 hover:!text-red-600 hover:!bg-red-50"
-                            aria-label="Eliminar comentario"
-                            title="Eliminar comentario"
-                          >
-                            {isDeleting ? (
-                              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                            ) : (
-                              <TrashIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
-                            )}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {isEditing ? (
-                      <div className="mt-3">
-                        <textarea
-                          value={editingText}
-                          onChange={(e) => setEditingText(e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl border border-ink-200 resize-none text-ink-900"
-                          rows={3}
-                          disabled={updatingComment}
-                          maxLength={1000}
-                          aria-label="Editar comentario"
-                        />
-                        <div className="mt-2 flex items-center justify-between gap-3">
-                          <span className={`text-xs tabular-nums ${editingText.length > 900 ? 'text-red-600' : 'text-ink-400'}`}>
-                            {editingText.length}/1000
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <button onClick={handleCancelEdit} disabled={updatingComment} className="btn btn-ghost btn-sm">
-                              Cancelar
-                            </button>
-                            <button
-                              onClick={() => handleSaveEdit(comment.id)}
-                              disabled={updatingComment || !editingText.trim() || editingText.length > 1000}
-                              className="btn btn-primary btn-sm"
-                            >
-                              {updatingComment ? 'Guardando...' : 'Guardar'}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="mt-2 text-ink-700 leading-relaxed whitespace-pre-line break-words">
-                        {comment.comment_text}
-                      </p>
-                    )}
+            <h3 className="mt-6 pt-5 border-t border-ink-100 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-500">Por tipo</h3>
+            <ul className="mt-3 space-y-2.5">
+              {typeStats.map(({ type, count, percentage }) => (
+                <li key={type}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-ink-700">{translateCardType(type)}</span>
+                    <span className="font-semibold text-ink-900 tabular-nums">{count}</span>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-ink-100 overflow-hidden" aria-hidden="true">
+                    <div className="h-full rounded-full bg-ink-800" style={{ width: `${percentage}%` }} />
                   </div>
                 </li>
-              )
-            })}
-          </ul>
-        )}
-      </section>
+              ))}
+            </ul>
+          </section>
+        </aside>
+      </div>
 
       <ToastContainer />
 

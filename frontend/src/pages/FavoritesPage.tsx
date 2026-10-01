@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useToast } from '../components/Toast'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
-import { getClassColor } from '../utils/classColors'
 import {
   PageHeader,
   PageHeaderContent,
@@ -15,8 +14,9 @@ import {
   pageHeaderButton,
 } from '../components/ui/page-header'
 import { AnimatedNumber } from '../components/ui/animated-number'
-import { ArrowLeftIcon, CalendarBlankIcon, HeartIcon, LockIcon, StarIcon, UserIcon, WarningCircleIcon } from '@phosphor-icons/react'
+import { ArrowLeftIcon, HeartIcon, LockIcon, WarningCircleIcon } from '@phosphor-icons/react'
 import { usePageMeta } from '../lib/seo'
+import DeckCard from '../components/DeckCard'
 
 const FavoritesPage: React.FC = () => {
   usePageMeta({ title: 'Mis favoritos', noindex: true })
@@ -195,90 +195,16 @@ const FavoritesPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {favorites.map((deck) => (
-              <div 
+              <DeckCard
                 key={deck.id}
-                className="group deck-card relative has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand-500"
-              >
-                {/* Header Section */}
-                <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
-                      <Link
-                        to={`/decks/${deck.id}`}
-                        className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
-                      >
-                        {deck.name}
-                      </Link>
-                    </h2>
-                    <div className="relative z-10 flex items-center gap-2">
-                      {/* Botón de eliminar favorito con contador */}
-                      {isAuthenticated && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            handleRemoveFavorite(deck.id!)
-                          }}
-                          className="flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors text-red-500 hover:text-red-700 hover:bg-red-50"
-                          title="Eliminar de favoritos"
-                        >
-                          <HeartIcon className="w-5 h-5" weight="fill" aria-hidden="true" />
-                          <span className="text-sm font-semibold">
-                            {deck.favorite_count !== undefined ? deck.favorite_count : 0}
-                          </span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Content Section */}
-                <div className="p-4">
-                  {/* Hero and Aspect Info */}
-                  <div className="mb-4">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
-                          <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
-                        </div>
-                        <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
-                          {deck.hero_name || '—'}
-                        </span>
-                      </div>
-                      {deck.aspect && (
-                        <div className="flex items-center gap-1 ml-auto">
-                          <div className={`w-3 h-3 rounded-full shadow-sm ${getClassColor(deck.aspect)}`}></div>
-                          <span className="text-sm font-semibold text-gray-700 capitalize px-2 py-1 rounded-full bg-gray-100">
-                            {deck.aspect}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Footer */}
-                  <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-gradient-to-br from-gray-400 to-gray-500 rounded-md flex items-center justify-center">
-                        <UserIcon className="w-3 h-3 text-white" weight="duotone" aria-hidden="true" />
-                      </div>
-                      <span className="font-medium text-gray-600">
-                        by {deck.creator_name || 'Anónimo'}
-                      </span>
-                      <span className="text-gray-400">·</span>
-                      <span className="font-semibold text-blue-600">
-                        {deck.cards?.length || 0} cartas
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
-                      <time dateTime={deck.created_at || undefined}>
-                        {deck.created_at ? new Date(deck.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                      </time>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                deck={deck}
+                favorite={{
+                  active: true,
+                  count: deck.favorite_count ?? 0,
+                  onToggle: isAuthenticated ? () => handleRemoveFavorite(deck.id!) : undefined,
+                  label: 'Eliminar de favoritos',
+                }}
+              />
             ))}
           </div>
         )}

@@ -1,10 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { apiService } from '../services/api'
 import { Deck } from '../types/card'
 import { useToast } from '../components/Toast'
-import { getClassColor } from '../utils/classColors'
 import {
   PageHeader,
   PageHeaderContent,
@@ -12,8 +10,9 @@ import {
   PageHeaderTitle,
   PageHeaderDescription,
 } from '../components/ui/page-header'
-import { CalendarBlankIcon, CardsIcon, CaretLeftIcon, CaretRightIcon, HeartIcon, StarIcon, UserIcon, WarningIcon } from '@phosphor-icons/react'
+import { CardsIcon, CaretLeftIcon, CaretRightIcon, WarningIcon } from '@phosphor-icons/react'
 import { usePageMeta } from '../lib/seo'
+import DeckCard from '../components/DeckCard'
 import { usePageParam } from '../lib/use-page-param'
 import pageMeta from '../lib/page-meta.json'
 
@@ -408,118 +407,27 @@ const DecksPage: React.FC = () => {
                   })()
                   
                   return (
-                <div 
+                <DeckCard
                   key={deck.id}
+                  deck={deck}
                   id={isLastViewed ? `deck-${deck.id}` : undefined}
-                  className={`group deck-card relative has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand-500 ${
-                    isLastViewed 
-                      ? 'border-blue-500 border-2 shadow-lg ring-2 ring-blue-200' 
-                      : 'border-ink-900/[0.08] hover:border-ink-300'
-                  }`}
-                >
-                  {/* Header Section - Clean and Professional */}
-                  <div className="bg-ink-50 px-4 py-3 border-b border-ink-900/[0.06]">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-base font-semibold text-gray-900 group-hover:text-brand-700 transition-colors duration-200 leading-tight">
-                        {/* Enlace real (rastreable) estirado sobre toda la tarjeta */}
-                        <Link
-                          to={`/decks/${deck.id}`}
-                          className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
-                          onClick={() => {
-                            // Guardar el ID antes de navegar
-                            if (deck.id) {
-                              try {
-                                localStorage.setItem('lastViewedDeckId', deck.id.toString())
-                              } catch (err) {
-                                console.error('Error guardando último mazo visto:', err)
-                              }
-                            }
-                          }}
-                        >
-                          {deck.name}
-                        </Link>
-                      </h2>
-                      <div className="relative z-10 flex items-center gap-2">
-                        {/* Botón de favorito con contador - solo si está autenticado */}
-                        {isAuthenticated ? (
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              handleToggleFavorite(deck.id!)
-                            }}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors ${
-                              favorites.has(deck.id!) 
-                                ? 'text-red-500 hover:text-red-700 hover:bg-red-50' 
-                                : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
-                            }`}
-                            title={favorites.has(deck.id!) ? 'Eliminar de favoritos' : 'Añadir a favoritos'}
-                          >
-                            <HeartIcon className="w-5 h-5" weight={favorites.has(deck.id!) ? 'fill' : 'regular'} aria-hidden="true" />
-                            <span className="text-sm font-semibold">
-                              {deck.favorite_count !== undefined ? deck.favorite_count : 0}
-                            </span>
-                          </button>
-                        ) : (
-                          /* Contador de favoritos - solo si no está autenticado */
-                          deck.favorite_count !== undefined && (
-                            <div className="flex items-center gap-1 text-red-500">
-                              <HeartIcon className="w-4 h-4" weight="fill" aria-hidden="true" />
-                              <span className="text-sm font-semibold">{deck.favorite_count}</span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Content Section */}
-                  <div className="p-4">
-                    {/* Hero and Aspect Info */}
-                    <div className="mb-4">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
-                            <StarIcon className="w-4 h-4 text-white" weight="duotone" aria-hidden="true" />
-                          </div>
-                          <span className="text-lg font-bold text-gray-900 whitespace-nowrap">
-                            {getDeckHeroName(deck) || '—'}
-                          </span>
-                        </div>
-                        {getDeckAspect(deck) && (
-                          <div className="flex items-center gap-1 ml-auto">
-                            <div className={`w-3 h-3 rounded-full shadow-sm ${getClassColor(getDeckAspect(deck))}`}></div>
-                            <span className="text-sm font-semibold text-gray-700 capitalize px-2 py-1 rounded-full bg-gray-100">
-                              {getDeckAspect(deck)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Footer */}
-                    <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 bg-gradient-to-br from-gray-400 to-gray-500 rounded-md flex items-center justify-center">
-                          <UserIcon className="w-3 h-3 text-white" weight="duotone" aria-hidden="true" />
-                        </div>
-                        <span className="font-medium text-gray-600">
-                          by {deck.creator_name || 'Anónimo'}
-                        </span>
-                        <span className="text-gray-400">·</span>
-                        <span className="font-semibold text-blue-600">
-                          {deck.cards.length} cartas
-                      </span>
-                      </div>
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <CalendarBlankIcon className="w-3 h-3 text-gray-400" weight="duotone" aria-hidden="true" />
-                        <time dateTime={deck.created_at || undefined}>
-                          {deck.created_at ? new Date(deck.created_at).toLocaleDateString('es-ES', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                        </time>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  highlighted={Boolean(isLastViewed)}
+                  onNavigate={() => {
+                    // Guardar el ID antes de navegar
+                    if (deck.id) {
+                      try {
+                        localStorage.setItem('lastViewedDeckId', deck.id.toString())
+                      } catch (err) {
+                        console.error('Error guardando último mazo visto:', err)
+                      }
+                    }
+                  }}
+                  favorite={{
+                    active: isAuthenticated && favorites.has(deck.id!),
+                    count: deck.favorite_count ?? 0,
+                    onToggle: isAuthenticated ? () => handleToggleFavorite(deck.id!) : undefined,
+                  }}
+                />
                 )
                 })}
               </div>

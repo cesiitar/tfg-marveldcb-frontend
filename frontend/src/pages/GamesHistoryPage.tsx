@@ -149,6 +149,21 @@ const GamesHistoryPage: React.FC = () => {
     loadGameHistory()
   }, [user?.sub, filterMyGames, isAuthenticated])
 
+  // Partidas registradas por el usuario: son las únicas que el backend le deja borrar.
+  // (Antes se comparaba el nombre del creador del mazo con el nombre de Auth0, que ya no
+  // coincide desde que los usuarios tienen nombre público.)
+  const [ownGameIds, setOwnGameIds] = useState<Set<number>>(new Set())
+  useEffect(() => {
+    if (!isAuthenticated || !user?.sub) {
+      setOwnGameIds(new Set())
+      return
+    }
+    apiService
+      .getGameHistory(user.sub, true)
+      .then((data) => setOwnGameIds(new Set((data.games || []).map((g: { id: number }) => g.id))))
+      .catch((err) => console.error('Error cargando tus partidas:', err))
+  }, [isAuthenticated, user?.sub])
+
   // Filtrar partidas
   const filteredGames = games.filter(game => {
     const matchesSearch = game.deck_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -387,27 +402,27 @@ const GamesHistoryPage: React.FC = () => {
                     return (
                       <li
                         key={game.id}
-                        className={`relative grid grid-cols-1 md:grid-cols-[8.5rem_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-3 md:gap-5 md:items-center px-5 md:px-6 py-4 hover:bg-ink-50/70 transition-colors before:absolute before:left-0 before:top-3 before:bottom-3 before:w-1 before:rounded-r ${
+                        className={`relative grid grid-cols-1 md:grid-cols-[7rem_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] gap-2.5 md:gap-5 md:items-center px-5 md:px-6 py-3.5 hover:bg-ink-50/70 transition-colors before:absolute before:left-0 before:top-3 before:bottom-3 before:w-1 before:rounded-r ${
                           isWin ? 'before:bg-green-500' : 'before:bg-red-500'
                         }`}
                       >
                         {/* Resultado */}
-                        <div className="flex items-center gap-2">
-                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${isWin ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        <div>
+                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-semibold ring-1 ring-inset ${isWin ? 'bg-green-50 text-green-700 ring-green-600/15' : 'bg-red-50 text-red-700 ring-red-600/15'}`}>
                             {isWin ? (
-                              <CheckIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                              <CheckIcon className="w-3.5 h-3.5" weight="bold" aria-hidden="true" />
                             ) : (
-                              <XIcon className="w-4 h-4" weight="bold" aria-hidden="true" />
+                              <XIcon className="w-3.5 h-3.5" weight="bold" aria-hidden="true" />
                             )}
-                          </span>
-                          <span className={`font-semibold ${isWin ? 'text-green-700' : 'text-red-700'}`}>
                             {isWin ? 'Victoria' : 'Derrota'}
                           </span>
                         </div>
 
                         {/* Mazo */}
                         <div className="min-w-0">
-                          <p className="font-semibold text-ink-900 truncate">{game.deck_name}</p>
+                          <Link to={`/decks/${game.deck_id}`} className="block font-semibold text-ink-900 truncate hover:text-brand-700 transition-colors">
+                            {game.deck_name}
+                          </Link>
                           <p className="mt-0.5 text-sm text-ink-500 truncate">
                             {game.hero_name}
                             {game.creator_name && <span className="text-ink-400"> · de {game.creator_name}</span>}
@@ -415,9 +430,9 @@ const GamesHistoryPage: React.FC = () => {
                         </div>
 
                         {/* Villano */}
-                        <div className="min-w-0">
-                          <p className="text-sm text-ink-500">contra</p>
-                          <p className="font-semibold text-ink-900 truncate">{game.villain_name}</p>
+                        <div className="min-w-0 flex items-center gap-2.5">
+                          <span className="flex-shrink-0 rounded-md bg-ink-900 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-[0.12em] text-white" aria-label="contra">VS</span>
+                          <span className="font-semibold text-ink-900 truncate">{game.villain_name}</span>
                         </div>
 
                         {/* Etiquetas y fecha */}
@@ -437,7 +452,7 @@ const GamesHistoryPage: React.FC = () => {
                             <EyeIcon className="w-4 h-4" weight="duotone" aria-hidden="true" />
                             Ver mazo
                           </Link>
-                          {isAuthenticated && user?.sub && user?.name && game.creator_name === user.name && (
+                          {isAuthenticated && ownGameIds.has(game.id) && (
                             <button
                               type="button"
                               onClick={(e) => {
