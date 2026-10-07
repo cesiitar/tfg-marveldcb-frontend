@@ -43,14 +43,15 @@ const aspectIcons: Record<string, Icon> = {
 
 const totalCards = (deck: Deck) => (deck.cards || []).reduce((n, c) => n + (Number(c.quantity) || 1), 0)
 
-// Tipos de carta de jugador: icono (el mismo que en GameCard) y nombre en plural
+// Tipos de carta de jugador: icono (el mismo que en GameCard) y nombre en plural, en inglés
+// como el resto de términos del juego en la web (translateCardType)
 const cardTypes: Record<string, { icon: Icon; label: string }> = {
-  ally: { icon: UsersIcon, label: 'Aliados' },
-  event: { icon: LightningIcon, label: 'Eventos' },
-  upgrade: { icon: ArrowFatLinesUpIcon, label: 'Mejoras' },
-  support: { icon: HandshakeIcon, label: 'Apoyos' },
-  resource: { icon: DiamondIcon, label: 'Recursos' },
-  player_side_scheme: { icon: TargetIcon, label: 'Planes' },
+  ally: { icon: UsersIcon, label: 'Allies' },
+  event: { icon: LightningIcon, label: 'Events' },
+  upgrade: { icon: ArrowFatLinesUpIcon, label: 'Upgrades' },
+  support: { icon: HandshakeIcon, label: 'Supports' },
+  resource: { icon: DiamondIcon, label: 'Resources' },
+  player_side_scheme: { icon: TargetIcon, label: 'Schemes' },
 }
 
 /** Las tres categorías de carta con más copias en el mazo. */
